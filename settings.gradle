@@ -1,0 +1,4 @@
+rootProject.name = 'onixlabs-corda-bnms'
+include 'onixlabs-corda-bnms-contract'
+include 'onixlabs-corda-bnms-workflow'
+include 'onixlabs-corda-bnms-integration'
