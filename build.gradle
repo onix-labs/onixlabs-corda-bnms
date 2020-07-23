@@ -5,7 +5,7 @@ buildscript {
 
         corda_artifactory_url = 'https://ci-artifactory.corda.r3cev.com/artifactory'
         corda_group = 'net.corda'
-        corda_release_version = '4.5'
+        corda_release_version = '4.3'
 
         corda_gradle_plugin_group = 'net.corda.plugins'
         corda_gradle_plugin_version = '5.0.4'
@@ -62,7 +62,7 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'net.corda.plugins.cordapp'
 
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
             languageVersion = "1.2"
             apiVersion = "1.2"

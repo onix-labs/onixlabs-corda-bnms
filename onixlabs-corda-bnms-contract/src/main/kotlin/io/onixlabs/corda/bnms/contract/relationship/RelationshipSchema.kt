@@ -1,6 +1,5 @@
-package io.onixlabs.corda.bnms.contract.membership
+package io.onixlabs.corda.bnms.contract.relationship
 
-import net.corda.core.crypto.NullKeys.NULL_PARTY
 import net.corda.core.identity.AbstractParty
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
@@ -9,19 +8,16 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Table
 
-object MembershipSchema {
+object RelationshipSchema {
 
     @Entity
-    @Table(name = "membership_states")
-    class MembershipEntity(
+    @Table(name = "relationship_states")
+    class RelationshipEntity(
         @Column(name = "linear_id", nullable = false)
         val linearId: UUID = UUID.randomUUID(),
 
         @Column(name = "external_id", nullable = true)
         val externalId: String? = null,
-
-        @Column(name = "bearer", nullable = false)
-        val bearer: AbstractParty = NULL_PARTY,
 
         @Column(name = "network_name", nullable = false)
         val networkName: String = "",
@@ -32,14 +28,11 @@ object MembershipSchema {
         @Column(name = "network_operator", nullable = true)
         val networkOperator: AbstractParty? = null,
 
-        @Column(name = "network_identity", nullable = false)
-        val networkIdentity: AbstractParty = NULL_PARTY,
-
         @Column(name = "network_hash", nullable = false)
         val networkHash: String = "",
 
-        @Column(name = "is_network_operator", nullable = false)
-        val isNetworkOperator: Boolean = false,
+        @Column(name = "identity_hash", nullable = false)
+        val identityHash: String = "",
 
         @Column(name = "hash", nullable = false, unique = true)
         val hash: String = ""
@@ -47,9 +40,9 @@ object MembershipSchema {
 
     private const val SCHEMA_VERSION_1 = 1
 
-    object MembershipSchemaV1 : MappedSchema(
-        schemaFamily = MembershipSchema.javaClass,
+    object RelationshipSchemaV1 : MappedSchema(
+        schemaFamily = RelationshipSchema.javaClass,
         version = SCHEMA_VERSION_1,
-        mappedTypes = listOf(MembershipEntity::class.java)
+        mappedTypes = listOf(RelationshipEntity::class.java)
     )
 }
