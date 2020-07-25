@@ -26,7 +26,7 @@ import net.corda.core.schemas.PersistentState
  * @property participants The participants of the attestation state, namely the attestor, attestees and network operator.
  */
 @BelongsToContract(MembershipAttestationContract::class)
-data class MembershipAttestation(
+data class MembershipAttestation internal constructor(
     override val network: Network,
     override val pointer: AttestationPointer<Membership>,
     override val attestor: AbstractParty,
@@ -36,34 +36,21 @@ data class MembershipAttestation(
     override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : AttestationState<Membership>() {
 
-    companion object {
-
-        /**
-         * Creates a membership attestation.
-         *
-         * @param attestor The participant attesting to the attested membership state.
-         * @param membership The membership state being attested.
-         * @param status Specifies whether the attestation is accepted or rejected.
-         * @param metadata Allows additional information to be added to the attestation for reference.
-         * @param linearId The unique identifier of the membership attestation state.
-         * @return Returns a membership attestation.
-         */
-        fun create(
-            attestor: AbstractParty,
-            membership: StateAndRef<Membership>,
-            status: AttestationStatus = AttestationStatus.REJECTED,
-            metadata: Map<String, String> = emptyMap(),
-            linearId: UniqueIdentifier = UniqueIdentifier()
-        ) = MembershipAttestation(
-            network = membership.state.data.network,
-            pointer = AttestationPointer.create(membership),
-            attestor = attestor,
-            attestees = setOf(membership.state.data.bearer),
-            status = status,
-            metadata = metadata,
-            linearId = linearId
-        )
-    }
+    constructor(
+        attestor: AbstractParty,
+        membership: StateAndRef<Membership>,
+        status: AttestationStatus = AttestationStatus.REJECTED,
+        metadata: Map<String, String> = emptyMap(),
+        linearId: UniqueIdentifier = UniqueIdentifier()
+    ) : this(
+        network = membership.state.data.network,
+        pointer = AttestationPointer.create(membership),
+        attestor = attestor,
+        attestees = setOf(membership.state.data.bearer),
+        status = status,
+        metadata = metadata,
+        linearId = linearId
+    )
 
     init {
         check(attestees.size == 1) { "There can only be one attestee for a membership attestation state." }

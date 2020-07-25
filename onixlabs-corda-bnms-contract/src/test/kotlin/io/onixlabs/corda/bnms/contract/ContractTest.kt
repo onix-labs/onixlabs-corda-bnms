@@ -134,7 +134,7 @@ abstract class ContractTest : AutoCloseable {
         }
 
         val membership = retrieveOutputStateAndRef(Membership::class.java, label)
-        val attestation = MembershipAttestation.create(attestor, membership, AttestationStatus.ACCEPTED)
+        val attestation = MembershipAttestation(attestor, membership, AttestationStatus.ACCEPTED)
         return Pair(membership, attestation)
     }
 

@@ -2,6 +2,8 @@ package io.onixlabs.corda.bnms.workflow
 
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
+import io.onixlabs.corda.bnms.workflow.membership.FindLatestMembershipFlow
+import io.onixlabs.corda.bnms.workflow.membership.FindVersionedMembershipFlow
 import net.corda.core.contracts.ContractState
 import net.corda.core.flows.*
 import net.corda.core.identity.AbstractParty
@@ -19,15 +21,24 @@ fun FlowLogic<*>.currentStep(step: ProgressTracker.Step) {
 }
 
 fun FlowLogic<*>.checkMembershipExists(membership: Membership) {
-    if (subFlow(FindMembershipFlow(membership.bearer, membership.network, membership.previousStateRef)) != null) {
-        throw FlowException("Membership state already exists in the vault.")
+    val existingMembership = if (membership.previousStateRef == null) {
+        subFlow(FindLatestMembershipFlow(membership.bearer, membership.network))
+    } else {
+        subFlow(FindVersionedMembershipFlow(membership.bearer, membership.network, membership.previousStateRef!!))
+    }
+
+    if (existingMembership != null) {
+        throw FlowException("Membership state with the specified unique hash already exists: ${membership.hash}.")
     }
 }
 
 fun FlowLogic<*>.checkSufficientSessions(state: ContractState, sessions: Iterable<FlowSession>) {
-    val counterparties = state.participants - serviceHub.myInfo.legalIdentities
-    if (counterparties.isNotEmpty() && sessions.any { it.counterparty !in counterparties }) {
-        throw FlowException("Flow sessions are required for all counter-parties.")
+    val stateCounterparties = state.participants - serviceHub.myInfo.legalIdentities
+    val sessionCounterparties = sessions.map { it.counterparty }
+    stateCounterparties.forEach {
+        if (it !in sessionCounterparties) {
+            throw FlowException("A flow session must be provided for the specified counter-party: $it.")
+        }
     }
 }
 
