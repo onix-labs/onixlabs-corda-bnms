@@ -49,7 +49,7 @@ class RelationshipAttestationContract : Contract {
             CONTRACT_RULE_OUTPUTS using (tx.outputs.size == 1)
             CONTRACT_RULE_REFERENCES using (tx.references.size == 1)
 
-            val referencedRelationshipState = tx.referenceInputRefsOfType<Relationship<*>>().single()
+            val referencedRelationshipState = tx.referenceInputRefsOfType<Relationship>().single()
             val attestationOutputState = tx.outputsOfType<RelationshipAttestation>().single()
             val missingParticipants =
                 referencedRelationshipState.state.data.participants - attestationOutputState.participants
@@ -89,7 +89,7 @@ class RelationshipAttestationContract : Contract {
             CONTRACT_RULE_OUTPUTS using (tx.outputs.size == 1)
             CONTRACT_RULE_REFERENCES using (tx.references.size == 1)
 
-            val referencedRelationshipState = tx.referenceInputRefsOfType<Relationship<*>>().single()
+            val referencedRelationshipState = tx.referenceInputRefsOfType<Relationship>().single()
             val attestationOutputState = tx.outputsOfType<RelationshipAttestation>().single()
             val missingParticipants =
                 referencedRelationshipState.state.data.participants - attestationOutputState.participants

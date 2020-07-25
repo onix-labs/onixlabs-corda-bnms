@@ -1,6 +1,5 @@
 package io.onixlabs.corda.bnms.contract
 
-import io.onixlabs.corda.bnms.contract.DummyConfiguration.Companion.CENTRALIZED_CONFIGURATION
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import org.junit.jupiter.api.Test
@@ -34,8 +33,8 @@ class HashableTests {
     fun `Identical RelationshipState instances produce the same hash`() {
 
         // Arrange
-        val a = Relationship(CENTRALIZED_NETWORK_A, CENTRALIZED_CONFIGURATION)
-        val b = Relationship(CENTRALIZED_NETWORK_A, CENTRALIZED_CONFIGURATION)
+        val a = Relationship(CENTRALIZED_NETWORK_A, GLOBAL_RELATIONSHIP_SETTINGS, PARTICIPANT_RELATIONSHIP_SETTINGS)
+        val b = Relationship(CENTRALIZED_NETWORK_A, GLOBAL_RELATIONSHIP_SETTINGS, PARTICIPANT_RELATIONSHIP_SETTINGS)
 
         // Assert
         assertEquals(a.hash, b.hash)

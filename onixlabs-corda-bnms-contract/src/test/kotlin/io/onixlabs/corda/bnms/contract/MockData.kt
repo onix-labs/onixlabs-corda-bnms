@@ -1,27 +1,12 @@
 package io.onixlabs.corda.bnms.contract
 
-import io.onixlabs.corda.bnms.contract.DummyConfiguration.Companion.CENTRALIZED_CONFIGURATION
-import io.onixlabs.corda.bnms.contract.DummyConfiguration.Companion.DECENTRALIZED_CONFIGURATION
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import net.corda.core.contracts.StateRef
 import net.corda.core.crypto.SecureHash
-import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.serialization.CordaSerializable
 import net.corda.testing.core.TestIdentity
-
-@CordaSerializable
-class DummyConfiguration(
-    override val name: String,
-    override val networkIdentities: Set<AbstractParty>
-) : Configuration() {
-    companion object {
-        val DECENTRALIZED_CONFIGURATION = DummyConfiguration("Decentralized", DECENTRALIZED_PARTICIPANTS)
-        val CENTRALIZED_CONFIGURATION = DummyConfiguration("Centralized A", CENTRALIZED_PARTICIPANTS)
-    }
-}
 
 val IDENTITY_A = TestIdentity(CordaX500Name("PartyA", "London", "GB"))
 val IDENTITY_B = TestIdentity(CordaX500Name("PartyB", "New York", "US"))
@@ -43,8 +28,41 @@ val CENTRALIZED_MEMBERSHIP_B = Membership(CENTRALIZED_NETWORK_A, IDENTITY_B.part
 val CENTRALIZED_MEMBERSHIP_C = Membership(CENTRALIZED_NETWORK_A, IDENTITY_C.party)
 val CENTRALIZED_MEMBERSHIP_O = Membership(CENTRALIZED_NETWORK_A, OPERATOR_A.party, roles = setOf(Role.NETWORK_OPERATOR))
 
-val CENTRALIZED_RELATIONSHIP = Relationship(CENTRALIZED_NETWORK_A, CENTRALIZED_CONFIGURATION)
-val DECENTRALIZED_RELATIONSHIP = Relationship(DECENTRALIZED_NETWORK, DECENTRALIZED_CONFIGURATION)
+val GLOBAL_RELATIONSHIP_SETTINGS = setOf(
+    Setting("string", "Hello, World!"),
+    Setting("number", 123),
+    Setting("boolean", true)
+)
+
+val PARTICIPANT_RELATIONSHIP_SETTINGS = mapOf(
+    IDENTITY_A.party to setOf(
+        Setting("string", "Hello, World!"),
+        Setting("number", 123),
+        Setting("boolean", true)
+    ),
+    IDENTITY_B.party to setOf(
+        Setting("string", "Hello, World!"),
+        Setting("number", 123),
+        Setting("boolean", true)
+    ),
+    IDENTITY_C.party to setOf(
+        Setting("string", "Hello, World!"),
+        Setting("number", 123),
+        Setting("boolean", true)
+    )
+)
+
+val CENTRALIZED_RELATIONSHIP = Relationship(
+    CENTRALIZED_NETWORK_A,
+    GLOBAL_RELATIONSHIP_SETTINGS,
+    PARTICIPANT_RELATIONSHIP_SETTINGS
+)
+
+val DECENTRALIZED_RELATIONSHIP = Relationship(
+    DECENTRALIZED_NETWORK,
+    GLOBAL_RELATIONSHIP_SETTINGS,
+    PARTICIPANT_RELATIONSHIP_SETTINGS
+)
 
 val REVOCATION_LOCK = RevocationLock.create(IDENTITY_A.party, DECENTRALIZED_RELATIONSHIP)
 

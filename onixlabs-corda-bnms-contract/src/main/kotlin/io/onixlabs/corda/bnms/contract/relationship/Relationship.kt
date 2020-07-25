@@ -28,25 +28,27 @@ import net.corda.core.schemas.PersistentState
  * or even revoke relationships as they see fit, however relationships are still considered invalid until attested.
  *
  * @property network The identity of the network.
- * @property configuration The configuration which determines how participants of the relationship cooperate.
+ * @property globalSettings The settings that apply to all participants of the relationship.
+ * @property participantSettings The settings that apply to each participant of the relationship.
  * @property previousStateRef The state ref to the previous version of the state, or null if this is this first version.
  * @property linearId The unique identifier of the state.
  * @property participants The relationship configuration network identities, and optionally the network operator.
  * @property hash A SHA-256 hash that uniquely identifies this version of the state.
  */
 @BelongsToContract(RelationshipContract::class)
-data class Relationship<T : Configuration>(
+data class Relationship(
     override val network: Network,
-    val configuration: T,
+    val globalSettings: Set<Setting> = emptySet(),
+    val participantSettings: Map<out AbstractParty, Set<Setting>> = emptyMap(),
     val previousStateRef: StateRef? = null,
     override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : NetworkState(), Hashable {
 
     override val hash: SecureHash
-        get() = SecureHash.sha256("${network.hash}${configuration.hash}$previousStateRef")
+        get() = SecureHash.sha256("${network.hash}${participants.identityHash}$previousStateRef")
 
     override val participants: List<AbstractParty>
-        get() = (configuration.networkIdentities + network.operator).filterNotNull()
+        get() = (participantSettings.keys + network.operator).filterNotNull()
 
     /**
      * Maps this state to a persistent state.
@@ -59,7 +61,7 @@ data class Relationship<T : Configuration>(
             normalizedNetworkName = network.normalizedName,
             networkOperator = network.operator,
             networkHash = network.hash.toString(),
-            identityHash = configuration.networkIdentities.identityHash.toString(),
+            identityHash = participantSettings.keys.identityHash.toString(),
             hash = hash.toString()
         )
         else -> throw IllegalArgumentException("Unrecognised schema: $schema.")

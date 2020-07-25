@@ -43,9 +43,9 @@ class RelationshipContract : Contract {
 
         override fun verify(tx: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
             CONTRACT_RULE_INPUTS using (tx.inputs.isEmpty())
-            CONTRACT_RULE_OUTPUTS using (tx.outputsOfType<Relationship<*>>().size == 1)
+            CONTRACT_RULE_OUTPUTS using (tx.outputsOfType<Relationship>().size == 1)
 
-            val relationshipOutputState = tx.outputsOfType<Relationship<*>>().single()
+            val relationshipOutputState = tx.outputsOfType<Relationship>().single()
             val revocationLockOutputStates = tx.outputsOfType<RevocationLock<*>>()
 
             val validLockCount = relationshipOutputState.participants.size == revocationLockOutputStates.size
@@ -82,9 +82,9 @@ class RelationshipContract : Contract {
             CONTRACT_RULE_INPUTS using (tx.inputs.size == 1)
             CONTRACT_RULE_OUTPUTS using (tx.outputs.size == 1)
 
-            val relationshipInputStateAndRef = tx.inRefsOfType<Relationship<*>>().single()
+            val relationshipInputStateAndRef = tx.inRefsOfType<Relationship>().single()
             val relationshipInputState = relationshipInputStateAndRef.state.data
-            val relationshipOutputState = tx.outputsOfType<Relationship<*>>().single()
+            val relationshipOutputState = tx.outputsOfType<Relationship>().single()
 
             CONTRACT_RULE_NETWORK_HASH using (relationshipInputState.network == relationshipOutputState.network)
             CONTRACT_RULE_PREVIOUS_REF using (relationshipOutputState.previousStateRef == relationshipInputStateAndRef.ref)
@@ -107,7 +107,7 @@ class RelationshipContract : Contract {
             CONTRACT_RULE_INPUTS using (tx.inputs.size == 1)
             CONTRACT_RULE_OUTPUTS using (tx.outputs.isEmpty())
 
-            val relationshipInputState = tx.inputsOfType<Relationship<*>>().single()
+            val relationshipInputState = tx.inputsOfType<Relationship>().single()
 
             CONTRACT_RULE_SIGNERS using (relationshipInputState.participants.all { it.owningKey in signers })
         }

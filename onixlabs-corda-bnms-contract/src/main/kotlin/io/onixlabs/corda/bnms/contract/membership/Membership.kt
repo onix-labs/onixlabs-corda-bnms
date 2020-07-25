@@ -49,6 +49,16 @@ data class Membership(
     override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : NetworkState(), Hashable {
 
+    companion object {
+        fun createMembershipHash(
+            network: Network,
+            bearer: AbstractParty,
+            previousStateRef: StateRef? = null
+        ): SecureHash {
+            return SecureHash.sha256("${network.hash}$bearer$previousStateRef")
+        }
+    }
+
     override val participants: List<AbstractParty>
         get() = listOfNotNull(bearer, network.operator)
 
@@ -56,7 +66,7 @@ data class Membership(
         get() = bearer == network.operator
 
     override val hash: SecureHash
-        get() = SecureHash.sha256("${network.hash}$bearer$previousStateRef")
+        get() = createMembershipHash(network, bearer, previousStateRef)
 
     /**
      * Maps this state to a persistent state.

@@ -103,9 +103,9 @@ abstract class ContractTest : AutoCloseable {
 
     @Suppress("UNCHECKED_CAST")
     protected fun DSL.initialize(
-        relationshipState: Relationship<*>,
+        relationshipState: Relationship,
         label: String = SecureHash.randomSHA256().toString()
-    ): Pair<StateAndRef<Relationship<DummyConfiguration>>, Relationship<DummyConfiguration>> {
+    ): Pair<StateAndRef<Relationship>, Relationship> {
         transaction {
             val keys = relationshipState.participants.map { it.owningKey }
             output(RelationshipContract.ID, label, relationshipState)
@@ -118,7 +118,6 @@ abstract class ContractTest : AutoCloseable {
         }
 
         val input = retrieveOutputStateAndRef(Relationship::class.java, label)
-                as StateAndRef<Relationship<DummyConfiguration>>
 
         return Pair(input, input.getNextOutput())
     }
@@ -140,10 +139,10 @@ abstract class ContractTest : AutoCloseable {
     }
 
     protected fun DSL.initialize(
-        relationshipState: Relationship<*>,
+        relationshipState: Relationship,
         attestor: AbstractParty,
         label: String = SecureHash.randomSHA256().toString()
-    ): Pair<StateAndRef<Relationship<*>>, RelationshipAttestation> {
+    ): Pair<StateAndRef<Relationship>, RelationshipAttestation> {
         transaction {
             output(RelationshipContract.ID, label, relationshipState)
             relationshipState.participants.forEach {

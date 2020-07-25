@@ -25,13 +25,13 @@ import net.corda.core.schemas.PersistentState
 @BelongsToContract(RelationshipAttestationContract::class)
 data class RelationshipAttestation(
     override val network: Network,
-    override val pointer: AttestationPointer<Relationship<*>>,
+    override val pointer: AttestationPointer<Relationship>,
     override val attestor: AbstractParty,
     override val attestees: Set<AbstractParty>,
     override val status: AttestationStatus = AttestationStatus.REJECTED,
     override val metadata: Map<String, String> = emptyMap(),
     override val linearId: UniqueIdentifier = UniqueIdentifier()
-) : AttestationState<Relationship<*>>() {
+) : AttestationState<Relationship>() {
 
     companion object {
 
@@ -47,7 +47,7 @@ data class RelationshipAttestation(
          */
         fun create(
             attestor: AbstractParty,
-            relationship: StateAndRef<Relationship<*>>,
+            relationship: StateAndRef<Relationship>,
             status: AttestationStatus = AttestationStatus.REJECTED,
             metadata: Map<String, String> = emptyMap(),
             linearId: UniqueIdentifier = UniqueIdentifier()
@@ -69,7 +69,7 @@ data class RelationshipAttestation(
      * @param metadata Allows additional information to be added to the attestation for reference.
      * @return Returns an accepted attestation.
      */
-    override fun accept(stateAndRef: StateAndRef<Relationship<*>>?, metadata: Map<String, String>) = copy(
+    override fun accept(stateAndRef: StateAndRef<Relationship>?, metadata: Map<String, String>) = copy(
         pointer = if (stateAndRef != null) AttestationPointer.create(stateAndRef) else pointer,
         metadata = metadata,
         status = AttestationStatus.ACCEPTED
@@ -82,7 +82,7 @@ data class RelationshipAttestation(
      * @param metadata Allows additional information to be added to the attestation for reference.
      * @return Returns an rejected attestation.
      */
-    override fun reject(stateAndRef: StateAndRef<Relationship<*>>?, metadata: Map<String, String>) = copy(
+    override fun reject(stateAndRef: StateAndRef<Relationship>?, metadata: Map<String, String>) = copy(
         pointer = if (stateAndRef != null) AttestationPointer.create(stateAndRef) else pointer,
         metadata = metadata,
         status = AttestationStatus.REJECTED
