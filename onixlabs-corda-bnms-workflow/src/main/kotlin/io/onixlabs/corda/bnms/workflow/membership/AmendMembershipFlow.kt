@@ -4,11 +4,6 @@ import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipContract
 import io.onixlabs.corda.bnms.workflow.*
-import io.onixlabs.corda.bnms.workflow.FINALIZING
-import io.onixlabs.corda.bnms.workflow.GENERATING
-import io.onixlabs.corda.bnms.workflow.INITIALIZING
-import io.onixlabs.corda.bnms.workflow.SIGNING
-import io.onixlabs.corda.bnms.workflow.VERIFYING
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -19,20 +14,13 @@ import net.corda.core.utilities.ProgressTracker.Step
 class AmendMembershipFlow(
     private val oldMembership: StateAndRef<Membership>,
     private val newMembership: Membership,
-    private val notary: Party,
     private val sessions: Set<FlowSession> = emptySet(),
     override val progressTracker: ProgressTracker = tracker()
 ) : FlowLogic<SignedTransaction>() {
 
     companion object {
         @JvmStatic
-        fun tracker() = ProgressTracker(
-            INITIALIZING,
-            GENERATING,
-            VERIFYING,
-            SIGNING,
-            FINALIZING
-        )
+        fun tracker() = ProgressTracker(INITIALIZING, GENERATING, VERIFYING, SIGNING, FINALIZING)
 
         private const val FLOW_VERSION_1 = 1
     }
@@ -43,14 +31,13 @@ class AmendMembershipFlow(
         checkMembershipExists(newMembership)
         checkSufficientSessions(newMembership, sessions)
 
-        val transaction = transaction(notary) {
+        val transaction = transaction(oldMembership.state.notary) {
             addInputState(oldMembership)
             addOutputState(newMembership, MembershipContract.ID)
             addCommand(MembershipContract.Amend, ourIdentity.owningKey)
         }
 
         val signedTransaction = verifyAndSign(transaction)
-
         return finalize(signedTransaction, sessions)
     }
 
@@ -60,14 +47,12 @@ class AmendMembershipFlow(
     class Initiator(
         private val oldMembership: StateAndRef<Membership>,
         private val newMembership: Membership,
-        private val notary: Party? = null,
         private val observers: Set<Party> = emptySet()
     ) : FlowLogic<SignedTransaction>() {
 
         private companion object {
             object AMENDING : Step("Amending membership.") {
-                override fun childProgressTracker() =
-                    tracker()
+                override fun childProgressTracker() = tracker()
             }
         }
 
@@ -76,13 +61,12 @@ class AmendMembershipFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(AMENDING)
-            val sessions = initiateFlows(observers, newMembership.network.operator)
+            val sessions = initiateFlows(newMembership.participants + observers)
 
             return subFlow(
                 AmendMembershipFlow(
                     oldMembership,
                     newMembership,
-                    notary ?: firstNotary,
                     sessions,
                     AMENDING.childProgressTracker()
                 )
@@ -95,8 +79,7 @@ class AmendMembershipFlow(
 
         private companion object {
             object OBSERVING : Step("Observing membership amendment.") {
-                override fun childProgressTracker() =
-                    AmendMembershipFlowHandler.tracker()
+                override fun childProgressTracker() = AmendMembershipFlowHandler.tracker()
             }
         }
 
@@ -108,8 +91,7 @@ class AmendMembershipFlow(
             return subFlow(
                 AmendMembershipFlowHandler(
                     session,
-                    null,
-                    OBSERVING.childProgressTracker()
+                    progressTracker = OBSERVING.childProgressTracker()
                 )
             )
         }

@@ -2,6 +2,8 @@ package io.onixlabs.corda.bnms.workflow
 
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
+import io.onixlabs.corda.bnms.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.workflow.membership.FindLatestMembershipAttestationByBearerFlow
 import io.onixlabs.corda.bnms.workflow.membership.FindLatestMembershipFlow
 import io.onixlabs.corda.bnms.workflow.membership.FindVersionedMembershipFlow
 import net.corda.core.contracts.ContractState
@@ -20,6 +22,16 @@ fun FlowLogic<*>.currentStep(step: ProgressTracker.Step) {
     logger.info("IDENTITY = $ourIdentity, FLOW = ${javaClass.simpleName}, STEP = ${step.label}")
 }
 
+fun FlowLogic<*>.checkSufficientSessions(state: ContractState, sessions: Iterable<FlowSession>) {
+    val stateCounterparties = state.participants - serviceHub.myInfo.legalIdentities
+    val sessionCounterparties = sessions.map { it.counterparty }
+    stateCounterparties.forEach {
+        if (it !in sessionCounterparties) {
+            throw FlowException("A flow session must be provided for the specified counter-party: $it.")
+        }
+    }
+}
+
 fun FlowLogic<*>.checkMembershipExists(membership: Membership) {
     val existingMembership = if (membership.previousStateRef == null) {
         subFlow(FindLatestMembershipFlow(membership.bearer, membership.network))
@@ -32,14 +44,30 @@ fun FlowLogic<*>.checkMembershipExists(membership: Membership) {
     }
 }
 
-fun FlowLogic<*>.checkSufficientSessions(state: ContractState, sessions: Iterable<FlowSession>) {
-    val stateCounterparties = state.participants - serviceHub.myInfo.legalIdentities
-    val sessionCounterparties = sessions.map { it.counterparty }
-    stateCounterparties.forEach {
-        if (it !in sessionCounterparties) {
-            throw FlowException("A flow session must be provided for the specified counter-party: $it.")
+fun FlowLogic<*>.checkMembershipsAndAttestations(relationship: Relationship, counterparties: Iterable<AbstractParty>) {
+    counterparties.forEach {
+        val membership = subFlow(FindLatestMembershipFlow(it, relationship.network))
+            ?: throw FlowException("Membership not found for counter-party: $it.")
+
+        val attestation = subFlow(FindLatestMembershipAttestationByBearerFlow(it, relationship.network))
+            ?: throw FlowException("Membership attestation not found for counter-party: $it.")
+
+        if (!attestation.state.data.pointer.isPointingTo(membership)) {
+            throw FlowException("Latest attestation does not point to membership for counter-party: $it.")
         }
     }
+}
+
+fun FlowLogic<*>.filterOurIdentities(parties: Iterable<AbstractParty>): List<AbstractParty> {
+    return parties.filter { it in serviceHub.myInfo.legalIdentities }
+}
+
+fun FlowLogic<*>.filterCounterpartyIdentities(parties: Iterable<AbstractParty>): List<AbstractParty> {
+    return parties.filter { it !in serviceHub.myInfo.legalIdentities }
+}
+
+fun FlowLogic<*>.isOurIdentity(party: AbstractParty?): Boolean {
+    return party in serviceHub.myInfo.legalIdentities
 }
 
 fun FlowLogic<*>.initiateFlow(counterparty: AbstractParty): FlowSession {
@@ -47,7 +75,7 @@ fun FlowLogic<*>.initiateFlow(counterparty: AbstractParty): FlowSession {
 }
 
 fun FlowLogic<*>.initiateFlows(parties: Iterable<AbstractParty?>, vararg extras: AbstractParty?): Set<FlowSession> {
-    val counterparties = (parties + extras).filterNotNull().filter { it !in serviceHub.myInfo.legalIdentities }
+    val counterparties = filterCounterpartyIdentities((parties + extras).filterNotNull())
     return counterparties.map { initiateFlow(it) }.toSet()
 }
 

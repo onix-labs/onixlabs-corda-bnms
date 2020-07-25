@@ -19,5 +19,3 @@ internal object COUNTERSIGNING : Step("Gathering counter-party signatures.") {
 internal object FINALIZING : Step("Finalizing and recording signed transaction.") {
     override fun childProgressTracker() = FinalityFlow.tracker()
 }
-
-internal object COUNTERFINALIZING : Step("Finalizing and recording transaction.")

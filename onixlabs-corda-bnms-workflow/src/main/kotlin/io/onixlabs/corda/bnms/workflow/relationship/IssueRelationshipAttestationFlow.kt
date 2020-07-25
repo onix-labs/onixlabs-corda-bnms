@@ -1,8 +1,8 @@
-package io.onixlabs.corda.bnms.workflow.membership
+package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationContract
+import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
+import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationContract
 import io.onixlabs.corda.bnms.workflow.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -10,8 +10,8 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
 
-class IssueMembershipAttestationFlow(
-    private val attestation: MembershipAttestation,
+class IssueRelationshipAttestationFlow(
+    private val attestation: RelationshipAttestation,
     private val notary: Party,
     private val sessions: Set<FlowSession>,
     override val progressTracker: ProgressTracker = tracker()
@@ -30,9 +30,9 @@ class IssueMembershipAttestationFlow(
         checkSufficientSessions(attestation, sessions)
 
         val transaction = transaction(notary) {
-            addOutputState(attestation, MembershipAttestationContract.ID)
+            addOutputState(attestation, RelationshipAttestationContract.ID)
             addReferenceState(attestation.pointer.resolve(serviceHub).referenced())
-            addCommand(MembershipAttestationContract.Issue, attestation.attestor.owningKey)
+            addCommand(RelationshipAttestationContract.Issue, ourIdentity.owningKey)
         }
 
         val signedTransaction = verifyAndSign(transaction)
@@ -43,13 +43,12 @@ class IssueMembershipAttestationFlow(
     @StartableByService
     @InitiatingFlow(version = FLOW_VERSION_1)
     class Initiator(
-        private val attestation: MembershipAttestation,
-        private val notary: Party? = null,
-        private val observers: Set<Party> = emptySet()
+        private val attestation: RelationshipAttestation,
+        private val notary: Party? = null
     ) : FlowLogic<SignedTransaction>() {
 
         private companion object {
-            object ISSUING : Step("Issuing membership attestation.") {
+            object ISSUING : Step("Issuing relationship attestation.") {
                 override fun childProgressTracker() = tracker()
             }
         }
@@ -59,10 +58,9 @@ class IssueMembershipAttestationFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(ISSUING)
-            val sessions = initiateFlows(attestation.participants + observers)
-
+            val sessions = initiateFlows(attestation.participants)
             return subFlow(
-                IssueMembershipAttestationFlow(
+                IssueRelationshipAttestationFlow(
                     attestation,
                     notary ?: firstNotary,
                     sessions,
@@ -76,8 +74,8 @@ class IssueMembershipAttestationFlow(
     internal class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
 
         private companion object {
-            object OBSERVING : Step("Observing membership attestation issuance.") {
-                override fun childProgressTracker() = IssueMembershipAttestationFlowHandler.tracker()
+            object OBSERVING : Step("Observing relationship attestation issuance.") {
+                override fun childProgressTracker() = IssueRelationshipAttestationFlowHandler.tracker()
             }
         }
 
@@ -86,12 +84,7 @@ class IssueMembershipAttestationFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(OBSERVING)
-            return subFlow(
-                IssueMembershipAttestationFlowHandler(
-                    session,
-                    progressTracker = OBSERVING.childProgressTracker()
-                )
-            )
+            return subFlow(IssueRelationshipAttestationFlowHandler(session, null, OBSERVING.childProgressTracker()))
         }
     }
 }

@@ -4,11 +4,6 @@ import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipContract
 import io.onixlabs.corda.bnms.workflow.*
-import io.onixlabs.corda.bnms.workflow.FINALIZING
-import io.onixlabs.corda.bnms.workflow.GENERATING
-import io.onixlabs.corda.bnms.workflow.INITIALIZING
-import io.onixlabs.corda.bnms.workflow.SIGNING
-import io.onixlabs.corda.bnms.workflow.VERIFYING
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
@@ -24,13 +19,7 @@ class IssueMembershipFlow(
 
     companion object {
         @JvmStatic
-        fun tracker() = ProgressTracker(
-            INITIALIZING,
-            GENERATING,
-            VERIFYING,
-            SIGNING,
-            FINALIZING
-        )
+        fun tracker() = ProgressTracker(INITIALIZING, GENERATING, VERIFYING, SIGNING, FINALIZING)
 
         private const val FLOW_VERSION_1 = 1
     }
@@ -47,7 +36,6 @@ class IssueMembershipFlow(
         }
 
         val signedTransaction = verifyAndSign(transaction)
-
         return finalize(signedTransaction, sessions)
     }
 
@@ -62,8 +50,7 @@ class IssueMembershipFlow(
 
         private companion object {
             object ISSUING : Step("Issuing membership.") {
-                override fun childProgressTracker() =
-                    tracker()
+                override fun childProgressTracker() = tracker()
             }
         }
 
@@ -72,7 +59,7 @@ class IssueMembershipFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(ISSUING)
-            val sessions = initiateFlows(observers, membership.network.operator)
+            val sessions = initiateFlows(membership.participants + observers)
 
             return subFlow(
                 IssueMembershipFlow(
@@ -90,8 +77,7 @@ class IssueMembershipFlow(
 
         private companion object {
             object OBSERVING : Step("Observing membership issuance.") {
-                override fun childProgressTracker() =
-                    IssueMembershipFlowHandler.tracker()
+                override fun childProgressTracker() = IssueMembershipFlowHandler.tracker()
             }
         }
 
@@ -103,8 +89,7 @@ class IssueMembershipFlow(
             return subFlow(
                 IssueMembershipFlowHandler(
                     session,
-                    null,
-                    OBSERVING.childProgressTracker()
+                    progressTracker = OBSERVING.childProgressTracker()
                 )
             )
         }

@@ -1,11 +1,11 @@
-package io.onixlabs.corda.bnms.workflow.membership
+package io.onixlabs.corda.bnms.workflow.revocation
 
-import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.membership.Membership
-import io.onixlabs.corda.bnms.contract.membership.MembershipSchema.MembershipEntity
+import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
+import io.onixlabs.corda.bnms.contract.revocation.RevocationLockSchema.RevocationLockEntity
 import io.onixlabs.corda.bnms.workflow.FindStateFlow
 import io.onixlabs.corda.bnms.workflow.MAX_PAGE_SPECIFICATION
 import io.onixlabs.corda.claims.workflow.withExpressions
+import net.corda.core.contracts.LinearState
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.flows.StartableByService
 import net.corda.core.identity.AbstractParty
@@ -16,18 +16,18 @@ import net.corda.core.node.services.vault.builder
 
 @StartableByRPC
 @StartableByService
-class FindLatestMembershipFlow(
-    bearer: AbstractParty,
-    network: Network,
-    relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
+class FindRevocationLockFlow<T : LinearState>(
+    owner: AbstractParty,
+    linearState: T,
     pageSpecification: PageSpecification = MAX_PAGE_SPECIFICATION
-) : FindStateFlow<Membership>(builder {
+) : FindStateFlow<RevocationLock<T>>(builder {
     VaultQueryCriteria(
-        contractStateTypes = setOf(Membership::class.java),
+        contractStateTypes = setOf(RevocationLock::class.java),
         status = Vault.StateStatus.UNCONSUMED,
-        relevancyStatus = relevancyStatus
+        relevancyStatus = Vault.RelevancyStatus.RELEVANT
     ).withExpressions(
-        MembershipEntity::bearer.equal(bearer),
-        MembershipEntity::networkHash.equal(network.hash.toString())
+        RevocationLockEntity::owner.equal(owner),
+        RevocationLockEntity::linearId.equal(linearState.linearId.id),
+        RevocationLockEntity::canonicalName.equal(linearState.javaClass.canonicalName)
     )
 }, pageSpecification)

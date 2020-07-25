@@ -1,7 +1,6 @@
 package io.onixlabs.corda.bnms.workflow.membership
 
 import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema.MembershipAttestationEntity
 import io.onixlabs.corda.bnms.workflow.FindStateFlow
@@ -22,7 +21,7 @@ class FindLatestMembershipAttestationByBearerFlow(
     network: Network,
     relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
     pageSpecification: PageSpecification = MAX_PAGE_SPECIFICATION
-) : FindStateFlow<Membership>(builder {
+) : FindStateFlow<MembershipAttestation>(builder {
     VaultQueryCriteria(
         contractStateTypes = setOf(MembershipAttestation::class.java),
         status = Vault.StateStatus.UNCONSUMED,

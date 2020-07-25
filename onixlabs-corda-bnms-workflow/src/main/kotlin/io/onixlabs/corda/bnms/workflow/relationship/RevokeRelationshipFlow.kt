@@ -1,53 +1,52 @@
-package io.onixlabs.corda.bnms.workflow.membership
+package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
-import io.onixlabs.corda.bnms.contract.membership.Membership
-import io.onixlabs.corda.bnms.contract.membership.MembershipContract
+import io.onixlabs.corda.bnms.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.contract.relationship.RelationshipContract
 import io.onixlabs.corda.bnms.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
-import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
 
-class RevokeMembershipFlow(
-    private val membership: StateAndRef<Membership>,
-    private val sessions: Set<FlowSession> = emptySet(),
+class RevokeRelationshipFlow(
+    private val relationship: StateAndRef<Relationship>,
+    private val sessions: Set<FlowSession>,
     override val progressTracker: ProgressTracker = tracker()
 ) : FlowLogic<SignedTransaction>() {
 
     companion object {
-        @JvmStatic
-        fun tracker() = ProgressTracker(INITIALIZING, GENERATING, VERIFYING, SIGNING, FINALIZING)
-
         private const val FLOW_VERSION_1 = 1
+
+        @JvmStatic
+        fun tracker() = ProgressTracker(INITIALIZING, GENERATING, VERIFYING, SIGNING, COUNTERSIGNING, FINALIZING)
     }
 
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkSufficientSessions(membership.state.data, sessions)
+        checkSufficientSessions(relationship.state.data, sessions)
 
-        val transaction = transaction(membership.state.notary) {
-            addInputState(membership)
-            addCommand(MembershipContract.Revoke, ourIdentity.owningKey)
+        val transaction = transaction(relationship.state.notary) {
+            addInputState(relationship)
+            addCommand(RelationshipContract.Revoke, relationship.state.data.participants.map { it.owningKey })
         }
 
-        val signedTransaction = verifyAndSign(transaction)
-        return finalize(signedTransaction, sessions)
+        val partiallySignedTransaction = verifyAndSign(transaction)
+        val fullySignedTransaction = countersign(partiallySignedTransaction, sessions)
+        return finalize(fullySignedTransaction, sessions)
     }
 
     @StartableByRPC
     @StartableByService
     @InitiatingFlow(version = FLOW_VERSION_1)
     class Initiator(
-        private val membership: StateAndRef<Membership>,
-        private val observers: Set<Party> = emptySet()
+        private val relationship: StateAndRef<Relationship>
     ) : FlowLogic<SignedTransaction>() {
 
         private companion object {
-            object REVOKING : Step("Revoking membership.") {
+            object REVOKING : Step("Revoking relationship.") {
                 override fun childProgressTracker() = tracker()
             }
         }
@@ -57,11 +56,11 @@ class RevokeMembershipFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(REVOKING)
-            val sessions = initiateFlows(membership.state.data.participants + observers)
+            val sessions = initiateFlows(relationship.state.data.participants)
 
             return subFlow(
-                RevokeMembershipFlow(
-                    membership,
+                RevokeRelationshipFlow(
+                    relationship,
                     sessions,
                     REVOKING.childProgressTracker()
                 )
@@ -73,8 +72,8 @@ class RevokeMembershipFlow(
     internal class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
 
         private companion object {
-            object OBSERVING : Step("Observing membership revocation.") {
-                override fun childProgressTracker() = RevokeMembershipFlowHandler.tracker()
+            object OBSERVING : Step("Observing relationship revocation.") {
+                override fun childProgressTracker() = RevokeRelationshipFlowHandler.tracker()
             }
         }
 
@@ -83,12 +82,7 @@ class RevokeMembershipFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(OBSERVING)
-            return subFlow(
-                RevokeMembershipFlowHandler(
-                    session,
-                    progressTracker = OBSERVING.childProgressTracker()
-                )
-            )
+            return subFlow(RevokeRelationshipFlowHandler(session, OBSERVING.childProgressTracker()))
         }
     }
 }

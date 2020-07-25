@@ -13,20 +13,13 @@ import net.corda.core.utilities.ProgressTracker.Step
 
 class RevokeMembershipAttestationFlow(
     private val attestation: StateAndRef<MembershipAttestation>,
-    private val notary: Party,
     private val sessions: Set<FlowSession>,
     override val progressTracker: ProgressTracker = tracker()
 ) : FlowLogic<SignedTransaction>() {
 
     companion object {
         @JvmStatic
-        fun tracker() = ProgressTracker(
-            INITIALIZING,
-            GENERATING,
-            VERIFYING,
-            SIGNING,
-            FINALIZING
-        )
+        fun tracker() = ProgressTracker(INITIALIZING, GENERATING, VERIFYING, SIGNING, FINALIZING)
 
         private const val FLOW_VERSION_1 = 1
     }
@@ -36,13 +29,12 @@ class RevokeMembershipAttestationFlow(
         currentStep(INITIALIZING)
         checkSufficientSessions(attestation.state.data, sessions)
 
-        val transaction = transaction(notary) {
+        val transaction = transaction(attestation.state.notary) {
             addInputState(attestation)
             addCommand(MembershipAttestationContract.Issue, attestation.state.data.attestor.owningKey)
         }
 
         val signedTransaction = verifyAndSign(transaction)
-
         return finalize(signedTransaction, sessions)
     }
 
@@ -51,7 +43,6 @@ class RevokeMembershipAttestationFlow(
     @InitiatingFlow(version = FLOW_VERSION_1)
     class Initiator(
         private val attestation: StateAndRef<MembershipAttestation>,
-        private val notary: Party? = null,
         private val observers: Set<Party> = emptySet()
     ) : FlowLogic<SignedTransaction>() {
 
@@ -66,12 +57,11 @@ class RevokeMembershipAttestationFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(REVOKING)
-            val sessions = initiateFlows(attestation.state.data.attestees + observers)
+            val sessions = initiateFlows(attestation.state.data.participants + observers)
 
             return subFlow(
                 RevokeMembershipAttestationFlow(
                     attestation,
-                    notary ?: firstNotary,
                     sessions,
                     REVOKING.childProgressTracker()
                 )
@@ -83,8 +73,8 @@ class RevokeMembershipAttestationFlow(
     internal class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
 
         private companion object {
-            object OBSERVING : Step("Observing membership attestation.") {
-                override fun childProgressTracker() = IssueMembershipAttestationFlowHandler.tracker()
+            object OBSERVING : Step("Observing membership attestation revocation.") {
+                override fun childProgressTracker() = RevokeMembershipAttestationFlowHandler.tracker()
             }
         }
 
@@ -93,7 +83,12 @@ class RevokeMembershipAttestationFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(OBSERVING)
-            return subFlow(RevokeMembershipAttestationFlowHandler(session, null, OBSERVING.childProgressTracker()))
+            return subFlow(
+                RevokeMembershipAttestationFlowHandler(
+                    session,
+                    progressTracker = OBSERVING.childProgressTracker()
+                )
+            )
         }
     }
 }

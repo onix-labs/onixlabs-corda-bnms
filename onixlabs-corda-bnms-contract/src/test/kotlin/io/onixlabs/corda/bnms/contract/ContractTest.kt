@@ -155,7 +155,7 @@ abstract class ContractTest : AutoCloseable {
         }
 
         val relationship = retrieveOutputStateAndRef(Relationship::class.java, label)
-        val attestation = RelationshipAttestation.create(attestor, relationship, AttestationStatus.ACCEPTED)
+        val attestation = RelationshipAttestation(attestor, relationship, AttestationStatus.ACCEPTED)
         return Pair(relationship, attestation)
     }
 }

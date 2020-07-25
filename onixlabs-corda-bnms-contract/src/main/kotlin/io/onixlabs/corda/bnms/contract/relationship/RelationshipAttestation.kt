@@ -23,7 +23,7 @@ import net.corda.core.schemas.PersistentState
  * @property participants The participants of the attestation state, namely the attestor, attestees and network operator.
  */
 @BelongsToContract(RelationshipAttestationContract::class)
-data class RelationshipAttestation(
+data class RelationshipAttestation internal constructor(
     override val network: Network,
     override val pointer: AttestationPointer<Relationship>,
     override val attestor: AbstractParty,
@@ -33,34 +33,21 @@ data class RelationshipAttestation(
     override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : AttestationState<Relationship>() {
 
-    companion object {
-
-        /**
-         * Creates a relationship attestation.
-         *
-         * @param attestor The participant attesting to the attested relationship state.
-         * @param relationship The relationship state being attested.
-         * @param status Specifies whether the attestation is accepted or rejected.
-         * @param metadata Allows additional information to be added to the attestation for reference.
-         * @param linearId The unique identifier of the relationship attestation state.
-         * @return Returns a relationship attestation.
-         */
-        fun create(
-            attestor: AbstractParty,
-            relationship: StateAndRef<Relationship>,
-            status: AttestationStatus = AttestationStatus.REJECTED,
-            metadata: Map<String, String> = emptyMap(),
-            linearId: UniqueIdentifier = UniqueIdentifier()
-        ) = RelationshipAttestation(
-            network = relationship.state.data.network,
-            pointer = AttestationPointer.create(relationship),
-            attestor = attestor,
-            attestees = (relationship.state.data.participants - attestor).toSet(),
-            status = status,
-            metadata = metadata,
-            linearId = linearId
-        )
-    }
+    constructor(
+        attestor: AbstractParty,
+        relationship: StateAndRef<Relationship>,
+        status: AttestationStatus = AttestationStatus.REJECTED,
+        metadata: Map<String, String> = emptyMap(),
+        linearId: UniqueIdentifier = UniqueIdentifier()
+    ) : this(
+        network = relationship.state.data.network,
+        pointer = AttestationPointer.create(relationship),
+        attestor = attestor,
+        attestees = (relationship.state.data.participants - attestor).toSet(),
+        status = status,
+        metadata = metadata,
+        linearId = linearId
+    )
 
     /**
      * Creates an accepted attestation.
