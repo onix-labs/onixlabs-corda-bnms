@@ -31,7 +31,7 @@ class RevokeMembershipAttestationFlow(
 
         val transaction = transaction(attestation.state.notary) {
             addInputState(attestation)
-            addCommand(MembershipAttestationContract.Issue, attestation.state.data.attestor.owningKey)
+            addCommand(MembershipAttestationContract.Revoke, attestation.state.data.attestor.owningKey)
         }
 
         val signedTransaction = verifyAndSign(transaction)

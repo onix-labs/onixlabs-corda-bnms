@@ -32,9 +32,6 @@ object MembershipSchema {
         @Column(name = "network_operator", nullable = true)
         val networkOperator: AbstractParty? = null,
 
-        @Column(name = "network_identity", nullable = false)
-        val networkIdentity: AbstractParty = NULL_PARTY,
-
         @Column(name = "network_hash", nullable = false)
         val networkHash: String = "",
 

@@ -32,9 +32,9 @@ internal val KClass<*>.contractClassName: ContractClassName
         } else this.java.enclosingClass.canonicalName
     }
 
-internal fun StateAndRef<Membership>.getNextOutput() = state.data.copy(previousStateRef = ref)
+fun StateAndRef<Membership>.getNextOutput() = state.data.copy(previousStateRef = ref)
 
-internal fun StateAndRef<Relationship>.getNextOutput() = state.data.copy(previousStateRef = ref)
+fun StateAndRef<Relationship>.getNextOutput() = state.data.copy(previousStateRef = ref)
 
 private object IdentityComparator : Comparator<AbstractParty> {
     override fun compare(p0: AbstractParty?, p1: AbstractParty?): Int {
