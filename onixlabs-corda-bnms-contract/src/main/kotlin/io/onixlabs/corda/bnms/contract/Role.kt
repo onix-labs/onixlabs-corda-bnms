@@ -1,16 +1,16 @@
 package io.onixlabs.corda.bnms.contract
 
-import net.corda.core.serialization.CordaSerializable
+import io.onixlabs.corda.identity.framework.contract.Claim
 import java.util.*
 
 /**
- * Represents a role possessed by a network member.
+ * Represents a claim that describes a role possessed by a network member.
  *
- * @property name The name of the role.
- * @property normalizedName The normalize name of the role.
+ * @property property The property of the Role claim, which is set to "Role".
+ * @property value The value of the Role claim, which is the name of the role.
+ * @property normalizedValue The normalized value of the Role claim.
  */
-@CordaSerializable
-class Role(val name: String) {
+class Role(value: String) : Claim<String>("Role", value) {
 
     companion object {
 
@@ -35,8 +35,8 @@ class Role(val name: String) {
         val GUEST = Role("Guest")
     }
 
-    val normalizedName: String
-        get() = name.toLowerCase()
+    val normalizedValue: String
+        get() = value.toLowerCase()
 
     /**
      * Compares this object for equality with the specified object.
@@ -45,20 +45,14 @@ class Role(val name: String) {
      * @return Returns true if the objects are considered equal; otherwise, false.
      */
     override fun equals(other: Any?): Boolean {
-        return other === this || (other != null
-                && other is Role
-                && other.normalizedName == normalizedName)
+        return other === this || (other is Role && other.normalizedValue == normalizedValue)
     }
 
     /**
      * Serves as the default hash code implementation.
      * @return Returns a unique hash code for this object instance.
      */
-    override fun hashCode() = Objects.hash(normalizedName)
-
-    /**
-     * Gets a string representation of this object instance.
-     * @return Returns a string representation of this object instance.
-     */
-    override fun toString() = "Role: name = $name, normalized name = $normalizedName"
+    override fun hashCode(): Int {
+        return Objects.hash(normalizedValue)
+    }
 }

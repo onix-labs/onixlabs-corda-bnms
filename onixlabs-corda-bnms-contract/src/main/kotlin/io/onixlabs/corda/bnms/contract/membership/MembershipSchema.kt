@@ -11,6 +11,12 @@ import javax.persistence.Table
 
 object MembershipSchema {
 
+    object MembershipSchemaV1 : MappedSchema(
+        schemaFamily = MembershipSchema.javaClass,
+        version = 1,
+        mappedTypes = listOf(MembershipEntity::class.java)
+    )
+
     @Entity
     @Table(name = "membership_states")
     class MembershipEntity(
@@ -20,20 +26,17 @@ object MembershipSchema {
         @Column(name = "external_id", nullable = true)
         val externalId: String? = null,
 
-        @Column(name = "bearer", nullable = false)
-        val bearer: AbstractParty = NULL_PARTY,
+        @Column(name = "holder", nullable = false)
+        val holder: AbstractParty = NULL_PARTY,
 
-        @Column(name = "network_name", nullable = false)
-        val networkName: String = "",
+        @Column(name = "network_value", nullable = false)
+        val networkValue: String = "",
 
-        @Column(name = "normalized_network_name", nullable = false)
-        val normalizedNetworkName: String = "",
+        @Column(name = "normalized_network_value", nullable = false)
+        val normalizedNetworkValue: String = "",
 
         @Column(name = "network_operator", nullable = true)
         val networkOperator: AbstractParty? = null,
-
-        @Column(name = "network_identity", nullable = false)
-        val networkIdentity: AbstractParty = NULL_PARTY,
 
         @Column(name = "network_hash", nullable = false)
         val networkHash: String = "",
@@ -44,12 +47,4 @@ object MembershipSchema {
         @Column(name = "hash", nullable = false, unique = true)
         val hash: String = ""
     ) : PersistentState()
-
-    private const val SCHEMA_VERSION_1 = 1
-
-    object MembershipSchemaV1 : MappedSchema(
-        schemaFamily = MembershipSchema.javaClass,
-        version = SCHEMA_VERSION_1,
-        mappedTypes = listOf(MembershipEntity::class.java)
-    )
 }

@@ -1,8 +1,13 @@
 package io.onixlabs.corda.bnms.contract.relationship
 
-import io.onixlabs.corda.bnms.contract.*
+import io.onixlabs.corda.bnms.contract.Network
+import io.onixlabs.corda.bnms.contract.NetworkState
+import io.onixlabs.corda.bnms.contract.Setting
+import io.onixlabs.corda.bnms.contract.identityHash
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipSchema.RelationshipEntity
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipSchema.RelationshipSchemaV1
+import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
+import io.onixlabs.corda.identity.framework.contract.Hashable
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -11,44 +16,24 @@ import net.corda.core.identity.AbstractParty
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
 
-/**
- * Represents a configurable multi-lateral network relationship.
- *
- * The configurability of this state allows different business networks to specify requirements for managing
- * multi-lateral working relationships whilst maintaining interoperability with other business networks using
- * the same underlying framework.
- *
- * When creating or amending a relationship state, the transaction must only contain one output, which is the
- * relationship state. This transaction needs to be propagated to all participants of the relationship as all of
- * them are required to attest to the relationship. Relationship attestation is static because any participant of
- * the relationship state can amend it. If attestations were linear, this would pose a vulnerability, as participants
- * would implicitly attest to updated relationship states which could have undesirable consequences on the network.
- *
- * The network operator is considered a participant of this state because they have authority to create, amend
- * or even revoke relationships as they see fit, however relationships are still considered invalid until attested.
- *
- * @property network The identity of the network.
- * @property globalSettings The settings that apply to all participants of the relationship.
- * @property participantSettings The settings that apply to each participant of the relationship.
- * @property previousStateRef The state ref to the previous version of the state, or null if this is this first version.
- * @property linearId The unique identifier of the state.
- * @property participants The relationship configuration network identities, and optionally the network operator.
- * @property hash A SHA-256 hash that uniquely identifies this version of the state.
- */
 @BelongsToContract(RelationshipContract::class)
 data class Relationship(
     override val network: Network,
-    val globalSettings: Set<Setting> = emptySet(),
-    val participantSettings: Map<out AbstractParty, Set<Setting>> = emptyMap(),
-    val previousStateRef: StateRef? = null,
+    val members: Set<RelationshipMember> = emptySet(),
+    val settings: Set<Setting<*>> = emptySet(),
+    internal val previousStateRef: StateRef? = null,
     override val linearId: UniqueIdentifier = UniqueIdentifier()
-) : NetworkState(), Hashable {
+) : NetworkState, Hashable {
 
     override val hash: SecureHash
         get() = SecureHash.sha256("${network.hash}${participants.identityHash}$previousStateRef")
 
     override val participants: List<AbstractParty>
-        get() = (participantSettings.keys + network.operator).filterNotNull()
+        get() = members.map { it.member }
+
+    fun createRevocationLocks(): List<RevocationLock<Relationship>> {
+        return members.map { RevocationLock(it.member, this) }
+    }
 
     /**
      * Maps this state to a persistent state.
@@ -57,11 +42,10 @@ data class Relationship(
         is RelationshipSchemaV1 -> RelationshipEntity(
             linearId = linearId.id,
             externalId = linearId.externalId,
-            networkName = network.name,
-            normalizedNetworkName = network.normalizedName,
+            networkValue = network.value,
+            normalizedNetworkValue = network.normalizedValue,
             networkOperator = network.operator,
             networkHash = network.hash.toString(),
-            identityHash = participantSettings.keys.identityHash.toString(),
             hash = hash.toString()
         )
         else -> throw IllegalArgumentException("Unrecognised schema: $schema.")
@@ -70,5 +54,7 @@ data class Relationship(
     /**
      * Gets a list of supported state schemas.
      */
-    override fun supportedSchemas(): Iterable<MappedSchema> = listOf(RelationshipSchemaV1)
+    override fun supportedSchemas(): Iterable<MappedSchema> {
+        return listOf(RelationshipSchemaV1)
+    }
 }

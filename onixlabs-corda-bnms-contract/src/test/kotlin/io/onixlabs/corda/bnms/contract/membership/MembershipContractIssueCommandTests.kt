@@ -1,13 +1,13 @@
 package io.onixlabs.corda.bnms.contract.membership
 
-import io.onixlabs.corda.bnms.contract.*
+import io.onixlabs.corda.bnms.contract.ContractTest
 import net.corda.testing.node.ledger
 import org.junit.jupiter.api.Test
 
-class MembershipContractIssuanceTests : ContractTest() {
+class MembershipContractIssueCommandTests : ContractTest() {
 
     @Test
-    fun `On membership issuance, the transaction must include the Issue command (centralized)`() {
+    fun `On membership issuing, the transaction must include the Issue command (centralized)`() {
         services.ledger {
             transaction {
                 output(MembershipContract.ID, CENTRALIZED_MEMBERSHIP_A)
@@ -19,7 +19,7 @@ class MembershipContractIssuanceTests : ContractTest() {
     }
 
     @Test
-    fun `On membership issuance, the transaction must include the Issue command (decentralized)`() {
+    fun `On membership issuing, the transaction must include the Issue command (decentralized)`() {
         services.ledger {
             transaction {
                 output(MembershipContract.ID, DECENTRALIZED_MEMBERSHIP_A)
@@ -31,7 +31,7 @@ class MembershipContractIssuanceTests : ContractTest() {
     }
 
     @Test
-    fun `On membership issuance, zero states must be consumed (centralized)`() {
+    fun `On membership issuing, zero membership states must be consumed (centralized)`() {
         services.ledger {
             transaction {
                 input(MembershipContract.ID, CENTRALIZED_MEMBERSHIP_A)
@@ -43,7 +43,7 @@ class MembershipContractIssuanceTests : ContractTest() {
     }
 
     @Test
-    fun `On membership issuance, zero states must be consumed (decentralized)`() {
+    fun `On membership issuing, zero membership states must be consumed (decentralized)`() {
         services.ledger {
             transaction {
                 input(MembershipContract.ID, DECENTRALIZED_MEMBERSHIP_A)
@@ -55,7 +55,7 @@ class MembershipContractIssuanceTests : ContractTest() {
     }
 
     @Test
-    fun `On membership issuance, only one state must be created (centralized)`() {
+    fun `On membership issuing, only one membership state must be created (centralized)`() {
         services.ledger {
             transaction {
                 output(MembershipContract.ID, CENTRALIZED_MEMBERSHIP_A)
@@ -67,7 +67,7 @@ class MembershipContractIssuanceTests : ContractTest() {
     }
 
     @Test
-    fun `On membership issuance, only one state must be created (decentralized)`() {
+    fun `On membership issuing, only one membership state must be created (decentralized)`() {
         services.ledger {
             transaction {
                 output(MembershipContract.ID, DECENTRALIZED_MEMBERSHIP_A)
@@ -79,55 +79,55 @@ class MembershipContractIssuanceTests : ContractTest() {
     }
 
     @Test
-    fun `On membership issuance, network operators must possess the network operator role (centralized)`() {
+    fun `On membership issuing, a network operator must possess the network operator role (centralized)`() {
         services.ledger {
             transaction {
-                output(MembershipContract.ID, CENTRALIZED_MEMBERSHIP_O.copy(roles = emptySet()))
-                command(keysOf(OPERATOR_A), MembershipContract.Issue)
-                failsWith(MembershipContract.Issue.CONTRACT_RULE_ROLES)
-            }
-        }
-    }
-
-    @Test
-    fun `On membership issuance, the previous state reference must be null (centralized)`() {
-        services.ledger {
-            transaction {
-                output(MembershipContract.ID, CENTRALIZED_MEMBERSHIP_A.copy(previousStateRef = INVALID_STATEREF))
-                command(keysOf(OPERATOR_A), MembershipContract.Issue)
-                failsWith(MembershipContract.Issue.CONTRACT_RULE_PREVIOUS_REF)
-            }
-        }
-    }
-
-    @Test
-    fun `On membership issuance, the previous state reference must be null (decentralized)`() {
-        services.ledger {
-            transaction {
-                output(MembershipContract.ID, DECENTRALIZED_MEMBERSHIP_A.copy(previousStateRef = INVALID_STATEREF))
+                output(MembershipContract.ID, CENTRALIZED_MEMBERSHIP_OPERATOR.copy(roles = emptySet()))
                 command(keysOf(IDENTITY_A), MembershipContract.Issue)
-                failsWith(MembershipContract.Issue.CONTRACT_RULE_PREVIOUS_REF)
+                failsWith(MembershipContract.Issue.CONTRACT_RULE_ROLE)
             }
         }
     }
 
     @Test
-    fun `On membership issuance, only the network member must sign the transaction (centralized)`() {
+    fun `On membership issuing, the previous state reference of the created membership state must be null (centralized)`() {
+        services.ledger {
+            transaction {
+                output(MembershipContract.ID, CENTRALIZED_MEMBERSHIP_A.copy(previousStateRef = EMPTY_REF))
+                command(keysOf(IDENTITY_A), MembershipContract.Issue)
+                failsWith(MembershipContract.Issue.CONTRACT_RULE_PREVIOUS_STATE_REF)
+            }
+        }
+    }
+
+    @Test
+    fun `On membership issuing, the previous state reference of the created membership state must be null (decentralized)`() {
+        services.ledger {
+            transaction {
+                output(MembershipContract.ID, DECENTRALIZED_MEMBERSHIP_A.copy(previousStateRef = EMPTY_REF))
+                command(keysOf(IDENTITY_A), MembershipContract.Issue)
+                failsWith(MembershipContract.Issue.CONTRACT_RULE_PREVIOUS_STATE_REF)
+            }
+        }
+    }
+
+    @Test
+    fun `On membership issuing, the holder of the created membership state must sign the transaction (centralized)`() {
         services.ledger {
             transaction {
                 output(MembershipContract.ID, CENTRALIZED_MEMBERSHIP_A)
-                command(keysOf(IDENTITY_B), MembershipContract.Issue)
+                command(keysOf(OPERATOR_A), MembershipContract.Issue)
                 failsWith(MembershipContract.Issue.CONTRACT_RULE_SIGNERS)
             }
         }
     }
 
     @Test
-    fun `On membership issuance, only the network member must sign the transaction (decentralized)`() {
+    fun `On membership issuing, the holder of the created membership state must sign the transaction (decentralized)`() {
         services.ledger {
             transaction {
                 output(MembershipContract.ID, DECENTRALIZED_MEMBERSHIP_A)
-                command(keysOf(IDENTITY_B), MembershipContract.Issue)
+                command(keysOf(OPERATOR_A), MembershipContract.Issue)
                 failsWith(MembershipContract.Issue.CONTRACT_RULE_SIGNERS)
             }
         }

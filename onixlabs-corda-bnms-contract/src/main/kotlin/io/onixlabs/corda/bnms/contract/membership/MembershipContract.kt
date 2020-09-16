@@ -1,12 +1,7 @@
 package io.onixlabs.corda.bnms.contract.membership
 
 import io.onixlabs.corda.bnms.contract.Role
-import io.onixlabs.corda.bnms.contract.VerifiedCommand
-import io.onixlabs.corda.bnms.contract.contractClassName
-import io.onixlabs.corda.bnms.contract.verifySingleCommand
-import net.corda.core.contracts.Contract
-import net.corda.core.contracts.ContractClassName
-import net.corda.core.contracts.requireThat
+import net.corda.core.contracts.*
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
 
@@ -14,111 +9,122 @@ class MembershipContract : Contract {
 
     companion object {
         @JvmStatic
-        val ID: ContractClassName = this::class.contractClassName
+        val ID: ContractClassName = this::class.java.enclosingClass.canonicalName
     }
 
-    override fun verify(tx: LedgerTransaction) = verifySingleCommand<MembershipContractCommand>(tx)
+    override fun verify(tx: LedgerTransaction) {
+        val command = tx.commands.requireSingleCommand<MembershipContractCommand>()
+        when (command.value) {
+            is Issue, is Amend, is Revoke -> command.value.verifyCommand(tx, command.signers.toSet())
+            else -> throw IllegalArgumentException("Unrecognised command: ${command.value}")
+        }
+    }
 
-    interface MembershipContractCommand : VerifiedCommand
+    interface MembershipContractCommand : CommandData {
+        fun verifyCommand(transaction: LedgerTransaction, signers: Set<PublicKey>)
+    }
 
     object Issue : MembershipContractCommand {
 
         internal const val CONTRACT_RULE_INPUTS =
-            "On membership issuance, zero states must be consumed."
+            "On membership issuing, zero membership states must be consumed."
 
         internal const val CONTRACT_RULE_OUTPUTS =
-            "On membership issuance, only one state must be created."
+            "On membership issuing, only one membership state must be created."
 
-        internal const val CONTRACT_RULE_ROLES =
-            "On membership issuance, network operators must possess the network operator role."
+        internal const val CONTRACT_RULE_ROLE =
+            "On membership issuing, a network operator must possess the network operator role."
 
-        internal const val CONTRACT_RULE_PREVIOUS_REF =
-            "On membership issuance, the previous state reference must be null."
+        internal const val CONTRACT_RULE_PREVIOUS_STATE_REF =
+            "On membership issuing, the previous state reference of the created membership state must be null."
 
         internal const val CONTRACT_RULE_SIGNERS =
-            "On membership issuance, only the network member must sign the transaction."
+            "On membership issuing, the holder of the created membership state must sign the transaction."
 
-        override fun verify(tx: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
-            CONTRACT_RULE_INPUTS using (tx.inputs.isEmpty())
-            CONTRACT_RULE_OUTPUTS using (tx.outputs.size == 1)
+        override fun verifyCommand(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
+            val inputs = transaction.inputsOfType<Membership>()
+            val outputs = transaction.outputsOfType<Membership>()
 
-            val membershipOutputState = tx.outputsOfType<Membership>().single()
+            CONTRACT_RULE_INPUTS using (inputs.isEmpty())
+            CONTRACT_RULE_OUTPUTS using (outputs.size == 1)
 
-            if (membershipOutputState.isNetworkOperator) {
-                CONTRACT_RULE_ROLES using (membershipOutputState.hasRole(Role.NETWORK_OPERATOR))
+            val output = outputs.single()
+
+            if (output.isNetworkOperator) {
+                CONTRACT_RULE_ROLE using (output.hasRole(Role.NETWORK_OPERATOR))
             }
 
-            CONTRACT_RULE_PREVIOUS_REF using (membershipOutputState.previousStateRef == null)
-            CONTRACT_RULE_SIGNERS using (membershipOutputState.bearer.owningKey == signers.single())
+            CONTRACT_RULE_PREVIOUS_STATE_REF using (output.previousStateRef == null)
+            CONTRACT_RULE_SIGNERS using (output.holder.owningKey in signers)
         }
     }
 
     object Amend : MembershipContractCommand {
 
         internal const val CONTRACT_RULE_INPUTS =
-            "On membership amendment, only one state must be consumed."
+            "On membership amending, only one membership state must be consumed."
 
         internal const val CONTRACT_RULE_OUTPUTS =
-            "On membership amendment, only one state must be created."
+            "On membership amending, only one membership state must be created."
 
-        internal const val CONTRACT_RULE_NETWORK_HASH =
-            "On membership amendment, the network hash must not change."
+        internal const val CONTRACT_RULE_NETWORK =
+            "On membership amending, the network of the membership must not change."
 
-        internal const val CONTRACT_RULE_NETWORK_IDENTITY =
-            "On membership amendment, the network identity must not change."
+        internal const val CONTRACT_RULE_HOLDER =
+            "On membership amending, the holder of the membership must not change."
 
-        internal const val CONTRACT_RULE_ROLES =
-            "On membership amendment, network operators must possess the network operator role."
+        internal const val CONTRACT_RULE_ROLE =
+            "On membership amending, a network operator must possess the network operator role."
 
-        internal const val CONTRACT_RULE_PREVIOUS_REF =
-            "On membership amendment, the previous state reference must be equal to the input state reference."
+        internal const val CONTRACT_RULE_PREVIOUS_STATE_REF =
+            "On membership amending, the previous state reference of the created membership state must be equal to the state reference of the consumed membership state."
 
         internal const val CONTRACT_RULE_SIGNERS =
-            "On membership amendment, either the network member or the network operator must sign the transaction."
+            "On membership amending, either the holder or the network operator of the created membership state must sign the transaction."
 
-        override fun verify(tx: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
-            CONTRACT_RULE_INPUTS using (tx.inputs.size == 1)
-            CONTRACT_RULE_OUTPUTS using (tx.outputs.size == 1)
+        override fun verifyCommand(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
+            val inputs = transaction.inRefsOfType<Membership>()
+            val outputs = transaction.outputsOfType<Membership>()
 
-            val membershipInputStateAndRef = tx.inRefsOfType<Membership>().single()
-            val membershipInputState = membershipInputStateAndRef.state.data
-            val inputNetworkHash = membershipInputState.network.hash
-            val inputNetworkIdentity = membershipInputState.bearer
+            CONTRACT_RULE_INPUTS using (inputs.size == 1)
+            CONTRACT_RULE_OUTPUTS using (outputs.size == 1)
 
-            val membershipOutputState = tx.outputsOfType<Membership>().single()
-            val outputNetworkHash = membershipOutputState.network.hash
-            val outputNetworkIdentity = membershipOutputState.bearer
+            val input = inputs.single()
+            val output = outputs.single()
 
-            CONTRACT_RULE_NETWORK_HASH using (inputNetworkHash == outputNetworkHash)
-            CONTRACT_RULE_NETWORK_IDENTITY using (inputNetworkIdentity == outputNetworkIdentity)
+            CONTRACT_RULE_NETWORK using (input.state.data.network == output.network)
+            CONTRACT_RULE_HOLDER using (input.state.data.holder == output.holder)
 
-            if (membershipOutputState.isNetworkOperator) {
-                CONTRACT_RULE_ROLES using (membershipOutputState.hasRole(Role.NETWORK_OPERATOR))
+            if (output.isNetworkOperator) {
+                CONTRACT_RULE_ROLE using (output.hasRole(Role.NETWORK_OPERATOR))
             }
 
-            CONTRACT_RULE_PREVIOUS_REF using (membershipOutputState.previousStateRef == membershipInputStateAndRef.ref)
-            CONTRACT_RULE_SIGNERS using (membershipOutputState.participants.any { it.owningKey == signers.single() })
+            CONTRACT_RULE_PREVIOUS_STATE_REF using (input.ref == output.previousStateRef)
+            CONTRACT_RULE_SIGNERS using (output.participants.any { it.owningKey in signers })
         }
     }
 
     object Revoke : MembershipContractCommand {
 
         internal const val CONTRACT_RULE_INPUTS =
-            "On membership revocation, only one state must be consumed."
+            "On membership revoking, only one membership state must be consumed."
 
         internal const val CONTRACT_RULE_OUTPUTS =
-            "On membership revocation, zero states must be created."
+            "On membership revoking, zero membership states must be created."
 
         internal const val CONTRACT_RULE_SIGNERS =
-            "On membership revocation, either the network member or the network operator must sign the transaction."
+            "On membership revoking, either the holder or the network operator of the consumed membership state must sign the transaction."
 
-        override fun verify(tx: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
-            CONTRACT_RULE_INPUTS using (tx.inputs.size == 1)
-            CONTRACT_RULE_OUTPUTS using (tx.outputs.isEmpty())
+        override fun verifyCommand(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
+            val inputs = transaction.inRefsOfType<Membership>()
+            val outputs = transaction.outputsOfType<Membership>()
 
-            val inputMembershipState = tx.inputsOfType<Membership>().single()
+            CONTRACT_RULE_INPUTS using (inputs.size == 1)
+            CONTRACT_RULE_OUTPUTS using (outputs.isEmpty())
 
-            CONTRACT_RULE_SIGNERS using (inputMembershipState.participants.any { it.owningKey == signers.single() })
+            val input = inputs.single()
+
+            CONTRACT_RULE_SIGNERS using (input.state.data.participants.any { it.owningKey in signers })
         }
     }
 }

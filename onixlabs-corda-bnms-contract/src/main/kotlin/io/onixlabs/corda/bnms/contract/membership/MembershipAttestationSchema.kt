@@ -1,6 +1,6 @@
 package io.onixlabs.corda.bnms.contract.membership
 
-import io.onixlabs.corda.bnms.contract.AttestationStatus
+import io.onixlabs.corda.identity.framework.contract.AttestationStatus
 import net.corda.core.crypto.NullKeys.NULL_PARTY
 import net.corda.core.identity.AbstractParty
 import net.corda.core.schemas.MappedSchema
@@ -10,6 +10,12 @@ import javax.persistence.*
 
 object MembershipAttestationSchema {
 
+    object MembershipAttestationSchemaV1 : MappedSchema(
+        schemaFamily = MembershipAttestationSchema.javaClass,
+        version = 1,
+        mappedTypes = listOf(MembershipAttestationEntity::class.java)
+    )
+
     @Entity
     @Table(name = "membership_attestation_states")
     class MembershipAttestationEntity(
@@ -18,6 +24,18 @@ object MembershipAttestationSchema {
 
         @Column(name = "external_id", nullable = true)
         val externalId: String? = null,
+
+        @Column(name = "attestor", nullable = false)
+        val attestor: AbstractParty = NULL_PARTY,
+
+        @Column(name = "attestee", nullable = false)
+        val attestee: AbstractParty = NULL_PARTY,
+
+        @Column(name = "pointer", nullable = false)
+        val pointer: String = "",
+
+        @Column(name = "pointer_type", nullable = false)
+        val pointerType: String = "",
 
         @Column(name = "network_name", nullable = false)
         val networkName: String = "",
@@ -31,34 +49,11 @@ object MembershipAttestationSchema {
         @Column(name = "network_hash", nullable = false)
         val networkHash: String = "",
 
-        @Column(name = "membership_linear_id", nullable = false)
-        val membershipLinearId: UUID = UUID.randomUUID(),
-
-        @Column(name = "membership_external_id", nullable = true)
-        val membershipExternalId: String? = null,
-
-        @Column(name = "membership_stateref_hash", nullable = false)
-        val membershipStateRefHash: String = "",
-
-        @Column(name = "membership_stateref_index", nullable = false)
-        val membershipStateRefIndex: Int = 0,
-
-        @Column(name = "attestor", nullable = false)
-        val attestor: AbstractParty = NULL_PARTY,
-
-        @Column(name = "attestee", nullable = false)
-        val attestee: AbstractParty = NULL_PARTY,
-
         @Column(name = "status", nullable = false)
         @Enumerated(EnumType.STRING)
-        val status: AttestationStatus = AttestationStatus.REJECTED
+        val status: AttestationStatus = AttestationStatus.REJECTED,
+
+        @Column(name = "hash", nullable = false, unique = true)
+        val hash: String = ""
     ) : PersistentState()
-
-    private const val SCHEMA_VERSION_1 = 1
-
-    object MembershipAttestationSchemaV1 : MappedSchema(
-        schemaFamily = MembershipSchema.javaClass,
-        version = SCHEMA_VERSION_1,
-        mappedTypes = listOf(MembershipAttestationEntity::class.java)
-    )
 }

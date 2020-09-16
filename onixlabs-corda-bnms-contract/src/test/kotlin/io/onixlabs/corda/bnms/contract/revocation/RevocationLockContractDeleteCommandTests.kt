@@ -1,16 +1,13 @@
 package io.onixlabs.corda.bnms.contract.revocation
 
-import io.onixlabs.corda.bnms.contract.ContractTest
-import io.onixlabs.corda.bnms.contract.IDENTITY_A
-import io.onixlabs.corda.bnms.contract.IDENTITY_B
-import io.onixlabs.corda.bnms.contract.REVOCATION_LOCK
+import io.onixlabs.corda.bnms.contract.*
 import net.corda.testing.node.ledger
 import org.junit.jupiter.api.Test
 
-class RevocationLockContractDeletionTests : ContractTest() {
+class RevocationLockContractDeleteCommandTests : ContractTest() {
 
     @Test
-    fun `On revocation lock deletion, the transaction must include the Create command`() {
+    fun `On revocation lock deleting, the transaction must include the Create command`() {
         services.ledger {
             transaction {
                 input(RevocationLockContract.ID, REVOCATION_LOCK)
@@ -22,7 +19,7 @@ class RevocationLockContractDeletionTests : ContractTest() {
     }
 
     @Test
-    fun `On revocation lock deletion, only one state must be consumed`() {
+    fun `On revocation lock deleting, only one state must be consumed`() {
         services.ledger {
             transaction {
                 input(RevocationLockContract.ID, REVOCATION_LOCK)
@@ -34,7 +31,7 @@ class RevocationLockContractDeletionTests : ContractTest() {
     }
 
     @Test
-    fun `On revocation lock deletion, zero states must be created`() {
+    fun `On revocation lock deleting, zero states must be created`() {
         services.ledger {
             transaction {
                 input(RevocationLockContract.ID, REVOCATION_LOCK)
@@ -46,7 +43,7 @@ class RevocationLockContractDeletionTests : ContractTest() {
     }
 
     @Test
-    fun `On revocation lock deletion, only the owner must sign the transaction`() {
+    fun `On revocation lock deleting, only the owner must sign the transaction`() {
         services.ledger {
             transaction {
                 input(RevocationLockContract.ID, REVOCATION_LOCK)

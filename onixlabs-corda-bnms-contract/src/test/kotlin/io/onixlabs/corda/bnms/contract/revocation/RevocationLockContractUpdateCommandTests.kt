@@ -1,13 +1,10 @@
 package io.onixlabs.corda.bnms.contract.revocation
 
 import io.onixlabs.corda.bnms.contract.ContractTest
-import io.onixlabs.corda.bnms.contract.IDENTITY_A
-import io.onixlabs.corda.bnms.contract.IDENTITY_B
-import io.onixlabs.corda.bnms.contract.REVOCATION_LOCK
 import net.corda.testing.node.ledger
 import org.junit.jupiter.api.Test
 
-class RevocationLockContractUpdateTests : ContractTest() {
+class RevocationLockContractUpdateCommandTests : ContractTest() {
 
     @Test
     fun `On revocation lock creation, the transaction must include the Update command`() {

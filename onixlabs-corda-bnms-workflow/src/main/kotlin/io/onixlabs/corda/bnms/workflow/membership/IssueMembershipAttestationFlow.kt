@@ -3,7 +3,9 @@ package io.onixlabs.corda.bnms.workflow.membership
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationContract
-import io.onixlabs.corda.bnms.workflow.*
+import io.onixlabs.corda.bnms.workflow.checkSufficientSessions
+import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationContract
+import io.onixlabs.corda.identity.framework.workflow.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
@@ -32,10 +34,10 @@ class IssueMembershipAttestationFlow(
         val transaction = transaction(notary) {
             addOutputState(attestation, MembershipAttestationContract.ID)
             addReferenceState(attestation.pointer.resolve(serviceHub).referenced())
-            addCommand(MembershipAttestationContract.Issue, attestation.attestor.owningKey)
+            addCommand(EvolvableAttestationContract.Issue, attestation.attestor.owningKey)
         }
 
-        val signedTransaction = verifyAndSign(transaction)
+        val signedTransaction = verifyAndSign(transaction, attestation.attestor.owningKey)
         return finalize(signedTransaction, sessions)
     }
 
@@ -64,7 +66,7 @@ class IssueMembershipAttestationFlow(
             return subFlow(
                 IssueMembershipAttestationFlow(
                     attestation,
-                    notary ?: firstNotary,
+                    notary ?: preferredNotary,
                     sessions,
                     ISSUING.childProgressTracker()
                 )

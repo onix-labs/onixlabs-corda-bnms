@@ -10,6 +10,12 @@ import javax.persistence.Table
 
 object RelationshipSchema {
 
+    object RelationshipSchemaV1 : MappedSchema(
+        schemaFamily = RelationshipSchema.javaClass,
+        version = 1,
+        mappedTypes = listOf(RelationshipEntity::class.java)
+    )
+
     @Entity
     @Table(name = "relationship_states")
     class RelationshipEntity(
@@ -19,11 +25,11 @@ object RelationshipSchema {
         @Column(name = "external_id", nullable = true)
         val externalId: String? = null,
 
-        @Column(name = "network_name", nullable = false)
-        val networkName: String = "",
+        @Column(name = "network_value", nullable = false)
+        val networkValue: String = "",
 
-        @Column(name = "normalized_network_name", nullable = false)
-        val normalizedNetworkName: String = "",
+        @Column(name = "normalized_network_value", nullable = false)
+        val normalizedNetworkValue: String = "",
 
         @Column(name = "network_operator", nullable = true)
         val networkOperator: AbstractParty? = null,
@@ -31,18 +37,7 @@ object RelationshipSchema {
         @Column(name = "network_hash", nullable = false)
         val networkHash: String = "",
 
-        @Column(name = "identity_hash", nullable = false)
-        val identityHash: String = "",
-
         @Column(name = "hash", nullable = false, unique = true)
         val hash: String = ""
     ) : PersistentState()
-
-    private const val SCHEMA_VERSION_1 = 1
-
-    object RelationshipSchemaV1 : MappedSchema(
-        schemaFamily = RelationshipSchema.javaClass,
-        version = SCHEMA_VERSION_1,
-        mappedTypes = listOf(RelationshipEntity::class.java)
-    )
 }

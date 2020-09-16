@@ -3,7 +3,8 @@ package io.onixlabs.corda.bnms.workflow.membership
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipContract
-import io.onixlabs.corda.bnms.workflow.*
+import io.onixlabs.corda.bnms.workflow.checkSufficientSessions
+import io.onixlabs.corda.identity.framework.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -34,7 +35,7 @@ class RevokeMembershipFlow(
             addCommand(MembershipContract.Revoke, ourIdentity.owningKey)
         }
 
-        val signedTransaction = verifyAndSign(transaction)
+        val signedTransaction = verifyAndSign(transaction, ourIdentity.owningKey)
         return finalize(signedTransaction, sessions)
     }
 

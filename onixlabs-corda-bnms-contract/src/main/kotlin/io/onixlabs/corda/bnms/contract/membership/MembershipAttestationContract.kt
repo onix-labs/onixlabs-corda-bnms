@@ -1,135 +1,77 @@
 package io.onixlabs.corda.bnms.contract.membership
 
-import io.onixlabs.corda.bnms.contract.VerifiedCommand
-import io.onixlabs.corda.bnms.contract.contractClassName
-import io.onixlabs.corda.bnms.contract.verifySingleCommand
-import net.corda.core.contracts.Contract
+import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationContract
 import net.corda.core.contracts.ContractClassName
 import net.corda.core.contracts.requireThat
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
 
-class MembershipAttestationContract : Contract {
+class MembershipAttestationContract : EvolvableAttestationContract() {
 
     companion object {
         @JvmStatic
-        val ID: ContractClassName = this::class.contractClassName
+        val ID: ContractClassName = this::class.java.enclosingClass.canonicalName
     }
 
-    override fun verify(tx: LedgerTransaction) = verifySingleCommand<MembershipAttestationContractCommand>(tx)
+    internal object Issue {
+        const val CONTRACT_RULE_REFERENCES =
+            "On membership attestation issuing, only one membership state must be referenced."
 
-    interface MembershipAttestationContractCommand : VerifiedCommand
+        const val CONTRACT_RULE_POINTER =
+            "On membership attestation issuing, the attestation pointer must point to the referenced membership state."
 
-    object Issue : MembershipAttestationContractCommand {
+        const val CONTRACT_RULE_HOLDER_ATTESTEE =
+            "On membership attestation issuing, the holder of the referenced membership state must be listed as an attestee."
 
-        internal const val CONTRACT_RULE_INPUTS =
-            "On membership attestation issuance, zero states must be consumed."
+        const val CONTRACT_RULE_OPERATOR_ATTESTATION =
+            "On membership attestation issuing, if present, only the network operator must attest membership."
+    }
 
-        internal const val CONTRACT_RULE_OUTPUTS =
-            "On membership attestation issuance, only one state must be created."
+    internal object Amend {
+        const val CONTRACT_RULE_REFERENCES =
+            "On membership attestation amending, only one membership state must be referenced."
 
-        internal const val CONTRACT_RULE_REFERENCES =
-            "On membership attestation issuance, only one membership state must be referenced."
+        const val CONTRACT_RULE_POINTER =
+            "On membership attestation amending, the attestation pointer must point to the referenced membership state."
 
-        internal const val CONTRACT_RULE_POINTER =
-            "On membership attestation issuance, the attestation pointer must point to the referenced membership state."
+        const val CONTRACT_RULE_HOLDER_ATTESTEE =
+            "On membership attestation amending, the holder of the referenced membership state must be listed as an attestee."
 
-        internal const val CONTRACT_RULE_MEMBERSHIP =
-            "On membership attestation issuance, the attestee must be the network identity of the referenced membership state."
+        const val CONTRACT_RULE_OPERATOR_ATTESTATION =
+            "On membership attestation amending, if present, only the network operator must attest membership."
+    }
 
-        internal const val CONTRACT_RULE_OPERATOR =
-            "On membership attestation issuance, if present, only the network operator must attest membership."
+    override fun onVerifyIssue(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
+        val references = transaction.referenceInputRefsOfType<Membership>()
+        val attestation = transaction.outputsOfType<MembershipAttestation>().single()
 
-        internal const val CONTRACT_RULE_NETWORK_HASH =
-            "On membership attestation issuance, the attestation and membership network hash must be equal."
+        Issue.CONTRACT_RULE_REFERENCES using (references.size == 1)
 
-        internal const val CONTRACT_RULE_SIGNERS =
-            "On membership attestation issuance, only the attestor must sign the transaction."
+        val membershipRef = references.single().ref
+        val membership = references.single().state.data
 
-        override fun verify(tx: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
-            CONTRACT_RULE_INPUTS using (tx.inputs.isEmpty())
-            CONTRACT_RULE_OUTPUTS using (tx.outputs.size == 1)
-            CONTRACT_RULE_REFERENCES using (tx.references.size == 1)
+        Issue.CONTRACT_RULE_POINTER using (attestation.pointer.pointer == membershipRef)
+        Issue.CONTRACT_RULE_HOLDER_ATTESTEE using (membership.holder in attestation.attestees)
 
-            val referencedMembershipState = tx.referenceInputRefsOfType<Membership>().single()
-            val attestationOutputState = tx.outputsOfType<MembershipAttestation>().single()
-
-            CONTRACT_RULE_POINTER using (attestationOutputState.pointer.isPointingTo(referencedMembershipState))
-            CONTRACT_RULE_MEMBERSHIP using (attestationOutputState.attestee == referencedMembershipState.state.data.bearer)
-
-            if (attestationOutputState.network.operator != null) {
-                CONTRACT_RULE_OPERATOR using (attestationOutputState.network.operator == attestationOutputState.attestor)
-            }
-
-            CONTRACT_RULE_NETWORK_HASH using (attestationOutputState.network.hash == referencedMembershipState.state.data.network.hash)
-            CONTRACT_RULE_SIGNERS using (attestationOutputState.attestor.owningKey == signers.single())
+        if (membership.network.operator != null) {
+            Issue.CONTRACT_RULE_OPERATOR_ATTESTATION using (attestation.attestor == membership.network.operator)
         }
     }
 
-    object Amend : MembershipAttestationContractCommand {
+    override fun onVerifyAmend(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
+        val references = transaction.referenceInputRefsOfType<Membership>()
+        val attestation = transaction.outputsOfType<MembershipAttestation>().single()
 
-        internal const val CONTRACT_RULE_INPUTS =
-            "On membership attestation amendment, only one state must be consumed."
+        Amend.CONTRACT_RULE_REFERENCES using (references.size == 1)
 
-        internal const val CONTRACT_RULE_OUTPUTS =
-            "On membership attestation amendment, only one state must be created."
+        val membershipRef = references.single().ref
+        val membership = references.single().state.data
 
-        internal const val CONTRACT_RULE_REFERENCES =
-            "On membership attestation amendment, only one membership state must be referenced."
+        Amend.CONTRACT_RULE_POINTER using (attestation.pointer.pointer == membershipRef)
+        Amend.CONTRACT_RULE_HOLDER_ATTESTEE using (membership.holder in attestation.attestees)
 
-        internal const val CONTRACT_RULE_POINTER =
-            "On membership attestation amendment, the attestation pointer must point to the referenced membership state."
-
-        internal const val CONTRACT_RULE_MEMBERSHIP =
-            "On membership attestation amendment, the attestee must be the network identity of the referenced membership state."
-
-        internal const val CONTRACT_RULE_OPERATOR =
-            "On membership attestation amendment, if present, only the network operator must attest membership."
-
-        internal const val CONTRACT_RULE_NETWORK_HASH =
-            "On membership attestation amendment, the attestation and membership network hash must be equal."
-
-        internal const val CONTRACT_RULE_SIGNERS =
-            "On membership attestation amendment, only the attestor must sign the transaction."
-
-        override fun verify(tx: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
-            CONTRACT_RULE_INPUTS using (tx.inputs.size == 1)
-            CONTRACT_RULE_OUTPUTS using (tx.outputs.size == 1)
-            CONTRACT_RULE_REFERENCES using (tx.references.size == 1)
-
-            val referencedMembershipState = tx.referenceInputRefsOfType<Membership>().single()
-            val attestationOutputState = tx.outputsOfType<MembershipAttestation>().single()
-
-            CONTRACT_RULE_POINTER using (attestationOutputState.pointer.isPointingTo(referencedMembershipState))
-            CONTRACT_RULE_MEMBERSHIP using (attestationOutputState.attestee == referencedMembershipState.state.data.bearer)
-            CONTRACT_RULE_NETWORK_HASH using (attestationOutputState.network.hash == referencedMembershipState.state.data.network.hash)
-
-            if (attestationOutputState.network.operator != null) {
-                CONTRACT_RULE_OPERATOR using (attestationOutputState.network.operator == attestationOutputState.attestor)
-            }
-
-            CONTRACT_RULE_SIGNERS using (attestationOutputState.attestor.owningKey == signers.single())
-        }
-    }
-
-    object Revoke : MembershipAttestationContractCommand {
-
-        internal const val CONTRACT_RULE_INPUTS =
-            "On membership attestation revocation, only one state must be consumed."
-
-        internal const val CONTRACT_RULE_OUTPUTS =
-            "On membership attestation revocation, zero states must be created."
-
-        internal const val CONTRACT_RULE_SIGNERS =
-            "On membership attestation revocation, only the attestor must sign the transaction."
-
-        override fun verify(tx: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
-            CONTRACT_RULE_INPUTS using (tx.inputs.size == 1)
-            CONTRACT_RULE_OUTPUTS using (tx.outputs.isEmpty())
-
-            val attestationInputState = tx.inputsOfType<MembershipAttestation>().single()
-
-            CONTRACT_RULE_SIGNERS using (attestationInputState.attestor.owningKey == signers.single())
+        if (membership.network.operator != null) {
+            Amend.CONTRACT_RULE_OPERATOR_ATTESTATION using (attestation.attestor == membership.network.operator)
         }
     }
 }
