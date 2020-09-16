@@ -3,9 +3,8 @@ package io.onixlabs.corda.bnms.contract.revocation
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockSchema.RevocationLockEntity
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockSchema.RevocationLockSchemaV1
 import net.corda.core.contracts.BelongsToContract
-import net.corda.core.contracts.CommandAndState
+import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.LinearState
-import net.corda.core.contracts.OwnableState
 import net.corda.core.identity.AbstractParty
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
@@ -21,50 +20,28 @@ import net.corda.core.schemas.QueryableState
  */
 @BelongsToContract(RevocationLockContract::class)
 data class RevocationLock<T : LinearState>(
-    override val owner: AbstractParty,
+    val owner: AbstractParty,
     val pointer: RevocationLockPointer<T>,
     val status: RevocationLockStatus = RevocationLockStatus.LOCKED
-) : OwnableState, QueryableState {
+) : ContractState, QueryableState {
 
-    companion object {
+    constructor(owner: AbstractParty, state: T) : this(
+        owner,
+        RevocationLockPointer(state.linearId, state.javaClass),
+        RevocationLockStatus.LOCKED
+    )
 
-        /**
-         * Creates a revocation lock.
-         *
-         * @property owner The owner of the revocation lock.
-         * @property state The state that requires a revocation lock.
-         * @property status Specifies whether the revocation lock is locked or unlocked.
-         * @return Returns a revocation lock state.
-         */
-        inline fun <reified T : LinearState> create(
-            owner: AbstractParty,
-            state: T,
-            status: RevocationLockStatus = RevocationLockStatus.LOCKED
-        ) = RevocationLock(
-            owner = owner,
-            pointer = RevocationLockPointer.create(state),
-            status = status
-        )
-    }
-
-    override val participants: List<AbstractParty> get() = listOf(owner)
-
-    /**
-     * Changes ownership of the revocation lock state.
-     * @throws IllegalStateException Cannot change ownership of a revocation lock state.
-     */
-    override fun withNewOwner(newOwner: AbstractParty): CommandAndState {
-        throw IllegalStateException("Cannot change ownership of a revocation lock state.")
-    }
+    override val participants: List<AbstractParty>
+        get() = listOf(owner)
 
     /**
      * Maps this state to a persistent state.
      */
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
         is RevocationLockSchemaV1 -> RevocationLockEntity(
-            owner = owner,
             linearId = pointer.linearId.id,
             externalId = pointer.linearId.externalId,
+            owner = owner,
             canonicalName = pointer.type.canonicalName,
             status = status
         )

@@ -1,101 +1,58 @@
 package io.onixlabs.corda.bnms.contract.revocation
 
-import io.onixlabs.corda.bnms.contract.Resolvable
+import io.onixlabs.corda.identity.framework.contract.Resolvable
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.node.ServiceHub
 import net.corda.core.node.services.Vault
-import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.QueryCriteria.LinearStateQueryCriteria
 import net.corda.core.serialization.CordaSerializable
+import net.corda.core.transactions.LedgerTransaction
 import java.util.*
 
-/**
- * Represents a pointer to a state that requires revocation locking.
- *
- * @property linearId The unique identifier of the revocation locked state.
- * @property type The type of the revocation locked state.
- */
 @CordaSerializable
 class RevocationLockPointer<T : LinearState>(val linearId: UniqueIdentifier, val type: Class<T>) : Resolvable<T> {
 
     companion object {
-
-        /**
-         * Creates an [RevocationLockPointer] instance from the specified [LinearState] instance.
-         *
-         * @param linearState The [StateAndRef] instance which the revocation lock pointer will point to.
-         * @return Returns an [RevocationLockPointer] pointing to the specified [LinearState] instance.
-         */
-        inline fun <reified T : LinearState> create(linearState: T): RevocationLockPointer<T> {
-            return RevocationLockPointer(linearState.linearId, T::class.java)
-        }
+        private const val EX_CANNOT_RESOLVE =
+            "State with linearId is not known by this node:"
     }
 
-    /**
-     * Resolves a [StateAndRef] using a [CordaRPCOps] instance.
-     *
-     * @param cordaRPCOps The [CordaRPCOps] instance to use to resolve the [StateAndRef].
-     * @return Returns a resolved [StateAndRef].
-     */
+    private val criteria = LinearStateQueryCriteria(
+        contractStateTypes = setOf(type),
+        relevancyStatus = Vault.RelevancyStatus.RELEVANT,
+        status = Vault.StateStatus.UNCONSUMED,
+        linearId = listOf(linearId)
+    )
+
     override fun resolve(cordaRPCOps: CordaRPCOps): StateAndRef<T> {
-        return cordaRPCOps.vaultQueryByCriteria(toQueryCriteria(), type).states.singleOrNull()
-            ?: throw IllegalStateException("Failed to obtain state with id '$linearId'.")
+        return cordaRPCOps.vaultQueryByCriteria(criteria, type).states.singleOrNull()
+            ?: throw IllegalStateException("$EX_CANNOT_RESOLVE $linearId")
     }
 
-    /**
-     * Resolves a [StateAndRef] using a [ServiceHub] instance.
-     *
-     * @param serviceHub The [ServiceHub] instance to use to resolve the [StateAndRef].
-     * @return Returns a resolved [StateAndRef].
-     */
     override fun resolve(serviceHub: ServiceHub): StateAndRef<T> {
-        return serviceHub.vaultService.queryBy(type, toQueryCriteria()).states.singleOrNull()
-            ?: throw IllegalStateException("Failed to obtain state with id '$linearId'.")
+        return serviceHub.vaultService.queryBy(type, criteria).states.singleOrNull()
+            ?: throw IllegalStateException("$EX_CANNOT_RESOLVE $linearId")
     }
 
-    /**
-     * Gets a [QueryCriteria] representing the state resolution query.
-     * @return Returns a [QueryCriteria] representing the state resolution query.
-     */
-    override fun toQueryCriteria(): QueryCriteria {
-        return LinearStateQueryCriteria(null, listOf(linearId), Vault.StateStatus.UNCONSUMED, setOf(type))
+    override fun resolve(transaction: LedgerTransaction): StateAndRef<T> {
+        return transaction.referenceInputRefsOfType(type).singleOrNull { it.state.data.linearId == linearId }
+            ?: throw IllegalStateException("State with specified linearId has not been referenced in the transaction $linearId")
     }
 
-    /**
-     * Compares this object for equality with the specified object.
-     *
-     * @param other The object to compare with this object.
-     * @return Returns true if the objects are considered equal; otherwise, false.
-     */
     override fun equals(other: Any?): Boolean {
-        return other === this || (other != null
-                && other is RevocationLockPointer<*>
+        return this === other || (other is RevocationLockPointer<*>
                 && other.linearId == linearId
                 && other.type == type)
     }
 
-    /**
-     * Serves as the default hash code implementation.
-     * @return Returns a unique hash code for this object instance.
-     */
-    override fun hashCode() = Objects.hash(linearId, type)
+    override fun hashCode(): Int {
+        return Objects.hash(linearId, type)
+    }
 
-    /**
-     * Gets a string representation of this object instance.
-     * @return Returns a string representation of this object instance.
-     */
-    override fun toString() = "RevocationLockPointer: linearId = $linearId, type = $type."
-
-    /**
-     * Determines whether this revocation lock pointer is pointing to the specified [LinearState].
-     *
-     * @param linearState The [LinearState] to check against this revocation lock pointer.
-     * @return Returns true if this revocation lock pointer is pointing to the specified [LinearState]; otherwise, false.
-     */
-    fun isPointingTo(linearState: LinearState): Boolean {
-        return linearId == linearState.linearId
+    override fun isPointingTo(stateAndRef: StateAndRef<T>): Boolean {
+        return stateAndRef.state.data.javaClass == type && stateAndRef.state.data.linearId == linearId
     }
 }

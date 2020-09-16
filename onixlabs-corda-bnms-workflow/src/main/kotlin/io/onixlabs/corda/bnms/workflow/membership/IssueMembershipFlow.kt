@@ -3,7 +3,9 @@ package io.onixlabs.corda.bnms.workflow.membership
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipContract
-import io.onixlabs.corda.bnms.workflow.*
+import io.onixlabs.corda.bnms.workflow.checkMembershipExists
+import io.onixlabs.corda.bnms.workflow.checkSufficientSessions
+import io.onixlabs.corda.identity.framework.workflow.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
@@ -31,11 +33,11 @@ class IssueMembershipFlow(
         checkSufficientSessions(membership, sessions)
 
         val transaction = transaction(notary) {
-            addOutputState(membership, MembershipContract.ID)
-            addCommand(MembershipContract.Issue, membership.bearer.owningKey)
+            addOutputState(membership)
+            addCommand(MembershipContract.Issue, membership.holder.owningKey)
         }
 
-        val signedTransaction = verifyAndSign(transaction)
+        val signedTransaction = verifyAndSign(transaction, membership.holder.owningKey)
         return finalize(signedTransaction, sessions)
     }
 
@@ -64,7 +66,7 @@ class IssueMembershipFlow(
             return subFlow(
                 IssueMembershipFlow(
                     membership,
-                    notary ?: firstNotary,
+                    notary ?: preferredNotary,
                     sessions,
                     ISSUING.childProgressTracker()
                 )
@@ -73,7 +75,7 @@ class IssueMembershipFlow(
     }
 
     @InitiatedBy(Initiator::class)
-    internal class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
+    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
 
         private companion object {
             object OBSERVING : Step("Observing membership issuance.") {
@@ -86,12 +88,7 @@ class IssueMembershipFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(OBSERVING)
-            return subFlow(
-                IssueMembershipFlowHandler(
-                    session,
-                    progressTracker = OBSERVING.childProgressTracker()
-                )
-            )
+            return subFlow(IssueMembershipFlowHandler(session, progressTracker = OBSERVING.childProgressTracker()))
         }
     }
 }

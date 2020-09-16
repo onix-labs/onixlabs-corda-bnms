@@ -2,8 +2,9 @@ package io.onixlabs.corda.bnms.workflow.membership
 
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationContract
-import io.onixlabs.corda.bnms.workflow.*
+import io.onixlabs.corda.bnms.workflow.checkSufficientSessions
+import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationContract
+import io.onixlabs.corda.identity.framework.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -31,10 +32,10 @@ class RevokeMembershipAttestationFlow(
 
         val transaction = transaction(attestation.state.notary) {
             addInputState(attestation)
-            addCommand(MembershipAttestationContract.Revoke, attestation.state.data.attestor.owningKey)
+            addCommand(EvolvableAttestationContract.Issue, attestation.state.data.attestor.owningKey)
         }
 
-        val signedTransaction = verifyAndSign(transaction)
+        val signedTransaction = verifyAndSign(transaction, attestation.state.data.attestor.owningKey)
         return finalize(signedTransaction, sessions)
     }
 
