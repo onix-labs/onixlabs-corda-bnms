@@ -109,3 +109,28 @@ Membership attestation amendment can only be performed by the attestor. This rep
 ### Membership Attestation Revocation
 
 Membership attestation revocation can only be performed by the attestor. This represents complete revocation of an attestation to a membership state, which can be used when a membership state is revoked. Only the attestor is required to sign a membership attestation issuance transaction.
+
+
+# Local setup
+
+## How to publish to local maven repo
+- With tests
+  - `./gradlew releaseLocal`
+- Without tests
+  - `./gradlew clean build -x test publishToMavenLocal`
+
+## How to delete local maven repo
+- `rm -rf ~/.m2/repository/io/onixlabs`
+
+## How to setup to publish to maven repo
+- [Create a GitHub Personal Access Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
+- Ensure it has the [correct permissions](https://docs.github.com/en/packages/publishing-and-managing-packages/about-github-packages#about-scopes-and-permissions-for-github-container-registry)
+- Add the following to your `~/.gradle/gradle.properties` file, replacing `GITHUB_USERNAME` and `GITHUB_ACCESS_KEY`
+> Note this file is in your home directory - not the root of the repo
+```
+gpr.user=GITHUB_USERNAME
+gpr.key=GITHUB_ACCESS_KEY
+```
+## Publish a new version
+- Update the version name in the root `build.gradle` file
+- Run `./gradlew publish`
