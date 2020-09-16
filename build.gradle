@@ -14,7 +14,7 @@ buildscript {
         junit_version = '5.3.1'
 
         onixlabs_group = 'io.onixlabs'
-        onixlabs_idfx_release_version = '0.0.9-beta'
+        onixlabs_idfx_release_version = '0.0.10-beta'
 
         cordapp_platform_version = 5
         cordapp_signing_enabled = true
