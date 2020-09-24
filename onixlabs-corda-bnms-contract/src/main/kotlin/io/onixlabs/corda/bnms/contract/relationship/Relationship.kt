@@ -21,8 +21,8 @@ data class Relationship(
     override val network: Network,
     val members: Set<RelationshipMember> = emptySet(),
     val settings: Set<Setting<*>> = emptySet(),
-    internal val previousStateRef: StateRef? = null,
-    override val linearId: UniqueIdentifier = UniqueIdentifier()
+    override val linearId: UniqueIdentifier = UniqueIdentifier(),
+    internal val previousStateRef: StateRef? = null
 ) : NetworkState, Hashable {
 
     companion object {
@@ -37,10 +37,12 @@ data class Relationship(
     }
 
     init {
-        val distinctMembers = members.distinctBy { it.member }
-        val distinctSettings = settings.distinctBy { it.normalizedProperty }
-        check(members.size == distinctMembers.size) { "Cannot create a relationship with duplicate members." }
-        check(settings.size == distinctSettings.size) { "Cannot create a relationship with duplicate settings." }
+        check(members.size == members.distinctBy { it.member }.size) {
+            "Cannot create a relationship with duplicate members."
+        }
+        check(settings.size == settings.distinctBy { it.normalizedProperty }.size) {
+            "Cannot create a relationship with duplicate settings."
+        }
     }
 
     override val hash: SecureHash

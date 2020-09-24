@@ -1,8 +1,9 @@
 package io.onixlabs.corda.bnms.integration
 
 import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.membership.Membership
-import io.onixlabs.corda.bnms.workflow.membership.*
+import io.onixlabs.corda.bnms.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
+import io.onixlabs.corda.bnms.workflow.relationship.*
 import io.onixlabs.corda.identity.framework.workflow.DEFAULT_PAGE_SPEC
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -15,89 +16,87 @@ import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.utilities.getOrThrow
 import java.time.Duration
 
-class MembershipQueryService(rpc: CordaRPCOps) : Service(rpc) {
+class RelationshipAttestationQueryService(rpc: CordaRPCOps) : Service(rpc) {
 
-    fun findMembershipByLinearId(
+    fun findRelationshipAttestationByLinearId(
         linearId: UniqueIdentifier,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<Membership>? {
+    ): StateAndRef<RelationshipAttestation>? {
         return rpc.startFlow(
-            ::FindMembershipByLinearIdFlow,
+            ::FindRelationshipAttestationByLinearIdFlow,
             linearId,
             relevancyStatus,
             pageSpecification
         ).returnValue.getOrThrow(flowTimeout)
     }
 
-    fun findMembershipByExternalId(
+    fun findRelationshipAttestationByExternalId(
         externalId: String,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<Membership>? {
+    ): StateAndRef<RelationshipAttestation>? {
         return rpc.startFlow(
-            ::FindMembershipByExternalIdFlow,
+            ::FindRelationshipAttestationByExternalIdFlow,
             externalId,
             relevancyStatus,
             pageSpecification
         ).returnValue.getOrThrow(flowTimeout)
     }
 
-    fun findMembershipByHash(
+    fun findRelationshipAttestationByHash(
         hash: SecureHash,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<Membership>? {
+    ): StateAndRef<RelationshipAttestation>? {
         return rpc.startFlow(
-            ::FindMembershipByHashFlow,
+            ::FindRelationshipAttestationByHashFlow,
             hash,
             relevancyStatus,
             pageSpecification
         ).returnValue.getOrThrow(flowTimeout)
     }
 
-    fun findMembershipByHolder(
-        holder: AbstractParty,
-        network: Network,
+    fun findRelationshipAttestationByRelationship(
+        relationship: StateAndRef<Relationship>,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<Membership>? {
+    ): StateAndRef<RelationshipAttestation>? {
         return rpc.startFlow(
-            ::FindMembershipByHolderFlow,
-            holder,
-            network,
+            ::FindRelationshipAttestationByRelationshipFlow,
+            relationship,
             relevancyStatus,
             pageSpecification
         ).returnValue.getOrThrow(flowTimeout)
     }
 
-    fun findMembershipsByStatus(
+    fun findRelationshipAttestationsByStatus(
         stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<Membership>> {
+    ): List<StateAndRef<RelationshipAttestation>> {
         return rpc.startFlow(
-            ::FindMembershipsByStatusFlow,
+            ::FindRelationshipAttestationsByStatusFlow,
             stateStatus,
             relevancyStatus,
             pageSpecification
         ).returnValue.getOrThrow(flowTimeout)
     }
 
-    fun findMembershipsByLinearId(
+    fun findRelationshipAttestationsByLinearId(
         linearId: UniqueIdentifier,
         stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<Membership>> {
+    ): List<StateAndRef<RelationshipAttestation>> {
         return rpc.startFlow(
-            ::FindMembershipsByLinearIdFlow,
+            ::FindRelationshipAttestationsByLinearIdFlow,
             linearId,
             stateStatus,
             relevancyStatus,
@@ -105,15 +104,15 @@ class MembershipQueryService(rpc: CordaRPCOps) : Service(rpc) {
         ).returnValue.getOrThrow(flowTimeout)
     }
 
-    fun findMembershipsByExternalId(
+    fun findRelationshipAttestationsByExternalId(
         externalId: String,
         stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<Membership>> {
+    ): List<StateAndRef<RelationshipAttestation>> {
         return rpc.startFlow(
-            ::FindMembershipsByExternalIdFlow,
+            ::FindRelationshipAttestationsByExternalIdFlow,
             externalId,
             stateStatus,
             relevancyStatus,
@@ -121,15 +120,15 @@ class MembershipQueryService(rpc: CordaRPCOps) : Service(rpc) {
         ).returnValue.getOrThrow(flowTimeout)
     }
 
-    fun findMembershipsByNetwork(
+    fun findRelationshipAttestationsByNetwork(
         network: Network,
         stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<Membership>> {
+    ): List<StateAndRef<RelationshipAttestation>> {
         return rpc.startFlow(
-            ::FindMembershipsByNetworkFlow,
+            ::FindRelationshipAttestationsByNetworkFlow,
             network,
             stateStatus,
             relevancyStatus,
@@ -137,16 +136,34 @@ class MembershipQueryService(rpc: CordaRPCOps) : Service(rpc) {
         ).returnValue.getOrThrow(flowTimeout)
     }
 
-    fun findMembershipsByHolder(
-        holder: AbstractParty,
+    fun findRelationshipAttestationsByAttestor(
+        attestor: AbstractParty,
         stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<Membership>> {
+    ): List<StateAndRef<RelationshipAttestation>> {
         return rpc.startFlow(
-            ::FindMembershipsByHolderFlow,
-            holder,
+            ::FindRelationshipAttestationsByAttestorFlow,
+            attestor,
+            stateStatus,
+            relevancyStatus,
+            pageSpecification
+        ).returnValue.getOrThrow(flowTimeout)
+    }
+
+    fun findRelationshipAttestationsByAttestorAndNetwork(
+        attestor: AbstractParty,
+        network: Network,
+        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
+        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
+        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
+        flowTimeout: Duration = Duration.ofSeconds(30)
+    ): List<StateAndRef<RelationshipAttestation>> {
+        return rpc.startFlow(
+            ::FindRelationshipAttestationsByAttestorAndNetworkFlow,
+            attestor,
+            network,
             stateStatus,
             relevancyStatus,
             pageSpecification
