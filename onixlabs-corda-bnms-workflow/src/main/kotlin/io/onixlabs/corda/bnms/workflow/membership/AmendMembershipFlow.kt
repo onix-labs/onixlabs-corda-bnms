@@ -77,7 +77,7 @@ class AmendMembershipFlow(
     }
 
     @InitiatedBy(Initiator::class)
-    internal class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
+    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
 
         private companion object {
             object OBSERVING : Step("Observing membership amendment.") {

@@ -31,7 +31,7 @@ class FindVersionedMembershipAttestationByHolderFlow(
         relevancyStatus = relevancyStatus
     ).withExpressions(
         MembershipAttestationEntity::attestee.equal(holder),
-        MembershipAttestationEntity::networkHash.equal(network.hash),
+        MembershipAttestationEntity::networkHash.equal(network.hash.toString()),
         MembershipAttestationEntity::pointer.equal(stateRef.toString())
     )
 }, pageSpecification)

@@ -25,11 +25,18 @@ data class Relationship(
     override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : NetworkState, Hashable {
 
+    init {
+        val distinctMembers = members.distinctBy { it.member }
+        val distinctSettings = settings.distinctBy { it.normalizedProperty }
+        check(members.size == distinctMembers.size) { "Cannot create a relationship with duplicate members." }
+        check(settings.size == distinctSettings.size) { "Cannot create a relationship with duplicate settings." }
+    }
+
     override val hash: SecureHash
         get() = SecureHash.sha256("${network.hash}${participants.identityHash}$previousStateRef")
 
     override val participants: List<AbstractParty>
-        get() = members.map { it.member }
+        get() = members.map { it.member }.distinct()
 
     fun createRevocationLocks(): List<RevocationLock<Relationship>> {
         return members.map { RevocationLock(it.member, this) }
@@ -56,5 +63,13 @@ data class Relationship(
      */
     override fun supportedSchemas(): Iterable<MappedSchema> {
         return listOf(RelationshipSchemaV1)
+    }
+
+    fun <T : Any> addSetting(property: String, value: T): Relationship {
+        return copy(settings = settings + Setting(property, value))
+    }
+
+    fun <T : Any> removeSetting(setting: Setting<*>): Relationship {
+        return copy(settings = settings - setting)
     }
 }

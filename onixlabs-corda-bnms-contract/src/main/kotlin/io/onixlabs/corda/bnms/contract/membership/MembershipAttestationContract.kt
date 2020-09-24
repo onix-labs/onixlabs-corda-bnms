@@ -1,12 +1,14 @@
 package io.onixlabs.corda.bnms.contract.membership
 
 import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationContract
+import net.corda.core.contracts.Contract
 import net.corda.core.contracts.ContractClassName
+import net.corda.core.contracts.NoConstraintPropagation
 import net.corda.core.contracts.requireThat
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
 
-class MembershipAttestationContract : EvolvableAttestationContract() {
+class MembershipAttestationContract : EvolvableAttestationContract(), Contract {
 
     companion object {
         @JvmStatic

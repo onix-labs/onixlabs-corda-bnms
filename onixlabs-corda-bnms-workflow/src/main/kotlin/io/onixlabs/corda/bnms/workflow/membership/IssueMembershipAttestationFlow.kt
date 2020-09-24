@@ -32,7 +32,7 @@ class IssueMembershipAttestationFlow(
         checkSufficientSessions(attestation, sessions)
 
         val transaction = transaction(notary) {
-            addOutputState(attestation, MembershipAttestationContract.ID)
+            addOutputState(attestation)
             addReferenceState(attestation.pointer.resolve(serviceHub).referenced())
             addCommand(EvolvableAttestationContract.Issue, attestation.attestor.owningKey)
         }
@@ -75,7 +75,7 @@ class IssueMembershipAttestationFlow(
     }
 
     @InitiatedBy(Initiator::class)
-    internal class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
+    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
 
         private companion object {
             object OBSERVING : Step("Observing membership attestation issuance.") {

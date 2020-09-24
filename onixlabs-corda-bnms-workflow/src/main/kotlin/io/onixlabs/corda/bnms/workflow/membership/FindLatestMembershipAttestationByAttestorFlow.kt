@@ -29,6 +29,6 @@ class FindLatestMembershipAttestationByAttestorFlow(
         relevancyStatus = relevancyStatus
     ).withExpressions(
         MembershipAttestationEntity::attestor.equal(attestor),
-        MembershipAttestationEntity::networkHash.equal(network.hash)
+        MembershipAttestationEntity::networkHash.equal(network.hash.toString())
     )
 }, pageSpecification)

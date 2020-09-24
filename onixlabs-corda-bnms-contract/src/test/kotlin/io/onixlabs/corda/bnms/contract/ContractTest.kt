@@ -4,9 +4,7 @@ import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationContract
 import io.onixlabs.corda.bnms.contract.membership.MembershipContract
-import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipContract
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipMember
+import io.onixlabs.corda.bnms.contract.relationship.*
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockContract
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockPointer
@@ -105,9 +103,10 @@ abstract class ContractTest {
 
         private val contracts = listOf(
             MembershipContract.ID,
-            MembershipAttestationContract.ID,
             RelationshipContract.ID,
-            RevocationLockContract.ID
+            RevocationLockContract.ID,
+            MembershipAttestationContract.ID,
+            RelationshipAttestationContract.ID
         )
 
         fun keysOf(vararg identities: TestIdentity) = identities.map { it.publicKey }
@@ -131,7 +130,7 @@ abstract class ContractTest {
         holder: AbstractParty
     ): MembershipAttestation {
         val stateAndRef = copy(state = state.copy(data = state.data.copy(holder = holder)))
-        return MembershipAttestation(state.data.network, attestor, stateAndRef)
+        return MembershipAttestation(attestor, stateAndRef)
     }
 
     protected fun StateAndRef<Membership>.withWrongAttestee(
@@ -143,7 +142,6 @@ abstract class ContractTest {
         val linearId = attestation.state.data.linearId
         val ref = attestation.ref
         return MembershipAttestation(
-            state.data.network,
             attestor,
             stateAndRef,
             linearId = linearId,
@@ -195,5 +193,21 @@ abstract class ContractTest {
         }
 
         return retrieveOutputStateAndRef(Relationship::class.java, label)
+    }
+
+    protected fun LedgerDSL<TestTransactionDSLInterpreter, TestLedgerDSLInterpreter>.issue(
+        attestation: RelationshipAttestation,
+        relationship: StateAndRef<Relationship>
+    ): StateAndRef<RelationshipAttestation> {
+        val label = SecureHash.randomSHA256().toString()
+
+        transaction {
+            output(RelationshipAttestationContract.ID, label, attestation)
+            reference(relationship.ref)
+            command(attestation.participants.map { it.owningKey }, EvolvableAttestationContract.Issue)
+            verifies()
+        }
+
+        return retrieveOutputStateAndRef(RelationshipAttestation::class.java, label)
     }
 }

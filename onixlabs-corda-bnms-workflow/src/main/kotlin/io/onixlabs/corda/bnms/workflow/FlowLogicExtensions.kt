@@ -46,3 +46,7 @@ fun FlowLogic<*>.checkMembershipsAndAttestations(relationship: Relationship, cou
         }
     }
 }
+
+fun FlowLogic<*>.filterCounterpartyIdentities(parties: Iterable<AbstractParty>): List<AbstractParty> {
+    return parties.filter { it !in serviceHub.myInfo.legalIdentities }
+}

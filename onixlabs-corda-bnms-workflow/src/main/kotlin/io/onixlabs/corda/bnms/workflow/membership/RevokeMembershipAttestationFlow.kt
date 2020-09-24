@@ -32,7 +32,7 @@ class RevokeMembershipAttestationFlow(
 
         val transaction = transaction(attestation.state.notary) {
             addInputState(attestation)
-            addCommand(EvolvableAttestationContract.Issue, attestation.state.data.attestor.owningKey)
+            addCommand(EvolvableAttestationContract.Revoke, attestation.state.data.attestor.owningKey)
         }
 
         val signedTransaction = verifyAndSign(transaction, attestation.state.data.attestor.owningKey)
@@ -71,7 +71,7 @@ class RevokeMembershipAttestationFlow(
     }
 
     @InitiatedBy(Initiator::class)
-    internal class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
+    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
 
         private companion object {
             object OBSERVING : Step("Observing membership attestation revocation.") {

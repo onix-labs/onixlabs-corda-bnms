@@ -5,7 +5,6 @@ import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema.Me
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema.MembershipAttestationSchemaV1
 import io.onixlabs.corda.identity.framework.contract.AttestationStatus
 import io.onixlabs.corda.identity.framework.contract.EvolvableAttestation
-import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationSchema.EvolvableAttestationSchemaV1
 import io.onixlabs.corda.identity.framework.contract.LinearAttestationPointer
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.StateAndRef
@@ -34,14 +33,13 @@ class MembershipAttestation private constructor(
 ) {
 
     constructor(
-        network: Network,
         attestor: AbstractParty,
         membership: StateAndRef<Membership>,
         status: AttestationStatus = AttestationStatus.REJECTED,
         linearId: UniqueIdentifier = UniqueIdentifier(),
         previousStateRef: StateRef? = null
     ) : this(
-        network,
+        membership.state.data.network,
         attestor,
         setOf(membership.state.data.holder),
         LinearAttestationPointer(membership),
@@ -63,7 +61,6 @@ class MembershipAttestation private constructor(
     }
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
-        is EvolvableAttestationSchemaV1 -> super.generateMappedObject(schema)
         is MembershipAttestationSchemaV1 -> MembershipAttestationEntity(
             linearId = linearId.id,
             externalId = linearId.externalId,
@@ -78,10 +75,10 @@ class MembershipAttestation private constructor(
             status = status,
             hash = hash.toString()
         )
-        else -> throw IllegalArgumentException("Unrecognised schema: $schema.")
+        else -> super.generateMappedObject(schema)
     }
 
     override fun supportedSchemas(): Iterable<MappedSchema> {
-        return listOf(MembershipAttestationSchemaV1)
+        return super.supportedSchemas() + MembershipAttestationSchemaV1
     }
 }

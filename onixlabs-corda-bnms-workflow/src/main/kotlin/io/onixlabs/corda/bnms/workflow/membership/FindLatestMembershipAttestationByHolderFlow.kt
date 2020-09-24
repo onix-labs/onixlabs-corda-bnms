@@ -28,6 +28,6 @@ class FindLatestMembershipAttestationByHolderFlow(
         relevancyStatus = relevancyStatus
     ).withExpressions(
         MembershipAttestationEntity::attestee.equal(holder),
-        MembershipAttestationEntity::networkHash.equal(network.hash)
+        MembershipAttestationEntity::networkHash.equal(network.hash.toString())
     )
 }, pageSpecification)

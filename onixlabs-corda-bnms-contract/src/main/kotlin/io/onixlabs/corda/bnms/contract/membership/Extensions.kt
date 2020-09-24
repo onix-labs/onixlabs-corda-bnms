@@ -15,7 +15,7 @@ fun StateAndRef<Membership>.attest(
     status: AttestationStatus,
     linearId: UniqueIdentifier = UniqueIdentifier()
 ): MembershipAttestation {
-    return MembershipAttestation(state.data.network, attestor, this, status, linearId)
+    return MembershipAttestation(attestor, this, status, linearId)
 }
 
 fun StateAndRef<Membership>.accept(

@@ -18,7 +18,7 @@ import net.corda.core.node.services.vault.builder
 @StartableByRPC
 @StartableByService
 class FindVersionedMembershipFlow(
-    bearer: AbstractParty,
+    holder: AbstractParty,
     network: Network,
     previousStateRef: StateRef,
     relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
@@ -29,6 +29,6 @@ class FindVersionedMembershipFlow(
         status = Vault.StateStatus.ALL,
         relevancyStatus = relevancyStatus
     ).withExpressions(
-        MembershipEntity::hash.equal(Membership.createMembershipHash(network, bearer, previousStateRef).toString())
+        MembershipEntity::hash.equal(Membership.createMembershipHash(network, holder, previousStateRef).toString())
     )
 }, pageSpecification)
