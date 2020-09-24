@@ -2,9 +2,9 @@ package io.onixlabs.corda.bnms.workflow
 
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.workflow.membership.FindLatestMembershipAttestationByHolderFlow
-import io.onixlabs.corda.bnms.workflow.membership.FindLatestMembershipFlow
-import io.onixlabs.corda.bnms.workflow.membership.FindVersionedMembershipFlow
+import io.onixlabs.corda.bnms.workflow.membership.FindMembershipAttestationByHolderFlow
+import io.onixlabs.corda.bnms.workflow.membership.FindMembershipByHashFlow
+import io.onixlabs.corda.bnms.workflow.membership.FindMembershipByHolderFlow
 import net.corda.core.contracts.ContractState
 import net.corda.core.flows.FlowException
 import net.corda.core.flows.FlowLogic
@@ -22,23 +22,17 @@ fun FlowLogic<*>.checkSufficientSessions(state: ContractState, sessions: Iterabl
 }
 
 fun FlowLogic<*>.checkMembershipExists(membership: Membership) {
-    val existingMembership = if (membership.previousStateRef == null) {
-        subFlow(FindLatestMembershipFlow(membership.holder, membership.network))
-    } else {
-        subFlow(FindVersionedMembershipFlow(membership.holder, membership.network, membership.previousStateRef!!))
-    }
-
-    if (existingMembership != null) {
+    if (subFlow(FindMembershipByHashFlow(membership.hash)) != null) {
         throw FlowException("Membership state with the specified unique hash already exists: ${membership.hash}.")
     }
 }
 
 fun FlowLogic<*>.checkMembershipsAndAttestations(relationship: Relationship, counterparties: Iterable<AbstractParty>) {
     counterparties.forEach {
-        val membership = subFlow(FindLatestMembershipFlow(it, relationship.network))
+        val membership = subFlow(FindMembershipByHolderFlow(it, relationship.network))
             ?: throw FlowException("Membership not found for counter-party: $it.")
 
-        val attestation = subFlow(FindLatestMembershipAttestationByHolderFlow(it, relationship.network))
+        val attestation = subFlow(FindMembershipAttestationByHolderFlow(it, relationship.network))
             ?: throw FlowException("Membership attestation not found for counter-party: $it.")
 
         if (!attestation.state.data.pointer.isPointingTo(membership)) {

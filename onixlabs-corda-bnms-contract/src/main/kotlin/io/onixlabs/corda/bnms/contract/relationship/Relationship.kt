@@ -25,6 +25,17 @@ data class Relationship(
     override val linearId: UniqueIdentifier = UniqueIdentifier()
 ) : NetworkState, Hashable {
 
+    companion object {
+        @JvmStatic
+        fun createRelationshipHash(
+            network: Network,
+            participants: List<AbstractParty>,
+            previousStateRef: StateRef?
+        ): SecureHash {
+            return SecureHash.sha256("${network.hash}${participants.identityHash}$previousStateRef")
+        }
+    }
+
     init {
         val distinctMembers = members.distinctBy { it.member }
         val distinctSettings = settings.distinctBy { it.normalizedProperty }
@@ -33,7 +44,7 @@ data class Relationship(
     }
 
     override val hash: SecureHash
-        get() = SecureHash.sha256("${network.hash}${participants.identityHash}$previousStateRef")
+        get() = createRelationshipHash(network, participants, previousStateRef)
 
     override val participants: List<AbstractParty>
         get() = members.map { it.member }.distinct()
