@@ -142,4 +142,36 @@ class MembershipAttestationContractAmendCommandTests : ContractTest() {
             }
         }
     }
+
+    @Test
+    fun `On membership attestation amending, the attestation network must be equal to the membership network (centralized)`() {
+        services.ledger {
+            transaction {
+                val issuedMembership1 = issue(CENTRALIZED_MEMBERSHIP_A)
+                val issuedAttestation1 = issue(issuedMembership1.accept(OPERATOR_A.party), issuedMembership1)
+                val amendedAttestation1 = issuedMembership1.withWrongNetwork(issuedAttestation1, INVALID_NETWORK)
+                input(issuedAttestation1.ref)
+                output(MembershipAttestationContract.ID, amendedAttestation1)
+                reference(issuedMembership1.ref)
+                command(keysOf(OPERATOR_A), EvolvableAttestationContract.Amend)
+                failsWith(MembershipAttestationContract.Amend.CONTRACT_RULE_NETWORK)
+            }
+        }
+    }
+
+    @Test
+    fun `On membership attestation amending, the attestation network must be equal to the membership network (decentralized)`() {
+        services.ledger {
+            transaction {
+                val issuedMembership1 = issue(DECENTRALIZED_MEMBERSHIP_A)
+                val issuedAttestation1 = issue(issuedMembership1.accept(IDENTITY_C.party), issuedMembership1)
+                val amendedAttestation1 = issuedMembership1.withWrongNetwork(issuedAttestation1, INVALID_NETWORK)
+                input(issuedAttestation1.ref)
+                output(MembershipAttestationContract.ID, amendedAttestation1)
+                reference(issuedMembership1.ref)
+                command(keysOf(IDENTITY_C), EvolvableAttestationContract.Amend)
+                failsWith(MembershipAttestationContract.Amend.CONTRACT_RULE_NETWORK)
+            }
+        }
+    }
 }

@@ -43,6 +43,22 @@ class RelationshipAttestationContractAmendCommandTests : ContractTest() {
     }
 
     @Test
+    fun `On relationship attestation amending, the attestation network must be equal to the relationship network`() {
+        services.ledger {
+            transaction {
+                val issuedRelationship1 = issue(RELATIONSHIP)
+                val issuedAttestation1 = issue(issuedRelationship1.accept(IDENTITY_A.party), issuedRelationship1)
+                val amendedAttestation1 = issuedRelationship1.withWrongNetwork(issuedAttestation1, INVALID_NETWORK)
+                input(issuedAttestation1.ref)
+                output(RelationshipAttestationContract.ID, amendedAttestation1)
+                reference(issuedRelationship1.ref)
+                command(keysOf(IDENTITY_A, IDENTITY_B), EvolvableAttestationContract.Amend)
+                failsWith(RelationshipAttestationContract.Amend.CONTRACT_RULE_NETWORK)
+            }
+        }
+    }
+
+    @Test
     fun `On relationship attestation amending, the attestation pointer must point to the referenced membership state`() {
         services.ledger {
             transaction {

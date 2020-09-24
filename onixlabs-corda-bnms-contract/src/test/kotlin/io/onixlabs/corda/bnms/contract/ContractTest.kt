@@ -125,6 +125,54 @@ abstract class ContractTest {
         contracts.forEach { _services.addMockCordapp(it) }
     }
 
+    protected fun StateAndRef<Membership>.withWrongNetwork(
+        attestor: AbstractParty,
+        network: Network
+    ): MembershipAttestation {
+        val stateAndRef = copy(state = state.copy(data = state.data.copy(network = network)))
+        return MembershipAttestation(attestor, stateAndRef)
+    }
+
+    protected fun StateAndRef<Membership>.withWrongNetwork(
+        attestation: StateAndRef<MembershipAttestation>,
+        network: Network
+    ): MembershipAttestation {
+        val stateAndRef = copy(state = state.copy(data = state.data.copy(network = network)))
+        val attestor = attestation.state.data.attestor
+        val linearId = attestation.state.data.linearId
+        val ref = attestation.ref
+        return MembershipAttestation(
+            attestor,
+            stateAndRef,
+            linearId = linearId,
+            previousStateRef = ref
+        )
+    }
+
+    protected fun StateAndRef<Relationship>.withWrongNetwork(
+        attestor: AbstractParty,
+        network: Network
+    ): RelationshipAttestation {
+        val stateAndRef = copy(state = state.copy(data = state.data.copy(network = network)))
+        return RelationshipAttestation(attestor, stateAndRef)
+    }
+
+    protected fun StateAndRef<Relationship>.withWrongNetwork(
+        attestation: StateAndRef<RelationshipAttestation>,
+        network: Network
+    ): RelationshipAttestation {
+        val stateAndRef = copy(state = state.copy(data = state.data.copy(network = network)))
+        val attestor = attestation.state.data.attestor
+        val linearId = attestation.state.data.linearId
+        val ref = attestation.ref
+        return RelationshipAttestation(
+            attestor,
+            stateAndRef,
+            linearId = linearId,
+            previousStateRef = ref
+        )
+    }
+
     protected fun StateAndRef<Membership>.withWrongAttestee(
         attestor: AbstractParty,
         holder: AbstractParty

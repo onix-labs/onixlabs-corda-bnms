@@ -3,7 +3,6 @@ package io.onixlabs.corda.bnms.contract.membership
 import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationContract
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.ContractClassName
-import net.corda.core.contracts.NoConstraintPropagation
 import net.corda.core.contracts.requireThat
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
@@ -25,6 +24,9 @@ class MembershipAttestationContract : EvolvableAttestationContract(), Contract {
         const val CONTRACT_RULE_HOLDER_ATTESTEE =
             "On membership attestation issuing, the holder of the referenced membership state must be listed as an attestee."
 
+        const val CONTRACT_RULE_NETWORK =
+            "On membership attestation issuing, the attestation network must be equal to the membership network."
+
         const val CONTRACT_RULE_OPERATOR_ATTESTATION =
             "On membership attestation issuing, if present, only the network operator must attest membership."
     }
@@ -38,6 +40,9 @@ class MembershipAttestationContract : EvolvableAttestationContract(), Contract {
 
         const val CONTRACT_RULE_HOLDER_ATTESTEE =
             "On membership attestation amending, the holder of the referenced membership state must be listed as an attestee."
+
+        const val CONTRACT_RULE_NETWORK =
+            "On membership attestation amending, the attestation network must be equal to the membership network."
 
         const val CONTRACT_RULE_OPERATOR_ATTESTATION =
             "On membership attestation amending, if present, only the network operator must attest membership."
@@ -54,6 +59,7 @@ class MembershipAttestationContract : EvolvableAttestationContract(), Contract {
 
         Issue.CONTRACT_RULE_POINTER using (attestation.pointer.pointer == membershipRef)
         Issue.CONTRACT_RULE_HOLDER_ATTESTEE using (membership.holder in attestation.attestees)
+        Issue.CONTRACT_RULE_NETWORK using (attestation.network == membership.network)
 
         if (membership.network.operator != null) {
             Issue.CONTRACT_RULE_OPERATOR_ATTESTATION using (attestation.attestor == membership.network.operator)
@@ -71,6 +77,7 @@ class MembershipAttestationContract : EvolvableAttestationContract(), Contract {
 
         Amend.CONTRACT_RULE_POINTER using (attestation.pointer.pointer == membershipRef)
         Amend.CONTRACT_RULE_HOLDER_ATTESTEE using (membership.holder in attestation.attestees)
+        Amend.CONTRACT_RULE_NETWORK using (attestation.network == membership.network)
 
         if (membership.network.operator != null) {
             Amend.CONTRACT_RULE_OPERATOR_ATTESTATION using (attestation.attestor == membership.network.operator)

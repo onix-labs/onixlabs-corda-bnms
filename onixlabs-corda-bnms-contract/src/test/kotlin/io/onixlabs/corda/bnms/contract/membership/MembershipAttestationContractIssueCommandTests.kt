@@ -1,9 +1,7 @@
 package io.onixlabs.corda.bnms.contract.membership
 
 import io.onixlabs.corda.bnms.contract.ContractTest
-import io.onixlabs.corda.identity.framework.contract.EvolvableAttestation
 import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationContract
-import io.onixlabs.corda.identity.framework.contract.LinearAttestationPointer
 import net.corda.testing.node.ledger
 import org.junit.jupiter.api.Test
 
@@ -125,6 +123,34 @@ class MembershipAttestationContractIssueCommandTests : ContractTest() {
                 reference(issuedMembership1.ref)
                 command(keysOf(IDENTITY_C), EvolvableAttestationContract.Issue)
                 failsWith(MembershipAttestationContract.Issue.CONTRACT_RULE_HOLDER_ATTESTEE)
+            }
+        }
+    }
+
+    @Test
+    fun `On membership attestation issuing, the attestation network must be equal to the membership network (centralized)`() {
+        services.ledger {
+            transaction {
+                val issuedMembership1 = issue(CENTRALIZED_MEMBERSHIP_A)
+                val attestation1 = issuedMembership1.withWrongNetwork(OPERATOR_A.party, INVALID_NETWORK)
+                output(MembershipAttestationContract.ID, attestation1)
+                reference(issuedMembership1.ref)
+                command(keysOf(OPERATOR_A), EvolvableAttestationContract.Issue)
+                failsWith(MembershipAttestationContract.Issue.CONTRACT_RULE_NETWORK)
+            }
+        }
+    }
+
+    @Test
+    fun `On membership attestation issuing, the attestation network must be equal to the membership network (decentralized)`() {
+        services.ledger {
+            transaction {
+                val issuedMembership1 = issue(DECENTRALIZED_MEMBERSHIP_A)
+                val attestation1 = issuedMembership1.withWrongNetwork(IDENTITY_C.party, INVALID_NETWORK)
+                output(MembershipAttestationContract.ID, attestation1)
+                reference(issuedMembership1.ref)
+                command(keysOf(IDENTITY_C), EvolvableAttestationContract.Issue)
+                failsWith(MembershipAttestationContract.Issue.CONTRACT_RULE_NETWORK)
             }
         }
     }
