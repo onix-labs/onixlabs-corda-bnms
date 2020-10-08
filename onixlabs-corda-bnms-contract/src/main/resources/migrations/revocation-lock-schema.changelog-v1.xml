@@ -1,0 +1,31 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="ONIXLabs" id="create-revocation_lock_states">
+        <createTable tableName="revocation_lock_states">
+            <column name="output_index" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_id" type="NVARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="linear_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_id" type="NVARCHAR(255)"/>
+            <column name="owner" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="canonical_name" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="output_index, transaction_id"
+                       constraintName="PK_revocation_lock_states"
+                       tableName="revocation_lock_states"/>
+    </changeSet>
+</databaseChangeLog>

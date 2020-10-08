@@ -1,0 +1,47 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="ONIXLabs" id="create-relationship_attestation_states">
+        <createTable tableName="relationship_attestation_states">
+            <column name="output_index" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transaction_id" type="NVARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="linear_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_id" type="NVARCHAR(255)"/>
+            <column name="attestor" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pointer" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pointer_type" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="network_value" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="normalized_network_value" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="network_operator" type="NVARCHAR(255)"/>
+            <column name="network_hash" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="NVARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hash" type="NVARCHAR(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="output_index, transaction_id"
+                       constraintName="PK_relationship_attestation_states"
+                       tableName="relationship_attestation_states"/>
+    </changeSet>
+</databaseChangeLog>

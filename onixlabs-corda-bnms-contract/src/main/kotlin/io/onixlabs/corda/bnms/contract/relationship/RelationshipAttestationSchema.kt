@@ -14,7 +14,9 @@ object RelationshipAttestationSchema {
         schemaFamily = RelationshipAttestationSchema.javaClass,
         version = 1,
         mappedTypes = listOf(RelationshipAttestationEntity::class.java)
-    )
+    ) {
+        override val migrationResource = "relationship-attestation-schema.changelog-master"
+    }
 
     @Entity
     @Table(name = "relationship_attestation_states")
@@ -34,11 +36,11 @@ object RelationshipAttestationSchema {
         @Column(name = "pointer_type", nullable = false)
         val pointerType: String = "",
 
-        @Column(name = "network_name", nullable = false)
-        val networkName: String = "",
+        @Column(name = "network_value", nullable = false)
+        val networkValue: String = "",
 
-        @Column(name = "normalized_network_name", nullable = false)
-        val normalizedNetworkName: String = "",
+        @Column(name = "normalized_network_value", nullable = false)
+        val normalizedNetworkValue: String = "",
 
         @Column(name = "network_operator", nullable = true)
         val networkOperator: AbstractParty? = null,

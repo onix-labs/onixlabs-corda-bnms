@@ -14,7 +14,9 @@ object RelationshipSchema {
         schemaFamily = RelationshipSchema.javaClass,
         version = 1,
         mappedTypes = listOf(RelationshipEntity::class.java)
-    )
+    ) {
+        override val migrationResource = "relationship-schema.changelog-master"
+    }
 
     @Entity
     @Table(name = "relationship_states")
