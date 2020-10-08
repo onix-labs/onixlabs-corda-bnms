@@ -13,7 +13,9 @@ object RevocationLockSchema {
         schemaFamily = RevocationLockSchema.javaClass,
         version = 1,
         mappedTypes = listOf(RevocationLockEntity::class.java)
-    )
+    ) {
+        override val migrationResource = "revocation-lock-schema.changelog-master"
+    }
 
     @Entity
     @Table(name = "revocation_lock_states")

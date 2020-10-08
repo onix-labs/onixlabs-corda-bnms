@@ -15,7 +15,9 @@ object MembershipSchema {
         schemaFamily = MembershipSchema.javaClass,
         version = 1,
         mappedTypes = listOf(MembershipEntity::class.java)
-    )
+    ) {
+        override val migrationResource = "membership-schema.changelog-master"
+    }
 
     @Entity
     @Table(name = "membership_states")
