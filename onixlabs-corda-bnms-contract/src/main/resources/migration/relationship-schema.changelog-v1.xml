@@ -24,7 +24,7 @@
             <column name="network_hash" type="nvarchar(64)">
                 <constraints nullable="false"/>
             </column>
-            <column name="hash" type="clob">
+            <column name="hash" type="nvarchar(64)">
                 <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
