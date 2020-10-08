@@ -4,27 +4,27 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
     <changeSet author="ONIXLabs" id="create-relationship_states">
         <createTable tableName="relationship_states">
-            <column name="output_index" type="INT">
+            <column name="output_index" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="transaction_id" type="NVARCHAR(64)">
+            <column name="transaction_id" type="nvarchar(64)">
                 <constraints nullable="false"/>
             </column>
             <column name="linear_id" type="uuid">
                 <constraints nullable="false"/>
             </column>
-            <column name="external_id" type="NVARCHAR(255)"/>
-            <column name="network_value" type="NVARCHAR(255)">
+            <column name="external_id" type="nvarchar(255)"/>
+            <column name="network_value" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="normalized_network_value" type="NVARCHAR(255)">
+            <column name="normalized_network_value" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="network_operator" type="NVARCHAR(255)"/>
-            <column name="network_hash" type="NVARCHAR(255)">
+            <column name="network_operator" type="nvarchar(255)"/>
+            <column name="network_hash" type="nvarchar(64)">
                 <constraints nullable="false"/>
             </column>
-            <column name="hash" type="NVARCHAR(MAX)">
+            <column name="hash" type="clob">
                 <constraints nullable="false" unique="true"/>
             </column>
         </createTable>
