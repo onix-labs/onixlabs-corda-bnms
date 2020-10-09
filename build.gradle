@@ -14,9 +14,9 @@ buildscript {
         junit_version = '5.3.1'
 
         onixlabs_group = 'io.onixlabs'
-        onixlabs_idfx_release_version = '0.1.3-beta'
+        onixlabs_cif_release_version = '0.1.4-beta'
 
-        cordapp_platform_version = 7
+        cordapp_platform_version = 8
         cordapp_signing_enabled = false
         cordapp_contract_name = 'ONIXLabs Corda BNMS Contract'
         cordapp_workflow_name = 'ONIXLabs Corda BNMS Workflow'
@@ -40,7 +40,7 @@ buildscript {
 }
 
 group 'io.onixlabs'
-version '0.0.5-beta'
+version '0.0.6-beta'
 
 subprojects {
     repositories {

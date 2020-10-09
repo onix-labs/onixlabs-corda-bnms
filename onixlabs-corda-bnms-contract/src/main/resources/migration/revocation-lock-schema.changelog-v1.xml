@@ -17,7 +17,7 @@
             <column name="owner" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="canonical_name" type="clob">
+            <column name="canonical_name" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="status" type="nvarchar(255)">
