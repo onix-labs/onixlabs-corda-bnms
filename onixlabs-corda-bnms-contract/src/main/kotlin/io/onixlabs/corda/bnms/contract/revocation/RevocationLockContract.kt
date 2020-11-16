@@ -1,3 +1,19 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.contract.revocation
 
 import net.corda.core.contracts.*
@@ -14,7 +30,7 @@ class RevocationLockContract : Contract {
     override fun verify(tx: LedgerTransaction) {
         val command = tx.commands.requireSingleCommand<RevocationLockContractCommand>()
         when (command.value) {
-            is Create, is Update, is Delete -> command.value.verifyCommand(tx, command.signers.toSet())
+            is Lock, is Unlock -> command.value.verifyCommand(tx, command.signers.toSet())
             else -> throw IllegalArgumentException("Unrecognised command: ${command.value}")
         }
     }
@@ -23,13 +39,13 @@ class RevocationLockContract : Contract {
         fun verifyCommand(transaction: LedgerTransaction, signers: Set<PublicKey>)
     }
 
-    object Create : RevocationLockContractCommand {
+    object Lock : RevocationLockContractCommand {
 
         internal const val CONTRACT_RULE_OUTPUTS =
-            "On revocation lock creation, at least one revocation lock state must be created."
+            "On revocation lock locking, at least one revocation lock state must be created."
 
         internal const val CONTRACT_RULE_SIGNERS =
-            "On revocation lock creation, the owner of the revocation lock state must sign the transaction."
+            "On revocation lock locking, the owner of the revocation lock state must sign the transaction."
 
         override fun verifyCommand(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
             val outputs = transaction.outputsOfType<RevocationLock<*>>()
@@ -38,49 +54,16 @@ class RevocationLockContract : Contract {
         }
     }
 
-    object Update : RevocationLockContractCommand {
+    object Unlock : RevocationLockContractCommand {
 
         internal const val CONTRACT_RULE_INPUTS =
-            "On revocation lock updating, only one revocation lock state must be consumed."
+            "On revocation lock unlocking, only one revocation lock state must be consumed."
 
         internal const val CONTRACT_RULE_OUTPUTS =
-            "On revocation lock updating, only one revocation lock state must be created."
-
-        internal const val CONTRACT_RULE_STATUS =
-            "On revocation lock updating, the revocation lock status must change."
-
-        internal const val CONTRACT_RULE_OWNER =
-            "On revocation lock updating, the revocation lock owner must not change."
+            "On revocation lock unlocking, zero revocation lock states must be created."
 
         internal const val CONTRACT_RULE_SIGNERS =
-            "On revocation lock updating, the owner of the revocation lock state must sign the transaction."
-
-        override fun verifyCommand(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
-            val inputs = transaction.inputsOfType<RevocationLock<*>>()
-            val outputs = transaction.outputsOfType<RevocationLock<*>>()
-
-            CONTRACT_RULE_INPUTS using (inputs.size == 1)
-            CONTRACT_RULE_OUTPUTS using (outputs.size == 1)
-
-            val input = inputs.single()
-            val output = outputs.single()
-
-            CONTRACT_RULE_STATUS using (input.status != output.status)
-            CONTRACT_RULE_OWNER using (input.owner == output.owner)
-            CONTRACT_RULE_SIGNERS using (output.owner.owningKey in signers)
-        }
-    }
-
-    object Delete : RevocationLockContractCommand {
-
-        internal const val CONTRACT_RULE_INPUTS =
-            "On revocation lock deleting, only one revocation lock state must be consumed."
-
-        internal const val CONTRACT_RULE_OUTPUTS =
-            "On revocation lock deleting, zero revocation lock states must be created."
-
-        internal const val CONTRACT_RULE_SIGNERS =
-            "On revocation lock deleting, the owner of the revocation lock state must sign the transaction."
+            "On revocation lock unlocking, the owner of the revocation lock state must sign the transaction."
 
         override fun verifyCommand(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
             val inputs = transaction.inputsOfType<RevocationLock<*>>()

@@ -1,3 +1,19 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.contract.relationship
 
 import net.corda.core.identity.AbstractParty
@@ -10,11 +26,8 @@ import javax.persistence.Table
 
 object RelationshipSchema {
 
-    object RelationshipSchemaV1 : MappedSchema(
-        schemaFamily = RelationshipSchema.javaClass,
-        version = 1,
-        mappedTypes = listOf(RelationshipEntity::class.java)
-    ) {
+    object RelationshipSchemaV1 :
+        MappedSchema(RelationshipSchema.javaClass, 1, listOf(RelationshipEntity::class.java)) {
         override val migrationResource = "relationship-schema.changelog-master"
     }
 
@@ -29,9 +42,6 @@ object RelationshipSchema {
 
         @Column(name = "network_value", nullable = false)
         val networkValue: String = "",
-
-        @Column(name = "normalized_network_value", nullable = false)
-        val normalizedNetworkValue: String = "",
 
         @Column(name = "network_operator", nullable = true)
         val networkOperator: AbstractParty? = null,

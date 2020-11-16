@@ -1,11 +1,25 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationContract
-import io.onixlabs.corda.bnms.workflow.checkSufficientSessions
-import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationContract
-import io.onixlabs.corda.identity.framework.workflow.*
+import io.onixlabs.corda.bnms.workflow.findRelationshipForAttestation
+import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
@@ -29,13 +43,11 @@ class AmendRelationshipAttestationFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkSufficientSessions(newAttestation, sessions)
+        checkHasSufficientFlowSessions(sessions, newAttestation, oldAttestation.state.data)
 
         val transaction = transaction(oldAttestation.state.notary) {
-            addInputState(oldAttestation)
-            addOutputState(newAttestation, RelationshipAttestationContract.ID)
-            addReferenceState(newAttestation.pointer.resolve(serviceHub).referenced())
-            addCommand(EvolvableAttestationContract.Amend, newAttestation.attestor.owningKey)
+            addAmendedAttestation(oldAttestation, newAttestation)
+            addReferenceState(findRelationshipForAttestation(newAttestation).referenced())
         }
 
         val signedTransaction = verifyAndSign(transaction, newAttestation.attestor.owningKey)
@@ -61,7 +73,8 @@ class AmendRelationshipAttestationFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(AMENDING)
-            val sessions = initiateFlows(newAttestation.participants)
+            val sessions = initiateFlows(emptyList(), newAttestation, oldAttestation.state.data)
+
             return subFlow(
                 AmendRelationshipAttestationFlow(
                     oldAttestation,

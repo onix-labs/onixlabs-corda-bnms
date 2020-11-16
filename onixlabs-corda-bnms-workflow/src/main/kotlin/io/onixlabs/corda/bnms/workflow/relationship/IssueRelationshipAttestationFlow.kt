@@ -1,11 +1,25 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationContract
-import io.onixlabs.corda.bnms.workflow.checkSufficientSessions
-import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationContract
-import io.onixlabs.corda.identity.framework.workflow.*
+import io.onixlabs.corda.bnms.workflow.findRelationshipForAttestation
+import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
@@ -29,12 +43,11 @@ class IssueRelationshipAttestationFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkSufficientSessions(attestation, sessions)
+        checkHasSufficientFlowSessions(sessions, attestation)
 
         val transaction = transaction(notary) {
-            addOutputState(attestation, RelationshipAttestationContract.ID)
-            addReferenceState(attestation.pointer.resolve(serviceHub).referenced())
-            addCommand(EvolvableAttestationContract.Issue, attestation.attestor.owningKey)
+            addIssuedAttestation(attestation)
+            addReferenceState(findRelationshipForAttestation(attestation).referenced())
         }
 
         val signedTransaction = verifyAndSign(transaction, attestation.attestor.owningKey)
@@ -60,7 +73,8 @@ class IssueRelationshipAttestationFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(ISSUING)
-            val sessions = initiateFlows(attestation.participants)
+            val sessions = initiateFlows(emptyList(), attestation)
+
             return subFlow(
                 IssueRelationshipAttestationFlow(
                     attestation,

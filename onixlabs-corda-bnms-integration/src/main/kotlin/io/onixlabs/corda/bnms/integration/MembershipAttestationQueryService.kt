@@ -1,16 +1,35 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.integration
 
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
-import io.onixlabs.corda.bnms.workflow.membership.*
-import io.onixlabs.corda.identity.framework.workflow.DEFAULT_PAGE_SPEC
+import io.onixlabs.corda.bnms.workflow.membership.FindMembershipAttestationFlow
+import io.onixlabs.corda.bnms.workflow.membership.FindMembershipAttestationsFlow
+import io.onixlabs.corda.identityframework.contract.AttestationPointer
+import io.onixlabs.corda.identityframework.contract.AttestationStatus
+import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
 import net.corda.core.contracts.StateAndRef
+import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 import net.corda.core.messaging.CordaRPCOps
-import net.corda.core.messaging.startFlow
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.utilities.getOrThrow
@@ -18,202 +37,92 @@ import java.time.Duration
 
 class MembershipAttestationQueryService(rpc: CordaRPCOps) : Service(rpc) {
 
-    fun findMembershipAttestationByLinearId(
-        linearId: UniqueIdentifier,
+    fun findMembershipAttestation(
+        linearId: UniqueIdentifier? = null,
+        externalId: String? = null,
+        attestor: AbstractParty? = null,
+        holder: AbstractParty? = null,
+        network: Network? = null,
+        networkValue: String? = null,
+        networkOperator: AbstractParty? = null,
+        networkHash: SecureHash? = null,
+        pointer: AttestationPointer<Membership>? = null,
+        pointerStateRef: StateRef? = null,
+        pointerStateLinearId: UniqueIdentifier? = null,
+        pointerHash: SecureHash? = null,
+        status: AttestationStatus? = null,
+        previousStateRef: StateRef? = null,
+        hash: SecureHash? = null,
+        membership: StateAndRef<Membership>? = null,
+        stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
+        pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
         flowTimeout: Duration = Duration.ofSeconds(30)
     ): StateAndRef<MembershipAttestation>? {
-        return rpc.startFlow(
-            ::FindMembershipAttestationByLinearIdFlow,
+        return rpc.startFlowDynamic(
+            FindMembershipAttestationFlow::class.java,
             linearId,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationByExternalId(
-        externalId: String,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<MembershipAttestation>? {
-        return rpc.startFlow(
-            ::FindMembershipAttestationByExternalIdFlow,
             externalId,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationByHash(
-        hash: SecureHash,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<MembershipAttestation>? {
-        return rpc.startFlow(
-            ::FindMembershipAttestationByHashFlow,
+            attestor,
+            holder,
+            network,
+            networkValue,
+            networkOperator,
+            networkHash,
+            pointer,
+            pointerStateRef,
+            pointerStateLinearId,
+            pointerHash,
+            status,
+            previousStateRef,
             hash,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationByHolder(
-        holder: AbstractParty,
-        network: Network,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<MembershipAttestation>? {
-        return rpc.startFlow(
-            ::FindMembershipAttestationByHolderFlow,
-            holder,
-            network,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationByMembership(
-        membership: StateAndRef<Membership>,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<MembershipAttestation>? {
-        return rpc.startFlow(
-            ::FindMembershipAttestationByMembershipFlow,
             membership,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationsByStatus(
-        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<MembershipAttestation>> {
-        return rpc.startFlow(
-            ::FindMembershipAttestationsByStatusFlow,
             stateStatus,
             relevancyStatus,
             pageSpecification
         ).returnValue.getOrThrow(flowTimeout)
     }
 
-    fun findMembershipAttestationsByLinearId(
-        linearId: UniqueIdentifier,
+    fun findMembershipAttestations(
+        linearId: UniqueIdentifier? = null,
+        externalId: String? = null,
+        attestor: AbstractParty? = null,
+        holder: AbstractParty? = null,
+        network: Network? = null,
+        networkValue: String? = null,
+        networkOperator: AbstractParty? = null,
+        networkHash: SecureHash? = null,
+        pointer: AttestationPointer<Membership>? = null,
+        pointerStateRef: StateRef? = null,
+        pointerStateLinearId: UniqueIdentifier? = null,
+        pointerHash: SecureHash? = null,
+        status: AttestationStatus? = null,
+        previousStateRef: StateRef? = null,
+        hash: SecureHash? = null,
+        membership: StateAndRef<Membership>? = null,
         stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
+        pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
         flowTimeout: Duration = Duration.ofSeconds(30)
     ): List<StateAndRef<MembershipAttestation>> {
-        return rpc.startFlow(
-            ::FindMembershipAttestationsByLinearIdFlow,
+        return rpc.startFlowDynamic(
+            FindMembershipAttestationsFlow::class.java,
             linearId,
-            stateStatus,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationsByExternalId(
-        externalId: String,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<MembershipAttestation>> {
-        return rpc.startFlow(
-            ::FindMembershipAttestationsByExternalIdFlow,
             externalId,
-            stateStatus,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationsByNetwork(
-        network: Network,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<MembershipAttestation>> {
-        return rpc.startFlow(
-            ::FindMembershipAttestationsByNetworkFlow,
-            network,
-            stateStatus,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationsByHolder(
-        holder: AbstractParty,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<MembershipAttestation>> {
-        return rpc.startFlow(
-            ::FindMembershipAttestationsByHolderFlow,
-            holder,
-            stateStatus,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationsByHolderAndNetwork(
-        holder: AbstractParty,
-        network: Network,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<MembershipAttestation>> {
-        return rpc.startFlow(
-            ::FindMembershipAttestationsByHolderAndNetworkFlow,
+            attestor,
             holder,
             network,
-            stateStatus,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationsByAttestor(
-        attestor: AbstractParty,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<MembershipAttestation>> {
-        return rpc.startFlow(
-            ::FindMembershipAttestationsByAttestorFlow,
-            attestor,
-            stateStatus,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findMembershipAttestationsByAttestorAndNetwork(
-        attestor: AbstractParty,
-        network: Network,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<MembershipAttestation>> {
-        return rpc.startFlow(
-            ::FindMembershipAttestationsByAttestorAndNetworkFlow,
-            attestor,
-            network,
+            networkValue,
+            networkOperator,
+            networkHash,
+            pointer,
+            pointerStateRef,
+            pointerStateLinearId,
+            pointerHash,
+            status,
+            previousStateRef,
+            hash,
+            membership,
             stateStatus,
             relevancyStatus,
             pageSpecification

@@ -1,3 +1,19 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
@@ -5,9 +21,7 @@ import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipContract
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockContract
 import io.onixlabs.corda.bnms.workflow.checkMembershipsAndAttestations
-import io.onixlabs.corda.bnms.workflow.checkSufficientSessions
-import io.onixlabs.corda.bnms.workflow.filterCounterpartyIdentities
-import io.onixlabs.corda.identity.framework.workflow.*
+import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
@@ -32,19 +46,18 @@ class IssueRelationshipFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkSufficientSessions(relationship, sessions)
+        checkHasSufficientFlowSessions(sessions, relationship)
         sessions.forEach { it.send(checkMembership) }
 
         if (checkMembership) {
-            val counterparties = filterCounterpartyIdentities(relationship.participants)
-            checkMembershipsAndAttestations(relationship, counterparties)
+            checkMembershipsAndAttestations(relationship)
         }
 
         val transaction = transaction(notary) {
             addOutputState(relationship, RelationshipContract.ID)
-            addCommand(RelationshipContract.Issue, relationship.participants.map { it.owningKey })
             relationship.createRevocationLocks().forEach { addOutputState(it) }
-            addCommand(RevocationLockContract.Create, relationship.participants.map { it.owningKey })
+            addCommand(RelationshipContract.Issue, relationship.participants.map { it.owningKey })
+            addCommand(RevocationLockContract.Lock, relationship.participants.map { it.owningKey })
         }
 
         val partiallySignedTransaction = verifyAndSign(transaction, ourIdentity.owningKey)
@@ -72,7 +85,7 @@ class IssueRelationshipFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(ISSUING)
-            val sessions = initiateFlows(relationship.participants)
+            val sessions = initiateFlows(emptyList(), relationship)
 
             return subFlow(
                 IssueRelationshipFlow(

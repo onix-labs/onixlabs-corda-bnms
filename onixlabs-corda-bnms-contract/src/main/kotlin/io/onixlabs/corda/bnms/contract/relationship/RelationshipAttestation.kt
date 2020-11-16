@@ -1,11 +1,29 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.contract.relationship
 
 import io.onixlabs.corda.bnms.contract.Network
+import io.onixlabs.corda.bnms.contract.NetworkState
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationSchema.RelationshipAttestationEntity
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationSchema.RelationshipAttestationSchemaV1
-import io.onixlabs.corda.identity.framework.contract.AttestationStatus
-import io.onixlabs.corda.identity.framework.contract.EvolvableAttestation
-import io.onixlabs.corda.identity.framework.contract.LinearAttestationPointer
+import io.onixlabs.corda.identityframework.contract.Attestation
+import io.onixlabs.corda.identityframework.contract.AttestationPointer
+import io.onixlabs.corda.identityframework.contract.AttestationStatus
+import io.onixlabs.corda.identityframework.contract.toAttestationPointer
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
@@ -15,49 +33,59 @@ import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
 
 @BelongsToContract(RelationshipAttestationContract::class)
-class RelationshipAttestation private constructor(
-    val network: Network,
+class RelationshipAttestation internal constructor(
+    override val network: Network,
     attestor: AbstractParty,
     attestees: Set<AbstractParty>,
-    pointer: LinearAttestationPointer<Relationship>,
+    pointer: AttestationPointer<Relationship>,
     status: AttestationStatus,
+    metadata: Map<String, String>,
     linearId: UniqueIdentifier,
     previousStateRef: StateRef?
-) : EvolvableAttestation<LinearAttestationPointer<Relationship>>(
+) : Attestation<Relationship>(
     attestor,
     attestees,
     pointer,
     status,
+    metadata,
     linearId,
     previousStateRef
-) {
+), NetworkState {
 
     constructor(
         attestor: AbstractParty,
         relationship: StateAndRef<Relationship>,
         status: AttestationStatus = AttestationStatus.REJECTED,
+        metadata: Map<String, String> = emptyMap(),
         linearId: UniqueIdentifier = UniqueIdentifier(),
         previousStateRef: StateRef? = null
     ) : this(
         relationship.state.data.network,
         attestor,
-        (relationship.state.data.participants - attestor).toSet(),
-        LinearAttestationPointer(relationship),
+        relationship.state.data.participants.toSet(),
+        relationship.toAttestationPointer(),
         status,
+        metadata,
         linearId,
         previousStateRef
     )
 
-    override fun amend(status: AttestationStatus, previousStateRef: StateRef): RelationshipAttestation {
-        return RelationshipAttestation(network, attestor, attestees, pointer, status, linearId, previousStateRef)
-    }
-
     override fun amend(
-        pointer: LinearAttestationPointer<Relationship>,
+        previousStateRef: StateRef,
         status: AttestationStatus,
-        previousStateRef: StateRef
+        pointer: AttestationPointer<Relationship>,
+        metadata: Map<String, String>
     ): RelationshipAttestation {
-        return RelationshipAttestation(network, attestor, attestees, pointer, status, linearId, previousStateRef)
+        return RelationshipAttestation(
+            network,
+            attestor,
+            attestees,
+            pointer,
+            status,
+            metadata,
+            linearId,
+            previousStateRef
+        )
     }
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
@@ -65,13 +93,15 @@ class RelationshipAttestation private constructor(
             linearId = linearId.id,
             externalId = linearId.externalId,
             attestor = attestor,
-            pointer = pointer.pointer.toString(),
-            pointerType = pointer.type.canonicalName,
             networkValue = network.value,
-            normalizedNetworkValue = network.normalizedValue,
-            networkHash = network.hash.toString(),
             networkOperator = network.operator,
+            networkHash = network.hash.toString(),
+            pointerStateRef = pointer.stateRef.toString(),
+            pointerStateClass = pointer.stateClass.canonicalName,
+            pointerStateLinearId = pointer.stateLinearId!!.id,
+            pointerHash = pointer.hash.toString(),
             status = status,
+            previousStateRef = previousStateRef?.toString(),
             hash = hash.toString()
         )
         else -> super.generateMappedObject(schema)

@@ -10,17 +10,15 @@
             <column name="transaction_id" type="nvarchar(64)">
                 <constraints nullable="false"/>
             </column>
-            <column name="linear_id" type="uuid">
-                <constraints nullable="false"/>
-            </column>
-            <column name="external_id" type="nvarchar(255)"/>
             <column name="owner" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="canonical_name" type="nvarchar(255)">
+            <column name="pointer_state_linear_id" type="uuid">
                 <constraints nullable="false"/>
             </column>
-            <column name="status" type="nvarchar(255)">
+            <column name="pointer_state_external_id" type="nvarchar(255)"/>
+
+            <column name="pointer_state_class" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
