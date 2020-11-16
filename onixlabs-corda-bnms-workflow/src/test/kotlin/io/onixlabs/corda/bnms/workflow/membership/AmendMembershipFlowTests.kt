@@ -16,7 +16,6 @@
 
 package io.onixlabs.corda.bnms.workflow.membership
 
-import io.onixlabs.corda.bnms.contract.Role
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.getNextOutput
 import io.onixlabs.corda.bnms.workflow.FlowTest

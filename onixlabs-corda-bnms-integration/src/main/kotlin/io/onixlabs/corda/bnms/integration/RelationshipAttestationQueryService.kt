@@ -18,10 +18,7 @@ package io.onixlabs.corda.bnms.integration
 
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.membership.Membership
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
-import io.onixlabs.corda.bnms.workflow.membership.FindMembershipAttestationFlow
-import io.onixlabs.corda.bnms.workflow.membership.FindMembershipAttestationsFlow
 import io.onixlabs.corda.bnms.workflow.relationship.FindRelationshipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.relationship.FindRelationshipAttestationsFlow
 import io.onixlabs.corda.identityframework.contract.AttestationPointer
