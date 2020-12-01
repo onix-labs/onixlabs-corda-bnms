@@ -40,7 +40,7 @@ buildscript {
 }
 
 group 'io.onixlabs'
-version '0.0.6-beta'
+version '1.0.0-rc1'
 
 subprojects {
     repositories {
@@ -89,6 +89,17 @@ subprojects {
     }
 }
 
+task cleanLocal(type: Exec) {
+    def shellExec = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows') ? 'cmd' : 'sh'
+    commandLine shellExec, './clean-cache.sh'
+}
+
 task releaseLocal(type: GradleBuild) {
-    tasks = ['clean', 'build', 'publishToMavenLocal']
+    startParameter = gradle.startParameter.newInstance()
+    tasks = ['cleanLocal', 'clean', 'build', 'publishToMavenLocal']
+}
+
+task releasePublic(type: GradleBuild) {
+    startParameter = gradle.startParameter.newInstance()
+    tasks = ['cleanLocal', 'clean', 'build', 'publishToMavenLocal', 'publish']
 }
