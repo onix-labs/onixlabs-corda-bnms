@@ -1,1 +1,1 @@
-rm -rf ~/.m2/repository/io/onixlabs/onixlabs-corda-identity-framework-*
+rm -rf ~/.m2/repository/io/onixlabs/onixlabs-corda-bnms-*
