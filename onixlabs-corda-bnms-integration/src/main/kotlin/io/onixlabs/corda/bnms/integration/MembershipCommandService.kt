@@ -23,6 +23,7 @@ import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.workflow.membership.AmendMembershipFlow
 import io.onixlabs.corda.bnms.workflow.membership.IssueMembershipFlow
 import io.onixlabs.corda.bnms.workflow.membership.RevokeMembershipFlow
+import io.onixlabs.corda.core.integration.RPCService
 import io.onixlabs.corda.identityframework.contract.AbstractClaim
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -33,7 +34,7 @@ import net.corda.core.messaging.FlowProgressHandle
 import net.corda.core.messaging.startTrackedFlow
 import net.corda.core.transactions.SignedTransaction
 
-class MembershipCommandService(rpc: CordaRPCOps) : Service(rpc) {
+class MembershipCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun issueMembership(
         network: Network,

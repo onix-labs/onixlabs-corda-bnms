@@ -20,7 +20,8 @@ import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.workflow.relationship.FindRelationshipFlow
 import io.onixlabs.corda.bnms.workflow.relationship.FindRelationshipsFlow
-import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
+import io.onixlabs.corda.core.integration.RPCService
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
@@ -31,7 +32,7 @@ import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.utilities.getOrThrow
 import java.time.Duration
 
-class RelationshipQueryService(rpc: CordaRPCOps) : Service(rpc) {
+class RelationshipQueryService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun findRelationship(
         linearId: UniqueIdentifier? = null,

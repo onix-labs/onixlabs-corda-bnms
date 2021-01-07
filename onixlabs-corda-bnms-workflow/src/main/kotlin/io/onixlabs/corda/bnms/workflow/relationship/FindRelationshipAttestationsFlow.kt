@@ -20,11 +20,12 @@ import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationSchema.RelationshipAttestationEntity
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
+import io.onixlabs.corda.core.workflow.DEFAULT_SORTING
+import io.onixlabs.corda.core.workflow.FindStatesFlow
+import io.onixlabs.corda.core.workflow.andWithExpressions
 import io.onixlabs.corda.identityframework.contract.AttestationPointer
 import io.onixlabs.corda.identityframework.contract.AttestationStatus
-import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
-import io.onixlabs.corda.identityframework.workflow.FindStatesFlow
-import io.onixlabs.corda.identityframework.workflow.withExpressions
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -37,6 +38,7 @@ import net.corda.core.node.services.vault.Builder.equal
 import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.QueryCriteria.VaultQueryCriteria
+import net.corda.core.node.services.vault.Sort
 
 @StartableByRPC
 @StartableByService
@@ -58,13 +60,14 @@ class FindRelationshipAttestationsFlow(
     relationship: StateAndRef<Relationship>? = null,
     stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
     relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-    override val pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION
+    override val pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
+    override val sorting: Sort = DEFAULT_SORTING
 ) : FindStatesFlow<RelationshipAttestation>() {
     override val criteria: QueryCriteria = VaultQueryCriteria(
         contractStateTypes = setOf(contractStateType),
         relevancyStatus = relevancyStatus,
         status = stateStatus
-    ).withExpressions(
+    ).andWithExpressions(
         linearId?.let { RelationshipAttestationEntity::linearId.equal(it.id) },
         externalId?.let { RelationshipAttestationEntity::externalId.equal(it) },
         attestor?.let { RelationshipAttestationEntity::attestor.equal(it) },

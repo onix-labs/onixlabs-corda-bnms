@@ -21,9 +21,10 @@ import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.bnms.workflow.membership.FindMembershipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.membership.FindMembershipAttestationsFlow
+import io.onixlabs.corda.core.integration.RPCService
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
 import io.onixlabs.corda.identityframework.contract.AttestationPointer
 import io.onixlabs.corda.identityframework.contract.AttestationStatus
-import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -35,7 +36,7 @@ import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.utilities.getOrThrow
 import java.time.Duration
 
-class MembershipAttestationQueryService(rpc: CordaRPCOps) : Service(rpc) {
+class MembershipAttestationQueryService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun findMembershipAttestation(
         linearId: UniqueIdentifier? = null,

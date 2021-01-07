@@ -19,6 +19,7 @@ package io.onixlabs.corda.bnms.workflow.revocation
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockContract
+import io.onixlabs.corda.core.workflow.getPreferredNotary
 import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByRPC
@@ -43,7 +44,7 @@ class LockRevocationLockFlow(
 
     @Suspendable
     override fun call(): SignedTransaction {
-        val transaction = transaction(notary ?: preferredNotary) {
+        val transaction = transaction(notary ?: getPreferredNotary()) {
             addOutputState(revocationLock, RevocationLockContract.ID)
             addCommand(RevocationLockContract.Lock, revocationLock.owner.owningKey)
         }

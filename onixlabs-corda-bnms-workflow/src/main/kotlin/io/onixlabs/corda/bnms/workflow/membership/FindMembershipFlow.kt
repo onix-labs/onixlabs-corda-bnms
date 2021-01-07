@@ -19,9 +19,9 @@ package io.onixlabs.corda.bnms.workflow.membership
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipSchema.MembershipEntity
-import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
-import io.onixlabs.corda.identityframework.workflow.FindStateFlow
-import io.onixlabs.corda.identityframework.workflow.withExpressions
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
+import io.onixlabs.corda.core.workflow.FindStateFlow
+import io.onixlabs.corda.core.workflow.andWithExpressions
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.StartableByRPC
@@ -53,7 +53,7 @@ class FindMembershipFlow(
         contractStateTypes = setOf(contractStateType),
         relevancyStatus = relevancyStatus,
         status = stateStatus
-    ).withExpressions(
+    ).andWithExpressions(
         linearId?.let { MembershipEntity::linearId.equal(it.id) },
         externalId?.let { MembershipEntity::externalId.equal(it) },
         holder?.let { MembershipEntity::holder.equal(it) },

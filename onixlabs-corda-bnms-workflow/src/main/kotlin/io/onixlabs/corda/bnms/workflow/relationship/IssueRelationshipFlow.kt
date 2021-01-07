@@ -21,6 +21,8 @@ import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipContract
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockContract
 import io.onixlabs.corda.bnms.workflow.checkMembershipsAndAttestations
+import io.onixlabs.corda.core.workflow.currentStep
+import io.onixlabs.corda.core.workflow.getPreferredNotary
 import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -90,7 +92,7 @@ class IssueRelationshipFlow(
             return subFlow(
                 IssueRelationshipFlow(
                     relationship,
-                    notary ?: preferredNotary,
+                    notary ?: getPreferredNotary(),
                     sessions,
                     checkMembership,
                     ISSUING.childProgressTracker()

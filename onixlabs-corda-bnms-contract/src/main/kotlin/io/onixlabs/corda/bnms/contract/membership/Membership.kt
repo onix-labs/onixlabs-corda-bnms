@@ -19,8 +19,8 @@ package io.onixlabs.corda.bnms.contract.membership
 import io.onixlabs.corda.bnms.contract.*
 import io.onixlabs.corda.bnms.contract.membership.MembershipSchema.MembershipEntity
 import io.onixlabs.corda.bnms.contract.membership.MembershipSchema.MembershipSchemaV1
+import io.onixlabs.corda.core.contract.Hashable
 import io.onixlabs.corda.identityframework.contract.AbstractClaim
-import io.onixlabs.corda.identityframework.contract.Hashable
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier

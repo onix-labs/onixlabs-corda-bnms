@@ -17,7 +17,8 @@
 package io.onixlabs.corda.bnms.integration
 
 import io.onixlabs.corda.bnms.workflow.revocation.FindRevocationLockFlow
-import io.onixlabs.corda.identityframework.contract.cast
+import io.onixlabs.corda.core.contract.cast
+import io.onixlabs.corda.core.integration.RPCService
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.identity.AbstractParty
@@ -25,7 +26,7 @@ import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.utilities.getOrThrow
 import java.time.Duration
 
-class RevocationLockQueryService(rpc: CordaRPCOps) : Service(rpc) {
+class RevocationLockQueryService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     inline fun <reified T : LinearState> findRevocationLock(
         state: T,

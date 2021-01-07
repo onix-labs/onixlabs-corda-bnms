@@ -20,7 +20,8 @@ import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.workflow.membership.FindMembershipFlow
 import io.onixlabs.corda.bnms.workflow.membership.FindMembershipsFlow
-import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
+import io.onixlabs.corda.core.integration.RPCService
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
@@ -31,7 +32,7 @@ import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.utilities.getOrThrow
 import java.time.Duration
 
-class MembershipQueryService(rpc: CordaRPCOps) : Service(rpc) {
+class MembershipQueryService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun findMembership(
         linearId: UniqueIdentifier? = null,

@@ -23,6 +23,7 @@ import io.onixlabs.corda.bnms.contract.relationship.RelationshipMember
 import io.onixlabs.corda.bnms.workflow.relationship.AmendRelationshipFlow
 import io.onixlabs.corda.bnms.workflow.relationship.IssueRelationshipFlow
 import io.onixlabs.corda.bnms.workflow.relationship.RevokeRelationshipFlow
+import io.onixlabs.corda.core.integration.RPCService
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
@@ -31,7 +32,7 @@ import net.corda.core.messaging.FlowProgressHandle
 import net.corda.core.messaging.startTrackedFlow
 import net.corda.core.transactions.SignedTransaction
 
-class RelationshipCommandService(rpc: CordaRPCOps) : Service(rpc) {
+class RelationshipCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun issueRelationship(
         network: Network,

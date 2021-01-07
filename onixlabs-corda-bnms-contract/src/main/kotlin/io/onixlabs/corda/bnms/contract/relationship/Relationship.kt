@@ -20,7 +20,8 @@ import io.onixlabs.corda.bnms.contract.*
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipSchema.RelationshipEntity
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipSchema.RelationshipSchemaV1
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
-import io.onixlabs.corda.identityframework.contract.Hashable
+import io.onixlabs.corda.core.contract.Hashable
+import io.onixlabs.corda.core.contract.participantHash
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.StateRef
@@ -50,7 +51,7 @@ data class Relationship(
     }
 
     override val hash: SecureHash
-        get() = SecureHash.sha256("$network${participants.identityHash}$previousStateRef")
+        get() = SecureHash.sha256("$network${participants.participantHash}$previousStateRef")
 
     override val participants: List<AbstractParty>
         get() = members.map { it.member }.distinct()

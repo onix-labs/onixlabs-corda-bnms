@@ -22,6 +22,7 @@ import io.onixlabs.corda.bnms.contract.relationship.attest
 import io.onixlabs.corda.bnms.workflow.relationship.AmendRelationshipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.relationship.IssueRelationshipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.relationship.RevokeRelationshipAttestationFlow
+import io.onixlabs.corda.core.integration.RPCService
 import io.onixlabs.corda.identityframework.contract.AttestationStatus
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -32,7 +33,7 @@ import net.corda.core.messaging.FlowProgressHandle
 import net.corda.core.messaging.startTrackedFlow
 import net.corda.core.transactions.SignedTransaction
 
-class RelationshipAttestationCommandService(rpc: CordaRPCOps) : Service(rpc) {
+class RelationshipAttestationCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun issueRelationshipAttestation(
         relationship: StateAndRef<Relationship>,

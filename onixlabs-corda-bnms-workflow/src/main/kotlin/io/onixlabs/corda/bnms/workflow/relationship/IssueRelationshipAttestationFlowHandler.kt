@@ -17,8 +17,8 @@
 package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
+import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.identityframework.workflow.FINALIZING
-import io.onixlabs.corda.identityframework.workflow.currentStep
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSession

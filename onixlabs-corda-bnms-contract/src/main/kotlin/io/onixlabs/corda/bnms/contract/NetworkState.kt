@@ -16,7 +16,7 @@
 
 package io.onixlabs.corda.bnms.contract
 
-import io.onixlabs.corda.identityframework.contract.ChainState
+import io.onixlabs.corda.core.contract.ChainState
 import net.corda.core.contracts.LinearState
 import net.corda.core.schemas.QueryableState
 

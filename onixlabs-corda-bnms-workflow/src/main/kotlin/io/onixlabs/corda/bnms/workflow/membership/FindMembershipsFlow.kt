@@ -19,9 +19,10 @@ package io.onixlabs.corda.bnms.workflow.membership
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipSchema.MembershipEntity
-import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
-import io.onixlabs.corda.identityframework.workflow.FindStatesFlow
-import io.onixlabs.corda.identityframework.workflow.withExpressions
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
+import io.onixlabs.corda.core.workflow.DEFAULT_SORTING
+import io.onixlabs.corda.core.workflow.FindStatesFlow
+import io.onixlabs.corda.core.workflow.andWithExpressions
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.StartableByRPC
@@ -32,6 +33,7 @@ import net.corda.core.node.services.vault.Builder.equal
 import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.node.services.vault.QueryCriteria.VaultQueryCriteria
+import net.corda.core.node.services.vault.Sort
 
 @StartableByRPC
 @StartableByService
@@ -47,13 +49,14 @@ class FindMembershipsFlow(
     hash: SecureHash? = null,
     stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
     relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-    override val pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION
+    override val pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
+    override val sorting: Sort = DEFAULT_SORTING
 ) : FindStatesFlow<Membership>() {
     override val criteria: QueryCriteria = VaultQueryCriteria(
         contractStateTypes = setOf(contractStateType),
         relevancyStatus = relevancyStatus,
         status = stateStatus
-    ).withExpressions(
+    ).andWithExpressions(
         linearId?.let { MembershipEntity::linearId.equal(it.id) },
         externalId?.let { MembershipEntity::externalId.equal(it) },
         holder?.let { MembershipEntity::holder.equal(it) },

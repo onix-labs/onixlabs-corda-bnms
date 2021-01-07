@@ -19,6 +19,8 @@ package io.onixlabs.corda.bnms.workflow.relationship
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
 import io.onixlabs.corda.bnms.workflow.findRelationshipForAttestation
+import io.onixlabs.corda.core.workflow.currentStep
+import io.onixlabs.corda.core.workflow.getPreferredNotary
 import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -78,7 +80,7 @@ class IssueRelationshipAttestationFlow(
             return subFlow(
                 IssueRelationshipAttestationFlow(
                     attestation,
-                    notary ?: preferredNotary,
+                    notary ?: getPreferredNotary(),
                     sessions,
                     ISSUING.childProgressTracker()
                 )

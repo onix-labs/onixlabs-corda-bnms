@@ -18,9 +18,9 @@ package io.onixlabs.corda.bnms.workflow.revocation
 
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockSchema.RevocationLockEntity
-import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
-import io.onixlabs.corda.identityframework.workflow.FindStateFlow
-import io.onixlabs.corda.identityframework.workflow.withExpressions
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
+import io.onixlabs.corda.core.workflow.FindStateFlow
+import io.onixlabs.corda.core.workflow.andWithExpressions
 import net.corda.core.contracts.LinearState
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.flows.StartableByService
@@ -40,7 +40,7 @@ class FindRevocationLockFlow<T : LinearState>(owner: AbstractParty, state: T) : 
         contractStateTypes = setOf(contractStateType),
         relevancyStatus = Vault.RelevancyStatus.RELEVANT,
         status = Vault.StateStatus.UNCONSUMED
-    ).withExpressions(
+    ).andWithExpressions(
         RevocationLockEntity::owner.equal(owner),
         RevocationLockEntity::pointerStateLinearId.equal(state.linearId.id),
         RevocationLockEntity::pointerStateExternalId.equal(state.linearId.externalId),

@@ -19,6 +19,7 @@ package io.onixlabs.corda.bnms.integration
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import io.onixlabs.corda.bnms.workflow.revocation.LockRevocationLockFlow
 import io.onixlabs.corda.bnms.workflow.revocation.UnlockRevocationLockFlow
+import io.onixlabs.corda.core.integration.RPCService
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.identity.AbstractParty
@@ -28,7 +29,7 @@ import net.corda.core.messaging.FlowProgressHandle
 import net.corda.core.messaging.startTrackedFlow
 import net.corda.core.transactions.SignedTransaction
 
-class RevocationLockCommandService(rpc: CordaRPCOps) : Service(rpc) {
+class RevocationLockCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun <T : LinearState> lock(
         state: T,

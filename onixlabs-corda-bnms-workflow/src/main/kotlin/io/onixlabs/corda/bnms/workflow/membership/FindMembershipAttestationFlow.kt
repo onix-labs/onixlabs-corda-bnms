@@ -20,11 +20,11 @@ import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema.MembershipAttestationEntity
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
+import io.onixlabs.corda.core.workflow.FindStateFlow
+import io.onixlabs.corda.core.workflow.andWithExpressions
 import io.onixlabs.corda.identityframework.contract.AttestationPointer
 import io.onixlabs.corda.identityframework.contract.AttestationStatus
-import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
-import io.onixlabs.corda.identityframework.workflow.FindStateFlow
-import io.onixlabs.corda.identityframework.workflow.withExpressions
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -65,7 +65,7 @@ class FindMembershipAttestationFlow(
         contractStateTypes = setOf(contractStateType),
         relevancyStatus = relevancyStatus,
         status = stateStatus
-    ).withExpressions(
+    ).andWithExpressions(
         linearId?.let { MembershipAttestationEntity::linearId.equal(it.id) },
         externalId?.let { MembershipAttestationEntity::externalId.equal(it) },
         attestor?.let { MembershipAttestationEntity::attestor.equal(it) },

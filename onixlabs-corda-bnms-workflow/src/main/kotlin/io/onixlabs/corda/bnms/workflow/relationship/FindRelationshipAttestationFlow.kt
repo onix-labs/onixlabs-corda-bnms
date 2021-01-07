@@ -20,11 +20,11 @@ import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationSchema.RelationshipAttestationEntity
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
+import io.onixlabs.corda.core.workflow.FindStateFlow
+import io.onixlabs.corda.core.workflow.andWithExpressions
 import io.onixlabs.corda.identityframework.contract.AttestationPointer
 import io.onixlabs.corda.identityframework.contract.AttestationStatus
-import io.onixlabs.corda.identityframework.workflow.DEFAULT_PAGE_SPECIFICATION
-import io.onixlabs.corda.identityframework.workflow.FindStateFlow
-import io.onixlabs.corda.identityframework.workflow.withExpressions
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -64,7 +64,7 @@ class FindRelationshipAttestationFlow(
         contractStateTypes = setOf(contractStateType),
         relevancyStatus = relevancyStatus,
         status = stateStatus
-    ).withExpressions(
+    ).andWithExpressions(
         linearId?.let { RelationshipAttestationEntity::linearId.equal(it.id) },
         externalId?.let { RelationshipAttestationEntity::externalId.equal(it) },
         attestor?.let { RelationshipAttestationEntity::attestor.equal(it) },

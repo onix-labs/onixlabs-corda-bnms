@@ -22,6 +22,7 @@ import io.onixlabs.corda.bnms.contract.membership.attest
 import io.onixlabs.corda.bnms.workflow.membership.AmendMembershipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.membership.IssueMembershipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.membership.RevokeMembershipAttestationFlow
+import io.onixlabs.corda.core.integration.RPCService
 import io.onixlabs.corda.identityframework.contract.AttestationStatus
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
@@ -32,7 +33,7 @@ import net.corda.core.messaging.FlowProgressHandle
 import net.corda.core.messaging.startTrackedFlow
 import net.corda.core.transactions.SignedTransaction
 
-class MembershipAttestationCommandService(rpc: CordaRPCOps) : Service(rpc) {
+class MembershipAttestationCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun issueMembershipAttestation(
         membership: StateAndRef<Membership>,

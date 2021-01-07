@@ -20,6 +20,7 @@ import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipContract
 import io.onixlabs.corda.bnms.workflow.checkMembershipExists
+import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
