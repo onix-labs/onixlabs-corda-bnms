@@ -67,6 +67,11 @@ abstract class FlowTest {
     private lateinit var _partyC: Party
     protected val partyC: Party get() = _partyC
 
+    private lateinit var _operatorNode: StartedMockNode
+    protected val operatorNode: StartedMockNode get() = _operatorNode
+    private lateinit var _operatorParty: Party
+    protected val operatorParty: Party get() = _operatorParty
+
     protected open fun initialize() = Unit
     protected open fun finalize() = Unit
 
@@ -88,11 +93,13 @@ abstract class FlowTest {
         _nodeA = network.createPartyNode(CordaX500Name("PartyA", "London", "GB"))
         _nodeB = network.createPartyNode(CordaX500Name("PartyB", "New York", "US"))
         _nodeC = network.createPartyNode(CordaX500Name("PartyC", "Paris", "FR"))
+        _operatorNode = network.createPartyNode(CordaX500Name("Network Operator", "London", "GB"))
 
         _notaryParty = notaryNode.info.singleIdentity()
         _partyA = nodeA.info.singleIdentity()
         _partyB = nodeB.info.singleIdentity()
         _partyC = nodeC.info.singleIdentity()
+        _operatorParty = operatorNode.info.singleIdentity()
 
         initialize()
     }
