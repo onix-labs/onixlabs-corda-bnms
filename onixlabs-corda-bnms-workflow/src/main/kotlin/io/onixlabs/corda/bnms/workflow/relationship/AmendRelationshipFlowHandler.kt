@@ -61,4 +61,22 @@ class AmendRelationshipFlowHandler(
         currentStep(FINALIZING)
         return subFlow(ReceiveFinalityFlow(session, transaction.id, StatesToRecord.ONLY_RELEVANT))
     }
+
+    @InitiatedBy(AmendRelationshipFlow.Initiator::class)
+    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
+
+        private companion object {
+            object OBSERVING : Step("Observing relationship amendment.") {
+                override fun childProgressTracker() = tracker()
+            }
+        }
+
+        override val progressTracker = ProgressTracker(OBSERVING)
+
+        @Suspendable
+        override fun call(): SignedTransaction {
+            currentStep(OBSERVING)
+            return subFlow(AmendRelationshipFlowHandler(session, OBSERVING.childProgressTracker()))
+        }
+    }
 }

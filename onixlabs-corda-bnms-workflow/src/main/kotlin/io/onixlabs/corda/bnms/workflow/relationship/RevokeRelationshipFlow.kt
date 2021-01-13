@@ -20,6 +20,7 @@ import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipContract
 import io.onixlabs.corda.core.workflow.currentStep
+import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
@@ -82,24 +83,6 @@ class RevokeRelationshipFlow(
                     REVOKING.childProgressTracker()
                 )
             )
-        }
-    }
-
-    @InitiatedBy(Initiator::class)
-    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
-
-        private companion object {
-            object OBSERVING : Step("Observing relationship revocation.") {
-                override fun childProgressTracker() = RevokeRelationshipFlowHandler.tracker()
-            }
-        }
-
-        override val progressTracker = ProgressTracker(OBSERVING)
-
-        @Suspendable
-        override fun call(): SignedTransaction {
-            currentStep(OBSERVING)
-            return subFlow(RevokeRelationshipFlowHandler(session, OBSERVING.childProgressTracker()))
         }
     }
 }

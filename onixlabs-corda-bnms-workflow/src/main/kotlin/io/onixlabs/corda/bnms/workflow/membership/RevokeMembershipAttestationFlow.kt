@@ -19,6 +19,7 @@ package io.onixlabs.corda.bnms.workflow.membership
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.core.workflow.currentStep
+import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
@@ -79,29 +80,6 @@ class RevokeMembershipAttestationFlow(
                     attestation,
                     sessions,
                     REVOKING.childProgressTracker()
-                )
-            )
-        }
-    }
-
-    @InitiatedBy(Initiator::class)
-    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
-
-        private companion object {
-            object OBSERVING : Step("Observing membership attestation revocation.") {
-                override fun childProgressTracker() = RevokeMembershipAttestationFlowHandler.tracker()
-            }
-        }
-
-        override val progressTracker = ProgressTracker(OBSERVING)
-
-        @Suspendable
-        override fun call(): SignedTransaction {
-            currentStep(OBSERVING)
-            return subFlow(
-                RevokeMembershipAttestationFlowHandler(
-                    session,
-                    progressTracker = OBSERVING.childProgressTracker()
                 )
             )
         }

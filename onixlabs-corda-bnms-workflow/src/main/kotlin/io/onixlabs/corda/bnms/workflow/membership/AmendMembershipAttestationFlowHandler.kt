@@ -22,6 +22,7 @@ import io.onixlabs.corda.identityframework.workflow.FINALIZING
 import net.corda.core.crypto.SecureHash
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSession
+import net.corda.core.flows.InitiatedBy
 import net.corda.core.flows.ReceiveFinalityFlow
 import net.corda.core.node.StatesToRecord
 import net.corda.core.transactions.SignedTransaction
@@ -43,5 +44,28 @@ class AmendMembershipAttestationFlowHandler(
     override fun call(): SignedTransaction {
         currentStep(FINALIZING)
         return subFlow(ReceiveFinalityFlow(session, expectedTransactionId, statesToRecord))
+    }
+
+    @InitiatedBy(AmendMembershipAttestationFlow.Initiator::class)
+    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
+
+        private companion object {
+            object OBSERVING : ProgressTracker.Step("Observing membership attestation amendment.") {
+                override fun childProgressTracker() = tracker()
+            }
+        }
+
+        override val progressTracker = ProgressTracker(OBSERVING)
+
+        @Suspendable
+        override fun call(): SignedTransaction {
+            currentStep(OBSERVING)
+            return subFlow(
+                AmendMembershipAttestationFlowHandler(
+                    session,
+                    progressTracker = OBSERVING.childProgressTracker()
+                )
+            )
+        }
     }
 }

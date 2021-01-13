@@ -56,4 +56,22 @@ class RevokeRelationshipFlowHandler(
         currentStep(FINALIZING)
         return subFlow(ReceiveFinalityFlow(session, transaction.id, StatesToRecord.ONLY_RELEVANT))
     }
+
+    @InitiatedBy(RevokeRelationshipFlow.Initiator::class)
+    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
+
+        private companion object {
+            object OBSERVING : ProgressTracker.Step("Observing relationship revocation.") {
+                override fun childProgressTracker() = RevokeRelationshipFlowHandler.tracker()
+            }
+        }
+
+        override val progressTracker = ProgressTracker(OBSERVING)
+
+        @Suspendable
+        override fun call(): SignedTransaction {
+            currentStep(OBSERVING)
+            return subFlow(RevokeRelationshipFlowHandler(session, OBSERVING.childProgressTracker()))
+        }
+    }
 }

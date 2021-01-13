@@ -62,20 +62,28 @@ data class Membership(
         return hasRole(Role(role))
     }
 
-    fun addRoles(vararg roles: Role): Membership {
+    fun addRoles(roles: Set<Role>): Membership {
         return copy(settings = settings + roles)
     }
 
-    fun addRoles(vararg roles: String): Membership {
-        return copy(settings = settings + roles.map { Role(it) })
+    fun addRoles(vararg roles: Role): Membership {
+        return addRoles(roles.toSet())
     }
 
-    fun removeRoles(vararg roles: Role): Membership {
+    fun addRoles(vararg roles: String): Membership {
+        return addRoles(roles.map { Role(it) }.toSet())
+    }
+
+    fun removeRoles(roles: Set<Role>): Membership {
         return copy(settings = settings - roles)
     }
 
+    fun removeRoles(vararg roles: Role): Membership {
+        return removeRoles(roles.toSet())
+    }
+
     fun removeRoles(vararg roles: String): Membership {
-        return copy(settings = settings - roles.map { Role(it) })
+        return removeRoles(roles.map { Role(it) }.toSet())
     }
 
     fun hasPermission(permission: Permission): Boolean {
@@ -86,20 +94,28 @@ data class Membership(
         return hasPermission(Permission(permission))
     }
 
-    fun addPermissions(vararg permissions: Permission): Membership {
+    fun addPermissions(permissions: Set<Permission>): Membership {
         return copy(settings = settings + permissions)
     }
 
-    fun addPermissions(vararg permissions: String): Membership {
-        return copy(settings = settings + permissions.map { Permission(it) })
+    fun addPermissions(vararg permissions: Permission): Membership {
+        return addPermissions(permissions.toSet())
     }
 
-    fun removePermissions(vararg permissions: Permission): Membership {
+    fun addPermissions(vararg permissions: String): Membership {
+        return addPermissions(permissions.map { Permission(it) }.toSet())
+    }
+
+    fun removePermissions(permissions: Set<Permission>): Membership {
         return copy(settings = settings - permissions)
     }
 
+    fun removePermissions(vararg permissions: Permission): Membership {
+        return removePermissions(permissions.toSet())
+    }
+
     fun removePermissions(vararg permissions: String): Membership {
-        return copy(settings = settings - permissions.map { Permission(it) })
+        return removePermissions(permissions.map { Permission(it) }.toSet())
     }
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {

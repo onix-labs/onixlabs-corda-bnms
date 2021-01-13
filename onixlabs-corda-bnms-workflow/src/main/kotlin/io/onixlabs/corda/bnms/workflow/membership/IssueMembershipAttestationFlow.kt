@@ -21,6 +21,7 @@ import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.bnms.workflow.findMembershipForAttestation
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.core.workflow.getPreferredNotary
+import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -84,29 +85,6 @@ class IssueMembershipAttestationFlow(
                     notary ?: getPreferredNotary(),
                     sessions,
                     ISSUING.childProgressTracker()
-                )
-            )
-        }
-    }
-
-    @InitiatedBy(Initiator::class)
-    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
-
-        private companion object {
-            object OBSERVING : Step("Observing membership attestation issuance.") {
-                override fun childProgressTracker() = IssueMembershipAttestationFlowHandler.tracker()
-            }
-        }
-
-        override val progressTracker = ProgressTracker(OBSERVING)
-
-        @Suspendable
-        override fun call(): SignedTransaction {
-            currentStep(OBSERVING)
-            return subFlow(
-                IssueMembershipAttestationFlowHandler(
-                    session,
-                    progressTracker = OBSERVING.childProgressTracker()
                 )
             )
         }

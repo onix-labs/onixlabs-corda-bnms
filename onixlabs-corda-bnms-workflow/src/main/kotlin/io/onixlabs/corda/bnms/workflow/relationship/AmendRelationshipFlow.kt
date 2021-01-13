@@ -21,6 +21,7 @@ import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipContract
 import io.onixlabs.corda.bnms.workflow.checkMembershipsAndAttestations
 import io.onixlabs.corda.core.workflow.currentStep
+import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
@@ -95,24 +96,6 @@ class AmendRelationshipFlow(
                     AMENDING.childProgressTracker()
                 )
             )
-        }
-    }
-
-    @InitiatedBy(Initiator::class)
-    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
-
-        private companion object {
-            object OBSERVING : Step("Observing relationship amendment.") {
-                override fun childProgressTracker() = AmendRelationshipFlowHandler.tracker()
-            }
-        }
-
-        override val progressTracker = ProgressTracker(OBSERVING)
-
-        @Suspendable
-        override fun call(): SignedTransaction {
-            currentStep(OBSERVING)
-            return subFlow(AmendRelationshipFlowHandler(session, OBSERVING.childProgressTracker()))
         }
     }
 }

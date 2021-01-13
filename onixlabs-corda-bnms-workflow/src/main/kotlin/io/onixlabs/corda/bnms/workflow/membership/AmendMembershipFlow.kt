@@ -21,6 +21,7 @@ import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipContract
 import io.onixlabs.corda.bnms.workflow.checkMembershipExists
 import io.onixlabs.corda.core.workflow.currentStep
+import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
@@ -89,24 +90,6 @@ class AmendMembershipFlow(
                     AMENDING.childProgressTracker()
                 )
             )
-        }
-    }
-
-    @InitiatedBy(Initiator::class)
-    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
-
-        private companion object {
-            object OBSERVING : Step("Observing membership amendment.") {
-                override fun childProgressTracker() = AmendMembershipFlowHandler.tracker()
-            }
-        }
-
-        override val progressTracker = ProgressTracker(OBSERVING)
-
-        @Suspendable
-        override fun call(): SignedTransaction {
-            currentStep(OBSERVING)
-            return subFlow(AmendMembershipFlowHandler(session, progressTracker = OBSERVING.childProgressTracker()))
         }
     }
 }
