@@ -68,7 +68,7 @@ class SynchronizeMembershipFlowTests : FlowTest() {
     }
 
     @Test
-    fun `Party A has recorded Party B's MembershipAttestation`() {
+    fun `Party A has recorded Party B's MembershipAttestation for Party C`() {
         Pipeline
             .create(network)
             .run(nodeA) {
@@ -88,7 +88,7 @@ class SynchronizeMembershipFlowTests : FlowTest() {
     }
 
     @Test
-    fun `Party C has recorded Party B's MembershipAttestation`() {
+    fun `Party C has recorded Party B's MembershipAttestation for Party A`() {
         Pipeline
             .create(network)
             .run(nodeA) {
