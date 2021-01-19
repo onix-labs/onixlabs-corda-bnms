@@ -54,6 +54,45 @@ data class Membership(
     override val participants: List<AbstractParty>
         get() = setOf(holder, network.operator).filterNotNull()
 
+    fun hasSetting(setting: Setting<*>): Boolean {
+        return setting in settings
+    }
+
+    fun hasSetting(property: String): Boolean {
+        return settings.any { it.property == property.toUpperCase() }
+    }
+
+    inline fun <reified T> getSettings(property: String): Set<Setting<T>> where T : Any {
+        return settings
+            .filter { it.property == property.toUpperCase() }
+            .map { Setting(it.property, T::class.java.cast(it.value)) }
+            .toSet()
+    }
+
+    fun <T> addSetting(property: String, value: T): Membership where T : Any {
+        return addSettings(Setting(property, value))
+    }
+
+    fun <T> addSettings(settings: Set<Setting<T>>): Membership where T : Any {
+        return copy(settings = this.settings + settings)
+    }
+
+    fun <T> addSettings(vararg settings: Setting<T>): Membership where T : Any {
+        return addSettings(settings.toSet())
+    }
+
+    fun <T> removeSetting(property: String, value: T): Membership where T : Any {
+        return removeSettings(Setting(property, value))
+    }
+
+    fun <T> removeSettings(settings: Set<Setting<T>>): Membership where T : Any {
+        return copy(settings = this.settings - settings)
+    }
+
+    fun <T> removeSettings(vararg settings: Setting<T>): Membership where T : Any {
+        return removeSettings(settings.toSet())
+    }
+
     fun hasRole(role: Role): Boolean {
         return role in roles
     }
@@ -63,7 +102,7 @@ data class Membership(
     }
 
     fun addRoles(roles: Set<Role>): Membership {
-        return copy(settings = settings + roles)
+        return addSettings(roles)
     }
 
     fun addRoles(vararg roles: Role): Membership {
@@ -75,7 +114,7 @@ data class Membership(
     }
 
     fun removeRoles(roles: Set<Role>): Membership {
-        return copy(settings = settings - roles)
+        return removeSettings(roles)
     }
 
     fun removeRoles(vararg roles: Role): Membership {
@@ -95,7 +134,7 @@ data class Membership(
     }
 
     fun addPermissions(permissions: Set<Permission>): Membership {
-        return copy(settings = settings + permissions)
+        return addSettings(permissions)
     }
 
     fun addPermissions(vararg permissions: Permission): Membership {
@@ -107,7 +146,7 @@ data class Membership(
     }
 
     fun removePermissions(permissions: Set<Permission>): Membership {
-        return copy(settings = settings - permissions)
+        return removeSettings(permissions)
     }
 
     fun removePermissions(vararg permissions: Permission): Membership {
