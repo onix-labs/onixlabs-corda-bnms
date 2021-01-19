@@ -1,6 +1,21 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.contract.membership
 
-import io.onixlabs.corda.bnms.contract.Role
 import net.corda.core.contracts.*
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
@@ -32,14 +47,11 @@ class MembershipContract : Contract {
         internal const val CONTRACT_RULE_OUTPUTS =
             "On membership issuing, only one membership state must be created."
 
-        internal const val CONTRACT_RULE_ROLE =
-            "On membership issuing, a network operator must possess the network operator role."
-
         internal const val CONTRACT_RULE_PREVIOUS_STATE_REF =
             "On membership issuing, the previous state reference of the created membership state must be null."
 
         internal const val CONTRACT_RULE_SIGNERS =
-            "On membership issuing, the holder of the created membership state must sign the transaction."
+            "On membership issuing, either the holder or the network operator of the creates membership state must sign the transaction."
 
         override fun verifyCommand(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
             val inputs = transaction.inputsOfType<Membership>()
@@ -50,12 +62,8 @@ class MembershipContract : Contract {
 
             val output = outputs.single()
 
-            if (output.isNetworkOperator) {
-                CONTRACT_RULE_ROLE using (output.hasRole(Role.NETWORK_OPERATOR))
-            }
-
             CONTRACT_RULE_PREVIOUS_STATE_REF using (output.previousStateRef == null)
-            CONTRACT_RULE_SIGNERS using (output.holder.owningKey in signers)
+            CONTRACT_RULE_SIGNERS using (output.participants.any { it.owningKey in signers })
         }
     }
 
@@ -67,14 +75,8 @@ class MembershipContract : Contract {
         internal const val CONTRACT_RULE_OUTPUTS =
             "On membership amending, only one membership state must be created."
 
-        internal const val CONTRACT_RULE_NETWORK =
-            "On membership amending, the network of the membership must not change."
-
-        internal const val CONTRACT_RULE_HOLDER =
-            "On membership amending, the holder of the membership must not change."
-
-        internal const val CONTRACT_RULE_ROLE =
-            "On membership amending, a network operator must possess the network operator role."
+        internal const val CONTRACT_RULE_CHANGES =
+            "On membership amending, the network, holder and linear ID of the membership must not change."
 
         internal const val CONTRACT_RULE_PREVIOUS_STATE_REF =
             "On membership amending, the previous state reference of the created membership state must be equal to the state reference of the consumed membership state."
@@ -92,13 +94,7 @@ class MembershipContract : Contract {
             val input = inputs.single()
             val output = outputs.single()
 
-            CONTRACT_RULE_NETWORK using (input.state.data.network == output.network)
-            CONTRACT_RULE_HOLDER using (input.state.data.holder == output.holder)
-
-            if (output.isNetworkOperator) {
-                CONTRACT_RULE_ROLE using (output.hasRole(Role.NETWORK_OPERATOR))
-            }
-
+            CONTRACT_RULE_CHANGES using (input.state.data.immutableEquals(output))
             CONTRACT_RULE_PREVIOUS_STATE_REF using (input.ref == output.previousStateRef)
             CONTRACT_RULE_SIGNERS using (output.participants.any { it.owningKey in signers })
         }

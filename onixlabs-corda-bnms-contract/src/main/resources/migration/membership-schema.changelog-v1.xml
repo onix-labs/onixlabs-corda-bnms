@@ -20,9 +20,6 @@
             <column name="network_value" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="normalized_network_value" type="nvarchar(255)">
-                <constraints nullable="false"/>
-            </column>
             <column name="network_operator" type="nvarchar(255)"/>
             <column name="network_hash" type="nvarchar(255)">
                 <constraints nullable="false"/>

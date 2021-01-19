@@ -1,14 +1,29 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.contract.relationship
 
-import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.NetworkState
-import io.onixlabs.corda.bnms.contract.Setting
-import io.onixlabs.corda.bnms.contract.identityHash
+import io.onixlabs.corda.bnms.contract.*
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipSchema.RelationshipEntity
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipSchema.RelationshipSchemaV1
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
-import io.onixlabs.corda.identity.framework.contract.Hashable
+import io.onixlabs.corda.core.contract.Hashable
+import io.onixlabs.corda.core.contract.participantHash
 import net.corda.core.contracts.BelongsToContract
+import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
@@ -19,51 +34,37 @@ import net.corda.core.schemas.PersistentState
 @BelongsToContract(RelationshipContract::class)
 data class Relationship(
     override val network: Network,
-    val members: Set<RelationshipMember> = emptySet(),
+    val members: Set<RelationshipMember>,
     val settings: Set<Setting<*>> = emptySet(),
     override val linearId: UniqueIdentifier = UniqueIdentifier(),
-    internal val previousStateRef: StateRef? = null
+    override val previousStateRef: StateRef? = null
 ) : NetworkState, Hashable {
 
-    companion object {
-        @JvmStatic
-        fun createRelationshipHash(
-            network: Network,
-            participants: List<AbstractParty>,
-            previousStateRef: StateRef?
-        ): SecureHash {
-            return SecureHash.sha256("${network.hash}${participants.identityHash}$previousStateRef")
-        }
-    }
-
     init {
-        check(members.size == members.distinctBy { it.member }.size) {
+        check(members.isDistinctBy { it.member }) {
             "Cannot create a relationship with duplicate members."
         }
-        check(settings.size == settings.distinctBy { it.normalizedProperty }.size) {
+
+        check(settings.isDistinctBy { it.property }) {
             "Cannot create a relationship with duplicate settings."
         }
     }
 
     override val hash: SecureHash
-        get() = createRelationshipHash(network, participants, previousStateRef)
+        get() = SecureHash.sha256("$network${participants.participantHash}$previousStateRef")
 
     override val participants: List<AbstractParty>
         get() = members.map { it.member }.distinct()
 
     fun createRevocationLocks(): List<RevocationLock<Relationship>> {
-        return members.map { RevocationLock(it.member, this) }
+        return members.map { RevocationLock(it.member, LinearPointer(this.linearId, this.javaClass, false)) }
     }
 
-    /**
-     * Maps this state to a persistent state.
-     */
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
         is RelationshipSchemaV1 -> RelationshipEntity(
             linearId = linearId.id,
             externalId = linearId.externalId,
             networkValue = network.value,
-            normalizedNetworkValue = network.normalizedValue,
             networkOperator = network.operator,
             networkHash = network.hash.toString(),
             hash = hash.toString()
@@ -71,18 +72,31 @@ data class Relationship(
         else -> throw IllegalArgumentException("Unrecognised schema: $schema.")
     }
 
-    /**
-     * Gets a list of supported state schemas.
-     */
     override fun supportedSchemas(): Iterable<MappedSchema> {
         return listOf(RelationshipSchemaV1)
     }
 
-    fun <T : Any> addSetting(property: String, value: T): Relationship {
-        return copy(settings = settings + Setting(property, value))
+    fun <T : Any> addSettings(vararg settings: Setting<T>): Relationship {
+        return copy(settings = this.settings + settings)
     }
 
-    fun <T : Any> removeSetting(setting: Setting<*>): Relationship {
-        return copy(settings = settings - setting)
+    fun <T : Any> addSetting(property: String, value: T): Relationship {
+        return addSettings(Setting(property, value))
+    }
+
+    fun <T : Any> removeSettings(vararg settings: Setting<T>): Relationship {
+        return copy(settings = this.settings - settings)
+    }
+
+    inline fun <reified T : Setting<*>> getSetting(property: String): T? {
+        return settings.filterIsInstance<T>().singleOrNull { it.property == property.toUpperCase() }
+    }
+
+    inline fun <reified T : Any> getSettingByValueType(property: String): Setting<T>? {
+        return settings.singleOrNull { it.property == property.toUpperCase() }?.cast()
+    }
+
+    internal fun immutableEquals(other: Relationship): Boolean {
+        return this === other || (network == other.network && linearId == other.linearId)
     }
 }

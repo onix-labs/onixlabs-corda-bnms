@@ -1,6 +1,25 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.contract.relationship
 
 import io.onixlabs.corda.bnms.contract.ContractTest
+import io.onixlabs.corda.bnms.contract.IDENTITY_A
+import io.onixlabs.corda.bnms.contract.IDENTITY_B
+import io.onixlabs.corda.bnms.contract.RELATIONSHIP
 import net.corda.testing.node.ledger
 import org.junit.jupiter.api.Test
 
@@ -38,8 +57,9 @@ class RelationshipContractRevokeCommandTests : ContractTest() {
         services.ledger {
             transaction {
                 val issuedRelationship1 = issue(RELATIONSHIP)
+                val issuedRelationship2 = RELATIONSHIP
                 input(issuedRelationship1.ref)
-                output(RelationshipContract.ID, issuedRelationship1.getNextOutput())
+                output(RelationshipContract.ID, issuedRelationship2)
                 command(keysOf(IDENTITY_A, IDENTITY_B), RelationshipContract.Revoke)
                 failsWith(RelationshipContract.Revoke.CONTRACT_RULE_OUTPUTS)
             }
@@ -52,7 +72,7 @@ class RelationshipContractRevokeCommandTests : ContractTest() {
             transaction {
                 val issuedRelationship1 = issue(RELATIONSHIP)
                 input(issuedRelationship1.ref)
-                command(keysOf(IDENTITY_A), RelationshipContract.Revoke)
+                command(keysOf(IDENTITY_B), RelationshipContract.Revoke)
                 failsWith(RelationshipContract.Revoke.CONTRACT_RULE_SIGNERS)
             }
         }

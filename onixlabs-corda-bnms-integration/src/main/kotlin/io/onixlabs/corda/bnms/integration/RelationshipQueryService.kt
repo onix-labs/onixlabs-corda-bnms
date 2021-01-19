@@ -1,119 +1,89 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.integration
 
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.workflow.relationship.*
-import io.onixlabs.corda.identity.framework.workflow.DEFAULT_PAGE_SPEC
+import io.onixlabs.corda.bnms.workflow.relationship.FindRelationshipFlow
+import io.onixlabs.corda.bnms.workflow.relationship.FindRelationshipsFlow
+import io.onixlabs.corda.core.integration.RPCService
+import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
+import net.corda.core.identity.AbstractParty
 import net.corda.core.messaging.CordaRPCOps
-import net.corda.core.messaging.startFlow
 import net.corda.core.node.services.Vault
 import net.corda.core.node.services.vault.PageSpecification
 import net.corda.core.utilities.getOrThrow
 import java.time.Duration
 
-class RelationshipQueryService(rpc: CordaRPCOps) : Service(rpc) {
+class RelationshipQueryService(rpc: CordaRPCOps) : RPCService(rpc) {
 
-    fun findRelationshipByLinearId(
-        linearId: UniqueIdentifier,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<Relationship>? {
-        return rpc.startFlow(
-            ::FindRelationshipByLinearIdFlow,
-            linearId,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findRelationshipByExternalId(
-        externalId: String,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<Relationship>? {
-        return rpc.startFlow(
-            ::FindRelationshipByExternalIdFlow,
-            externalId,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findRelationshipByHash(
-        hash: SecureHash,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): StateAndRef<Relationship>? {
-        return rpc.startFlow(
-            ::FindRelationshipByHashFlow,
-            hash,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findRelationshipsByStatus(
-        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<Relationship>> {
-        return rpc.startFlow(
-            ::FindRelationshipsByStatusFlow,
-            stateStatus,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findRelationshipsByLinearId(
-        linearId: UniqueIdentifier,
+    fun findRelationship(
+        linearId: UniqueIdentifier? = null,
+        externalId: String? = null,
+        network: Network? = null,
+        networkValue: String? = null,
+        networkOperator: AbstractParty? = null,
+        networkHash: SecureHash? = null,
+        hash: SecureHash? = null,
         stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
+        pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
         flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<Relationship>> {
-        return rpc.startFlow(
-            ::FindRelationshipsByLinearIdFlow,
+    ): StateAndRef<Relationship>? {
+        return rpc.startFlowDynamic(
+            FindRelationshipFlow::class.java,
             linearId,
-            stateStatus,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findRelationshipsByExternalId(
-        externalId: String,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<Relationship>> {
-        return rpc.startFlow(
-            ::FindRelationshipsByExternalIdFlow,
             externalId,
-            stateStatus,
-            relevancyStatus,
-            pageSpecification
-        ).returnValue.getOrThrow(flowTimeout)
-    }
-
-    fun findRelationshipsByNetwork(
-        network: Network,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
-        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
-        pageSpecification: PageSpecification = DEFAULT_PAGE_SPEC,
-        flowTimeout: Duration = Duration.ofSeconds(30)
-    ): List<StateAndRef<Relationship>> {
-        return rpc.startFlow(
-            ::FindRelationshipsByNetworkFlow,
             network,
+            networkValue,
+            networkOperator,
+            networkHash,
+            hash,
+            stateStatus,
+            relevancyStatus,
+            pageSpecification
+        ).returnValue.getOrThrow(flowTimeout)
+    }
+
+    fun findRelationships(
+        linearId: UniqueIdentifier? = null,
+        externalId: String? = null,
+        network: Network? = null,
+        networkValue: String? = null,
+        networkOperator: AbstractParty? = null,
+        networkHash: SecureHash? = null,
+        hash: SecureHash? = null,
+        stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
+        relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
+        pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
+        flowTimeout: Duration = Duration.ofSeconds(30)
+    ): List<StateAndRef<Relationship>> {
+        return rpc.startFlowDynamic(
+            FindRelationshipsFlow::class.java,
+            linearId,
+            externalId,
+            network,
+            networkValue,
+            networkOperator,
+            networkHash,
+            hash,
             stateStatus,
             relevancyStatus,
             pageSpecification

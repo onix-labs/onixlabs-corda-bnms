@@ -17,28 +17,32 @@
             <column name="attestor" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="attestee" type="nvarchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="pointer" type="nvarchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="pointer_type" type="nvarchar(255)">
+            <column name="holder" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="network_value" type="nvarchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="normalized_network_value" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="network_operator" type="nvarchar(255)"/>
             <column name="network_hash" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="pointer_state_ref" type="nvarchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pointer_state_class" type="nvarchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pointer_state_linear_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pointer_hash" type="nvarchar(64)">
+                <constraints nullable="false"/>
+            </column>
             <column name="status" type="nvarchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="previous_state_ref" type="nvarchar(255)"/>
             <column name="hash" type="nvarchar(64)">
                 <constraints nullable="false" unique="true"/>
             </column>

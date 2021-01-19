@@ -1,10 +1,26 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
-import io.onixlabs.corda.bnms.workflow.checkSufficientSessions
-import io.onixlabs.corda.identity.framework.contract.EvolvableAttestationContract
-import io.onixlabs.corda.identity.framework.workflow.*
+import io.onixlabs.corda.core.workflow.currentStep
+import io.onixlabs.corda.core.workflow.initiateFlows
+import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
@@ -27,11 +43,10 @@ class RevokeRelationshipAttestationFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkSufficientSessions(attestation.state.data, sessions)
+        checkHasSufficientFlowSessions(sessions, attestation.state.data)
 
         val transaction = transaction(attestation.state.notary) {
-            addInputState(attestation)
-            addCommand(EvolvableAttestationContract.Revoke, attestation.state.data.attestor.owningKey)
+            addRevokedAttestation(attestation)
         }
 
         val signedTransaction = verifyAndSign(transaction, attestation.state.data.attestor.owningKey)
@@ -56,7 +71,8 @@ class RevokeRelationshipAttestationFlow(
         @Suspendable
         override fun call(): SignedTransaction {
             currentStep(REVOKING)
-            val sessions = initiateFlows(attestation.state.data.attestees)
+            val sessions = initiateFlows(emptyList(), attestation.state.data)
+
             return subFlow(
                 RevokeRelationshipAttestationFlow(
                     attestation,
@@ -64,24 +80,6 @@ class RevokeRelationshipAttestationFlow(
                     REVOKING.childProgressTracker()
                 )
             )
-        }
-    }
-
-    @InitiatedBy(Initiator::class)
-    private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
-
-        private companion object {
-            object OBSERVING : Step("Observing relationship attestation revocation.") {
-                override fun childProgressTracker() = IssueRelationshipAttestationFlowHandler.tracker()
-            }
-        }
-
-        override val progressTracker = ProgressTracker(OBSERVING)
-
-        @Suspendable
-        override fun call(): SignedTransaction {
-            currentStep(OBSERVING)
-            return subFlow(IssueRelationshipAttestationFlowHandler(session, null, OBSERVING.childProgressTracker()))
         }
     }
 }

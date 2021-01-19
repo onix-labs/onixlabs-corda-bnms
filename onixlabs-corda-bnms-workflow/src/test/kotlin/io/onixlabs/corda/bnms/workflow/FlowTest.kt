@@ -1,13 +1,26 @@
+/**
+ * Copyright 2020 Matthew Layton
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.onixlabs.corda.bnms.workflow
 
 import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.Permission
-import io.onixlabs.corda.bnms.contract.Role
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipMember
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
-import io.onixlabs.corda.identity.framework.contract.StaticClaimPointer
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.testing.common.internal.testNetworkParameters
@@ -25,11 +38,8 @@ import org.junit.jupiter.api.TestInstance
 abstract class FlowTest {
 
     protected val NETWORK by lazy { Network("Example Network") }
-    protected val IDENTITY by lazy { emptySet<StaticClaimPointer<*>>() }
-    protected val ROLES by lazy { setOf(Role.USER) }
-    protected val PERMISSIONS by lazy { setOf(Permission("ACCESS_LEVEL", "SUPER_USER")) }
     protected val MEMBERS by lazy { setOf(RelationshipMember(partyA), RelationshipMember(partyB)) }
-    protected val MEMBERSHIP by lazy { Membership(NETWORK, partyA, IDENTITY, ROLES, PERMISSIONS) }
+    protected val MEMBERSHIP by lazy { Membership(NETWORK, partyA) }
     protected val RELATIONSHIP by lazy { Relationship(NETWORK, MEMBERS) }
 
     protected val REVOCATION_LOCK by lazy { RevocationLock(partyA, DummyLinearContract.State()) }
@@ -57,6 +67,11 @@ abstract class FlowTest {
     private lateinit var _partyC: Party
     protected val partyC: Party get() = _partyC
 
+    private lateinit var _operatorNode: StartedMockNode
+    protected val operatorNode: StartedMockNode get() = _operatorNode
+    private lateinit var _operatorParty: Party
+    protected val operatorParty: Party get() = _operatorParty
+
     protected open fun initialize() = Unit
     protected open fun finalize() = Unit
 
@@ -65,8 +80,8 @@ abstract class FlowTest {
         _network = MockNetwork(
             MockNetworkParameters(
                 cordappsForAllNodes = listOf(
-                    TestCordapp.findCordapp("io.onixlabs.corda.identity.framework.contract"),
-                    TestCordapp.findCordapp("io.onixlabs.corda.identity.framework.workflow"),
+                    TestCordapp.findCordapp("io.onixlabs.corda.identityframework.contract"),
+                    TestCordapp.findCordapp("io.onixlabs.corda.identityframework.workflow"),
                     TestCordapp.findCordapp("io.onixlabs.corda.bnms.contract"),
                     TestCordapp.findCordapp("io.onixlabs.corda.bnms.workflow")
                 ),
@@ -78,11 +93,13 @@ abstract class FlowTest {
         _nodeA = network.createPartyNode(CordaX500Name("PartyA", "London", "GB"))
         _nodeB = network.createPartyNode(CordaX500Name("PartyB", "New York", "US"))
         _nodeC = network.createPartyNode(CordaX500Name("PartyC", "Paris", "FR"))
+        _operatorNode = network.createPartyNode(CordaX500Name("Network Operator", "London", "GB"))
 
         _notaryParty = notaryNode.info.singleIdentity()
         _partyA = nodeA.info.singleIdentity()
         _partyB = nodeB.info.singleIdentity()
         _partyC = nodeC.info.singleIdentity()
+        _operatorParty = operatorNode.info.singleIdentity()
 
         initialize()
     }
