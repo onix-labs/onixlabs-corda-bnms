@@ -59,7 +59,7 @@ class FindMembershipAttestationsFlow(
     previousStateRef: StateRef? = null,
     hash: SecureHash? = null,
     membership: StateAndRef<Membership>? = null,
-    stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
+    stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
     relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
     override val pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
     override val sorting: Sort = DEFAULT_SORTING

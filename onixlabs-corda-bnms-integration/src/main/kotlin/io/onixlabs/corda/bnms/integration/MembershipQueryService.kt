@@ -44,7 +44,7 @@ class MembershipQueryService(rpc: CordaRPCOps) : RPCService(rpc) {
         networkHash: SecureHash? = null,
         isNetworkOperator: Boolean? = null,
         hash: SecureHash? = null,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
+        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
         flowTimeout: Duration = Duration.ofSeconds(30)
@@ -76,7 +76,7 @@ class MembershipQueryService(rpc: CordaRPCOps) : RPCService(rpc) {
         networkHash: SecureHash? = null,
         isNetworkOperator: Boolean? = null,
         hash: SecureHash? = null,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
+        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
         flowTimeout: Duration = Duration.ofSeconds(30)

@@ -54,7 +54,7 @@ class RelationshipAttestationQueryService(rpc: CordaRPCOps) : RPCService(rpc) {
         previousStateRef: StateRef? = null,
         hash: SecureHash? = null,
         membership: StateAndRef<Membership>? = null,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
+        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
         flowTimeout: Duration = Duration.ofSeconds(30)
@@ -99,7 +99,7 @@ class RelationshipAttestationQueryService(rpc: CordaRPCOps) : RPCService(rpc) {
         previousStateRef: StateRef? = null,
         hash: SecureHash? = null,
         membership: StateAndRef<Membership>? = null,
-        stateStatus: Vault.StateStatus = Vault.StateStatus.ALL,
+        stateStatus: Vault.StateStatus = Vault.StateStatus.UNCONSUMED,
         relevancyStatus: Vault.RelevancyStatus = Vault.RelevancyStatus.ALL,
         pageSpecification: PageSpecification = DEFAULT_PAGE_SPECIFICATION,
         flowTimeout: Duration = Duration.ofSeconds(30)

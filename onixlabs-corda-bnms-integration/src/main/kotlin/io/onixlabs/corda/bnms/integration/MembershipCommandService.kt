@@ -17,8 +17,7 @@
 package io.onixlabs.corda.bnms.integration
 
 import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.Permission
-import io.onixlabs.corda.bnms.contract.Role
+import io.onixlabs.corda.bnms.contract.Setting
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.workflow.membership.AmendMembershipFlow
 import io.onixlabs.corda.bnms.workflow.membership.IssueMembershipFlow
@@ -40,13 +39,12 @@ class MembershipCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
         network: Network,
         holder: AbstractParty = ourIdentity,
         identity: Set<AbstractClaim<*>> = emptySet(),
-        roles: Set<Role> = emptySet(),
-        permissions: Set<Permission> = emptySet(),
+        settings: Set<Setting<*>> = emptySet(),
         linearId: UniqueIdentifier = UniqueIdentifier(),
         notary: Party? = null,
         observers: Set<Party> = emptySet()
     ): FlowProgressHandle<SignedTransaction> {
-        val membership = Membership(network, holder, identity, roles + permissions, linearId)
+        val membership = Membership(network, holder, identity, settings, linearId)
         return issueMembership(membership, notary, observers)
     }
 
