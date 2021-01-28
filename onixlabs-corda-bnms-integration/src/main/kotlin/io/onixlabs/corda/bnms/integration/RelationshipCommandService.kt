@@ -16,10 +16,10 @@
 
 package io.onixlabs.corda.bnms.integration
 
-import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.Setting
-import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipMember
+import io.onixlabs.corda.bnms.v1.contract.Network
+import io.onixlabs.corda.bnms.v1.contract.Setting
+import io.onixlabs.corda.bnms.v1.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.v1.contract.relationship.RelationshipMember
 import io.onixlabs.corda.bnms.workflow.relationship.AmendRelationshipFlow
 import io.onixlabs.corda.bnms.workflow.relationship.IssueRelationshipFlow
 import io.onixlabs.corda.bnms.workflow.relationship.RevokeRelationshipFlow

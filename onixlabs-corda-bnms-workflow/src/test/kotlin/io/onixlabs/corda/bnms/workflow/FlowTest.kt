@@ -16,11 +16,11 @@
 
 package io.onixlabs.corda.bnms.workflow
 
-import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.membership.Membership
-import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipMember
-import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
+import io.onixlabs.corda.bnms.v1.contract.Network
+import io.onixlabs.corda.bnms.v1.contract.membership.Membership
+import io.onixlabs.corda.bnms.v1.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.v1.contract.relationship.RelationshipMember
+import io.onixlabs.corda.bnms.v1.contract.revocation.RevocationLock
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
 import net.corda.testing.common.internal.testNetworkParameters
@@ -80,9 +80,9 @@ abstract class FlowTest {
         _network = MockNetwork(
             MockNetworkParameters(
                 cordappsForAllNodes = listOf(
-                    TestCordapp.findCordapp("io.onixlabs.corda.identityframework.contract"),
+                    TestCordapp.findCordapp("io.onixlabs.corda.identityframework.v1.contract"),
                     TestCordapp.findCordapp("io.onixlabs.corda.identityframework.workflow"),
-                    TestCordapp.findCordapp("io.onixlabs.corda.bnms.contract"),
+                    TestCordapp.findCordapp("io.onixlabs.corda.bnms.v1.contract"),
                     TestCordapp.findCordapp("io.onixlabs.corda.bnms.workflow")
                 ),
                 networkParameters = testNetworkParameters(minimumPlatformVersion = 4)

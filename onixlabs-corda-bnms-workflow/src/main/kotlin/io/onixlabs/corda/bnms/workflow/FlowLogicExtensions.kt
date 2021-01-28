@@ -16,10 +16,10 @@
 
 package io.onixlabs.corda.bnms.workflow
 
-import io.onixlabs.corda.bnms.contract.membership.Membership
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
-import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
+import io.onixlabs.corda.bnms.v1.contract.membership.Membership
+import io.onixlabs.corda.bnms.v1.contract.membership.MembershipAttestation
+import io.onixlabs.corda.bnms.v1.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.v1.contract.relationship.RelationshipAttestation
 import io.onixlabs.corda.bnms.workflow.membership.FindMembershipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.membership.FindMembershipFlow
 import net.corda.core.contracts.StateAndRef

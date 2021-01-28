@@ -16,8 +16,8 @@
 
 package io.onixlabs.corda.bnms.workflow.revocation
 
-import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
-import io.onixlabs.corda.bnms.contract.revocation.RevocationLockSchema.RevocationLockEntity
+import io.onixlabs.corda.bnms.v1.contract.revocation.RevocationLock
+import io.onixlabs.corda.bnms.v1.contract.revocation.RevocationLockSchema.RevocationLockEntity
 import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
 import io.onixlabs.corda.core.workflow.FindStateFlow
 import io.onixlabs.corda.core.workflow.andWithExpressions

@@ -16,16 +16,16 @@
 
 package io.onixlabs.corda.bnms.workflow.membership
 
-import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.membership.Membership
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema.MembershipAttestationEntity
+import io.onixlabs.corda.bnms.v1.contract.Network
+import io.onixlabs.corda.bnms.v1.contract.membership.Membership
+import io.onixlabs.corda.bnms.v1.contract.membership.MembershipAttestation
+import io.onixlabs.corda.bnms.v1.contract.membership.MembershipAttestationSchema.MembershipAttestationEntity
 import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
 import io.onixlabs.corda.core.workflow.DEFAULT_SORTING
 import io.onixlabs.corda.core.workflow.FindStatesFlow
 import io.onixlabs.corda.core.workflow.andWithExpressions
-import io.onixlabs.corda.identityframework.contract.AttestationPointer
-import io.onixlabs.corda.identityframework.contract.AttestationStatus
+import io.onixlabs.corda.identityframework.v1.contract.AttestationPointer
+import io.onixlabs.corda.identityframework.v1.contract.AttestationStatus
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier

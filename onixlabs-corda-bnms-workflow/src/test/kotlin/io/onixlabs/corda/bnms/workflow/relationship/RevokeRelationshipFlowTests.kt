@@ -16,8 +16,8 @@
 
 package io.onixlabs.corda.bnms.workflow.relationship
 
-import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
+import io.onixlabs.corda.bnms.v1.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.v1.contract.revocation.RevocationLock
 import io.onixlabs.corda.bnms.workflow.FlowTest
 import io.onixlabs.corda.bnms.workflow.Pipeline
 import io.onixlabs.corda.bnms.workflow.revocation.UnlockRevocationLockFlow

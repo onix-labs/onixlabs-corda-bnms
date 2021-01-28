@@ -16,9 +16,9 @@
 
 package io.onixlabs.corda.bnms.workflow.relationship
 
-import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipSchema.RelationshipEntity
+import io.onixlabs.corda.bnms.v1.contract.Network
+import io.onixlabs.corda.bnms.v1.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.v1.contract.relationship.RelationshipSchema.RelationshipEntity
 import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
 import io.onixlabs.corda.core.workflow.FindStateFlow
 import io.onixlabs.corda.core.workflow.andWithExpressions

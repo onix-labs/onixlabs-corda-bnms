@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run Contract Tests" type="JUnit" factoryName="JUnit" singleton="false">
-    <module name="onixlabs-corda-bnms.onixlabs-corda-bnms-contract.test" />
+    <module name="onixlabs-corda-bnms.onixlabs-corda-bnms-v1-contract.test" />
     <useClassPathOnly />
-    <option name="PACKAGE_NAME" value="io.onixlabs.corda.bnms.contract" />
+    <option name="PACKAGE_NAME" value="io.onixlabs.corda.bnms.v1.contract" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="package" />

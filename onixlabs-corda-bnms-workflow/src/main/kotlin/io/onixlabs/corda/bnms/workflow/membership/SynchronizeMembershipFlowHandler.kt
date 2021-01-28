@@ -1,9 +1,9 @@
 package io.onixlabs.corda.bnms.workflow.membership
 
 import co.paralleluniverse.fibers.Suspendable
-import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.membership.Membership
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
+import io.onixlabs.corda.bnms.v1.contract.Network
+import io.onixlabs.corda.bnms.v1.contract.membership.Membership
+import io.onixlabs.corda.bnms.v1.contract.membership.MembershipAttestation
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.identityframework.workflow.INITIALIZING
 import net.corda.core.contracts.StateAndRef

@@ -16,14 +16,14 @@
 
 package io.onixlabs.corda.bnms.integration
 
-import io.onixlabs.corda.bnms.contract.membership.Membership
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
-import io.onixlabs.corda.bnms.contract.membership.attest
+import io.onixlabs.corda.bnms.v1.contract.membership.Membership
+import io.onixlabs.corda.bnms.v1.contract.membership.MembershipAttestation
+import io.onixlabs.corda.bnms.v1.contract.membership.attest
 import io.onixlabs.corda.bnms.workflow.membership.AmendMembershipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.membership.IssueMembershipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.membership.RevokeMembershipAttestationFlow
 import io.onixlabs.corda.core.integration.RPCService
-import io.onixlabs.corda.identityframework.contract.AttestationStatus
+import io.onixlabs.corda.identityframework.v1.contract.AttestationStatus
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
