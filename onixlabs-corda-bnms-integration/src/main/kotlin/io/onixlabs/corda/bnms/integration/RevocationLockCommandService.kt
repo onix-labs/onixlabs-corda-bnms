@@ -16,7 +16,7 @@
 
 package io.onixlabs.corda.bnms.integration
 
-import io.onixlabs.corda.bnms.v1.contract.revocation.RevocationLock
+import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import io.onixlabs.corda.bnms.workflow.revocation.LockRevocationLockFlow
 import io.onixlabs.corda.bnms.workflow.revocation.UnlockRevocationLockFlow
 import io.onixlabs.corda.core.integration.RPCService

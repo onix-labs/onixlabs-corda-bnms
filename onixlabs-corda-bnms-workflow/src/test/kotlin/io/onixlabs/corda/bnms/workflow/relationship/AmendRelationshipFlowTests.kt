@@ -16,8 +16,8 @@
 
 package io.onixlabs.corda.bnms.workflow.relationship
 
-import io.onixlabs.corda.bnms.v1.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.v1.contract.relationship.getNextOutput
+import io.onixlabs.corda.bnms.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.contract.relationship.getNextOutput
 import io.onixlabs.corda.bnms.workflow.FlowTest
 import io.onixlabs.corda.bnms.workflow.Pipeline
 import net.corda.core.transactions.SignedTransaction

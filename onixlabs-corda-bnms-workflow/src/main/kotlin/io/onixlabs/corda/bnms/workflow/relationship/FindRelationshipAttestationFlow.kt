@@ -16,15 +16,15 @@
 
 package io.onixlabs.corda.bnms.workflow.relationship
 
-import io.onixlabs.corda.bnms.v1.contract.Network
-import io.onixlabs.corda.bnms.v1.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.v1.contract.relationship.RelationshipAttestation
-import io.onixlabs.corda.bnms.v1.contract.relationship.RelationshipAttestationSchema.RelationshipAttestationEntity
+import io.onixlabs.corda.bnms.contract.Network
+import io.onixlabs.corda.bnms.contract.relationship.Relationship
+import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
+import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationSchema.RelationshipAttestationEntity
 import io.onixlabs.corda.core.workflow.DEFAULT_PAGE_SPECIFICATION
 import io.onixlabs.corda.core.workflow.FindStateFlow
 import io.onixlabs.corda.core.workflow.andWithExpressions
-import io.onixlabs.corda.identityframework.v1.contract.AttestationPointer
-import io.onixlabs.corda.identityframework.v1.contract.AttestationStatus
+import io.onixlabs.corda.identityframework.contract.AttestationPointer
+import io.onixlabs.corda.identityframework.contract.AttestationStatus
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier

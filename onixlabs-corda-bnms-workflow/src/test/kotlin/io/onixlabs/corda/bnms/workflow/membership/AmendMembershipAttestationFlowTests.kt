@@ -16,13 +16,13 @@
 
 package io.onixlabs.corda.bnms.workflow.membership
 
-import io.onixlabs.corda.bnms.v1.contract.membership.Membership
-import io.onixlabs.corda.bnms.v1.contract.membership.MembershipAttestation
-import io.onixlabs.corda.bnms.v1.contract.membership.accept
-import io.onixlabs.corda.bnms.v1.contract.membership.reject
+import io.onixlabs.corda.bnms.contract.membership.Membership
+import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
+import io.onixlabs.corda.bnms.contract.membership.accept
+import io.onixlabs.corda.bnms.contract.membership.reject
 import io.onixlabs.corda.bnms.workflow.FlowTest
 import io.onixlabs.corda.bnms.workflow.Pipeline
-import io.onixlabs.corda.identityframework.v1.contract.AttestationStatus
+import io.onixlabs.corda.identityframework.contract.AttestationStatus
 import net.corda.core.transactions.SignedTransaction
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail

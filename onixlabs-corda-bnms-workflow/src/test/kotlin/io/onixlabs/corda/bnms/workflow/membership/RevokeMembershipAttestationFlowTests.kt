@@ -16,9 +16,9 @@
 
 package io.onixlabs.corda.bnms.workflow.membership
 
-import io.onixlabs.corda.bnms.v1.contract.membership.Membership
-import io.onixlabs.corda.bnms.v1.contract.membership.MembershipAttestation
-import io.onixlabs.corda.bnms.v1.contract.membership.accept
+import io.onixlabs.corda.bnms.contract.membership.Membership
+import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
+import io.onixlabs.corda.bnms.contract.membership.accept
 import io.onixlabs.corda.bnms.workflow.FlowTest
 import io.onixlabs.corda.bnms.workflow.Pipeline
 import net.corda.core.transactions.SignedTransaction

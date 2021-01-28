@@ -16,8 +16,8 @@
 
 package io.onixlabs.corda.bnms.integration
 
-import io.onixlabs.corda.bnms.v1.contract.Network
-import io.onixlabs.corda.bnms.v1.contract.membership.Membership
+import io.onixlabs.corda.bnms.contract.Network
+import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.workflow.membership.FindMembershipFlow
 import io.onixlabs.corda.bnms.workflow.membership.FindMembershipsFlow
 import io.onixlabs.corda.core.integration.RPCService

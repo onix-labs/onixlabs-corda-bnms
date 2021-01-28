@@ -17,7 +17,7 @@
 package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
-import io.onixlabs.corda.bnms.v1.contract.relationship.RelationshipAttestation
+import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
 import io.onixlabs.corda.bnms.workflow.findRelationshipForAttestation
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.core.workflow.getPreferredNotary

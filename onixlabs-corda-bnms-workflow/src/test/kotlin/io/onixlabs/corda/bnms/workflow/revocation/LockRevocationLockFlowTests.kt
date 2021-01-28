@@ -16,7 +16,7 @@
 
 package io.onixlabs.corda.bnms.workflow.revocation
 
-import io.onixlabs.corda.bnms.v1.contract.revocation.RevocationLock
+import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import io.onixlabs.corda.bnms.workflow.FlowTest
 import io.onixlabs.corda.bnms.workflow.Pipeline
 import net.corda.core.transactions.SignedTransaction
