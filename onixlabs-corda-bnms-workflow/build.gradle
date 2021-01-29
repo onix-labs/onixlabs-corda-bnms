@@ -18,10 +18,10 @@ dependencies {
 
     // Corda Development Dependencies
     cordaCompile "$corda_group:corda-core:$corda_release_version"
-    cordaCompile "$onixlabs_group:onixlabs-corda-core-workflow:$onixlabs_corda_core_release_version"
-    cordaCompile "$onixlabs_group:onixlabs-corda-identity-framework-workflow:$onixlabs_corda_idfx_release_version"
 
     // CorDapp Dependencies
+    cordapp "$onixlabs_group:onixlabs-corda-core-workflow:$onixlabs_corda_core_release_version"
+    cordapp "$onixlabs_group:onixlabs-corda-identity-framework-workflow:$onixlabs_corda_idfx_release_version"
     cordapp project(":onixlabs-corda-bnms-contract")
 
     // Test Dependencies
