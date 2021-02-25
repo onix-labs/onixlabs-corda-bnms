@@ -18,7 +18,11 @@ package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
+import io.onixlabs.corda.bnms.workflow.finalize
 import io.onixlabs.corda.bnms.workflow.findRelationshipForAttestation
+import io.onixlabs.corda.bnms.workflow.transaction
+import io.onixlabs.corda.bnms.workflow.verifyAndSign
+import io.onixlabs.corda.core.workflow.checkSufficientSessions
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
@@ -26,7 +30,6 @@ import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
-import net.corda.core.utilities.ProgressTracker.Step
 
 class AmendRelationshipAttestationFlow(
     private val oldAttestation: StateAndRef<RelationshipAttestation>,
@@ -45,7 +48,7 @@ class AmendRelationshipAttestationFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkHasSufficientFlowSessions(sessions, newAttestation, oldAttestation.state.data)
+        checkSufficientSessions(sessions, newAttestation, oldAttestation.state.data)
 
         val transaction = transaction(oldAttestation.state.notary) {
             addAmendedAttestation(oldAttestation, newAttestation)

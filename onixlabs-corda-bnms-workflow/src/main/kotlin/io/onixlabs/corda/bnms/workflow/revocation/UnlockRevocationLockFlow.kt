@@ -19,7 +19,13 @@ package io.onixlabs.corda.bnms.workflow.revocation
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockContract
-import io.onixlabs.corda.identityframework.workflow.*
+import io.onixlabs.corda.bnms.workflow.finalize
+import io.onixlabs.corda.bnms.workflow.transaction
+import io.onixlabs.corda.bnms.workflow.verifyAndSign
+import io.onixlabs.corda.identityframework.workflow.FINALIZING
+import io.onixlabs.corda.identityframework.workflow.GENERATING
+import io.onixlabs.corda.identityframework.workflow.SIGNING
+import io.onixlabs.corda.identityframework.workflow.VERIFYING
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByRPC

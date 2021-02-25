@@ -21,10 +21,12 @@ import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipContract
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockContract
 import io.onixlabs.corda.bnms.workflow.checkMembershipsAndAttestations
+import io.onixlabs.corda.core.workflow.checkSufficientSessions
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.core.workflow.getPreferredNotary
 import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
+import io.onixlabs.corda.bnms.workflow.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
@@ -49,7 +51,7 @@ class IssueRelationshipFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkHasSufficientFlowSessions(sessions, relationship)
+        checkSufficientSessions(sessions, relationship)
         sessions.forEach { it.send(checkMembership) }
 
         if (checkMembership) {
