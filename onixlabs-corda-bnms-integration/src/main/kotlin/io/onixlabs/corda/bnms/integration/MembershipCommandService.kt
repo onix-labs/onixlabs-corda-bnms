@@ -28,10 +28,9 @@ import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
-import net.corda.core.messaging.CordaRPCOps
-import net.corda.core.messaging.FlowProgressHandle
-import net.corda.core.messaging.startTrackedFlow
+import net.corda.core.messaging.*
 import net.corda.core.transactions.SignedTransaction
+import java.util.*
 
 class MembershipCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
 
@@ -49,11 +48,40 @@ class MembershipCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
     }
 
     fun issueMembership(
+        network: Network,
+        holder: AbstractParty = ourIdentity,
+        identity: Set<AbstractClaim<*>> = emptySet(),
+        settings: Set<Setting<*>> = emptySet(),
+        linearId: UniqueIdentifier = UniqueIdentifier(),
+        notary: Party? = null,
+        observers: Set<Party> = emptySet(),
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        val membership = Membership(network, holder, identity, settings, linearId)
+        return issueMembership(membership, notary, observers, clientId)
+    }
+
+    fun issueMembership(
         membership: Membership,
         notary: Party? = null,
         observers: Set<Party> = emptySet()
     ): FlowProgressHandle<SignedTransaction> {
         return rpc.startTrackedFlow(
+            IssueMembershipFlow::Initiator,
+            membership,
+            notary,
+            observers
+        )
+    }
+
+    fun issueMembership(
+        membership: Membership,
+        notary: Party? = null,
+        observers: Set<Party> = emptySet(),
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        return rpc.startFlowWithClientId(
+            clientId,
             IssueMembershipFlow::Initiator,
             membership,
             notary,
@@ -74,11 +102,39 @@ class MembershipCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
         )
     }
 
+    fun amendMembership(
+        oldMembership: StateAndRef<Membership>,
+        newMembership: Membership,
+        observers: Set<Party> = emptySet(),
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        return rpc.startFlowWithClientId(
+            clientId,
+            AmendMembershipFlow::Initiator,
+            oldMembership,
+            newMembership,
+            observers
+        )
+    }
+
     fun revokeMembership(
         membership: StateAndRef<Membership>,
         observers: Set<Party> = emptySet()
     ): FlowProgressHandle<SignedTransaction> {
         return rpc.startTrackedFlow(
+            RevokeMembershipFlow::Initiator,
+            membership,
+            observers
+        )
+    }
+
+    fun revokeMembership(
+        membership: StateAndRef<Membership>,
+        observers: Set<Party> = emptySet(),
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        return rpc.startFlowWithClientId(
+            clientId,
             RevokeMembershipFlow::Initiator,
             membership,
             observers

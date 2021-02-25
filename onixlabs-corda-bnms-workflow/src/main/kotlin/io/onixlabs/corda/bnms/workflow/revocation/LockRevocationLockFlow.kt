@@ -21,6 +21,7 @@ import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockContract
 import io.onixlabs.corda.core.workflow.getPreferredNotary
 import io.onixlabs.corda.identityframework.workflow.*
+import io.onixlabs.corda.bnms.workflow.*
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.flows.StartableByService

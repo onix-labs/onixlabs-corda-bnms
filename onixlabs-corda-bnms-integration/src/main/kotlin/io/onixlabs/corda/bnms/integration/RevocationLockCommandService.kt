@@ -24,10 +24,9 @@ import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
-import net.corda.core.messaging.CordaRPCOps
-import net.corda.core.messaging.FlowProgressHandle
-import net.corda.core.messaging.startTrackedFlow
+import net.corda.core.messaging.*
 import net.corda.core.transactions.SignedTransaction
+import java.util.*
 
 class RevocationLockCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
 
@@ -40,9 +39,26 @@ class RevocationLockCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
         return rpc.startTrackedFlow(::LockRevocationLockFlow, lock, notary)
     }
 
+    fun <T : LinearState> lock(
+        state: T,
+        owner: AbstractParty = ourIdentity,
+        notary: Party? = null,
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        val lock = RevocationLock(owner, state)
+        return rpc.startFlowWithClientId(clientId, ::LockRevocationLockFlow, lock, notary)
+    }
+
     fun <T : LinearState> unlock(
         lock: StateAndRef<RevocationLock<T>>
     ): FlowProgressHandle<SignedTransaction> {
         return rpc.startTrackedFlow(::UnlockRevocationLockFlow, lock)
+    }
+
+    fun <T : LinearState> unlock(
+        lock: StateAndRef<RevocationLock<T>>,
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        return rpc.startFlowWithClientId(clientId, ::UnlockRevocationLockFlow, lock)
     }
 }
