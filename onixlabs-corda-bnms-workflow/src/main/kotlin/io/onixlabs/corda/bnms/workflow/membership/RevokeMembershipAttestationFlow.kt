@@ -18,9 +18,11 @@ package io.onixlabs.corda.bnms.workflow.membership
 
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
+import io.onixlabs.corda.core.workflow.checkSufficientSessions
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
+import io.onixlabs.corda.bnms.workflow.*
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -44,7 +46,7 @@ class RevokeMembershipAttestationFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkHasSufficientFlowSessions(sessions, attestation.state.data)
+        checkSufficientSessions(sessions, attestation.state.data)
 
         val transaction = transaction(attestation.state.notary) {
             addRevokedAttestation(attestation)

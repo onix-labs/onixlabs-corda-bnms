@@ -28,10 +28,9 @@ import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
-import net.corda.core.messaging.CordaRPCOps
-import net.corda.core.messaging.FlowProgressHandle
-import net.corda.core.messaging.startTrackedFlow
+import net.corda.core.messaging.*
 import net.corda.core.transactions.SignedTransaction
+import java.util.*
 
 class RelationshipAttestationCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
 
@@ -48,10 +47,36 @@ class RelationshipAttestationCommandService(rpc: CordaRPCOps) : RPCService(rpc) 
     }
 
     fun issueRelationshipAttestation(
+        relationship: StateAndRef<Relationship>,
+        attestor: AbstractParty = ourIdentity,
+        status: AttestationStatus = AttestationStatus.REJECTED,
+        metadata: Map<String, String> = emptyMap(),
+        linearId: UniqueIdentifier = UniqueIdentifier(),
+        notary: Party? = null,
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        val attestation = relationship.attest(attestor, status, metadata, linearId)
+        return issueRelationshipAttestation(attestation, notary, clientId)
+    }
+
+    fun issueRelationshipAttestation(
         attestation: RelationshipAttestation,
         notary: Party? = null
     ): FlowProgressHandle<SignedTransaction> {
         return rpc.startTrackedFlow(
+            IssueRelationshipAttestationFlow::Initiator,
+            attestation,
+            notary
+        )
+    }
+
+    fun issueRelationshipAttestation(
+        attestation: RelationshipAttestation,
+        notary: Party? = null,
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        return rpc.startFlowWithClientId(
+            clientId,
             IssueRelationshipAttestationFlow::Initiator,
             attestation,
             notary
@@ -69,10 +94,34 @@ class RelationshipAttestationCommandService(rpc: CordaRPCOps) : RPCService(rpc) 
         )
     }
 
+    fun amendRelationshipAttestation(
+        oldAttestation: StateAndRef<RelationshipAttestation>,
+        newAttestation: RelationshipAttestation,
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        return rpc.startFlowWithClientId(
+            clientId,
+            AmendRelationshipAttestationFlow::Initiator,
+            oldAttestation,
+            newAttestation
+        )
+    }
+
     fun revokeRelationshipAttestation(
         attestation: StateAndRef<RelationshipAttestation>
     ): FlowProgressHandle<SignedTransaction> {
         return rpc.startTrackedFlow(
+            RevokeRelationshipAttestationFlow::Initiator,
+            attestation
+        )
+    }
+
+    fun revokeRelationshipAttestation(
+        attestation: StateAndRef<RelationshipAttestation>,
+        clientId: String = UUID.randomUUID().toString()
+    ): FlowHandleWithClientId<SignedTransaction> {
+        return rpc.startFlowWithClientId(
+            clientId,
             RevokeRelationshipAttestationFlow::Initiator,
             attestation
         )

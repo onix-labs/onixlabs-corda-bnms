@@ -22,6 +22,8 @@ import io.onixlabs.corda.bnms.contract.membership.MembershipContract
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
+import io.onixlabs.corda.bnms.workflow.*
+import io.onixlabs.corda.core.workflow.checkSufficientSessions
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -45,7 +47,7 @@ class RevokeMembershipFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkHasSufficientFlowSessions(sessions, membership.state.data)
+        checkSufficientSessions(sessions, membership.state.data)
 
         val transaction = transaction(membership.state.notary) {
             addInputState(membership)

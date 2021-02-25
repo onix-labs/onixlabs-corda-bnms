@@ -19,6 +19,11 @@ package io.onixlabs.corda.bnms.workflow.relationship
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipContract
+import io.onixlabs.corda.bnms.workflow.countersign
+import io.onixlabs.corda.bnms.workflow.finalize
+import io.onixlabs.corda.bnms.workflow.transaction
+import io.onixlabs.corda.bnms.workflow.verifyAndSign
+import io.onixlabs.corda.core.workflow.checkSufficientSessions
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
@@ -44,7 +49,7 @@ class RevokeRelationshipFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkHasSufficientFlowSessions(sessions, relationship.state.data)
+        checkSufficientSessions(sessions, relationship.state.data)
 
         val transaction = transaction(relationship.state.notary) {
             addInputState(relationship)

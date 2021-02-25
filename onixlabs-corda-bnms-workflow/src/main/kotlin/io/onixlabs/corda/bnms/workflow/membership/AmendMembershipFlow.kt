@@ -20,6 +20,10 @@ import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipContract
 import io.onixlabs.corda.bnms.workflow.checkMembershipExists
+import io.onixlabs.corda.bnms.workflow.finalize
+import io.onixlabs.corda.bnms.workflow.transaction
+import io.onixlabs.corda.bnms.workflow.verifyAndSign
+import io.onixlabs.corda.core.workflow.checkSufficientSessions
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.core.workflow.initiateFlows
 import io.onixlabs.corda.identityframework.workflow.*
@@ -48,7 +52,7 @@ class AmendMembershipFlow(
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
         checkMembershipExists(newMembership)
-        checkHasSufficientFlowSessions(sessions, newMembership)
+        checkSufficientSessions(sessions, newMembership)
 
         val transaction = transaction(oldMembership.state.notary) {
             addInputState(oldMembership)

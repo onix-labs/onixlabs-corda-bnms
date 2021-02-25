@@ -1,11 +1,8 @@
 package io.onixlabs.corda.bnms.contract.membership.general
 
-import io.onixlabs.corda.bnms.contract.DECENTRALIZED_NETWORK
-import io.onixlabs.corda.bnms.contract.IDENTITY_A
-import io.onixlabs.corda.bnms.contract.Setting
+import io.onixlabs.corda.bnms.contract.*
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -38,44 +35,98 @@ class MembershipSettingTests {
     }
 
     @Test
-    fun `Membership getSettings should return a single setting by property name`() {
+    fun `Membership getSettingsByType should return all settings matching a particular type`() {
 
         // Arrange
-        val settings = setOf(Setting("One", 1), Setting("Two", 2), Setting("Three", 3))
+        val settings = setOf(
+            Network("Example Network"),
+            Setting("Key1", 123),
+            Setting("Key2", 456),
+            Setting("Key1", true),
+            Setting("Key2", "Example Setting"),
+            Role("User"),
+            Role("Admin"),
+            Permission("Example Permission 1"),
+            Permission("Example Permission 2")
+        )
         val membership = Membership(DECENTRALIZED_NETWORK, IDENTITY_A.party).addSettings(settings)
 
         // Act
-        val result = membership.getSettings<Int>("One")
-
-        // Assert
-        assertEquals(1, result.size)
-    }
-
-    @Test
-    fun `Membership getSettings should return multiple settings by property name`() {
-
-        // Arrange
-        val settings = setOf(Setting("One", 1), Setting("One", 2), Setting("Two", 3))
-        val membership = Membership(DECENTRALIZED_NETWORK, IDENTITY_A.party).addSettings(settings)
-
-        // Act
-        val result = membership.getSettings<Int>("One")
+        val result = membership.getSettingsByType<Role>()
 
         // Assert
         assertEquals(2, result.size)
     }
 
     @Test
-    fun `Membership getSettings should fail because the expected type cannot be cast to the specified type`() {
+    fun `Membership getSettingsByType should return all settings matching a particular type and key`() {
 
         // Arrange
-        val settings = setOf(Setting("One", 1), Setting("Two", 2))
+        val settings = setOf(
+            Network("Example Network"),
+            Setting("Key1", 123),
+            Setting("Key2", 456),
+            Setting("Key1", true),
+            Setting("Key2", "Example Setting"),
+            Role("User"),
+            Role("Admin"),
+            Permission("Example Permission 1"),
+            Permission("Example Permission 2")
+        )
         val membership = Membership(DECENTRALIZED_NETWORK, IDENTITY_A.party).addSettings(settings)
 
         // Act
-        val result = assertThrows<ClassCastException> { membership.getSettings<Long>("One") }
+        val result = membership.getSettingsByType<Setting<*>>("Key1")
 
         // Assert
-        assertEquals("Cannot cast java.lang.Integer to java.lang.Long", result.message)
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun `Membership getSettingsByType should return all settings matching a particular value type`() {
+
+        // Arrange
+        val settings = setOf(
+            Network("Example Network"),
+            Setting("Key1", 123),
+            Setting("Key2", 456),
+            Setting("Key1", true),
+            Setting("Key2", "Example Setting"),
+            Role("User"),
+            Role("Admin"),
+            Permission("Example Permission 1"),
+            Permission("Example Permission 2")
+        )
+        val membership = Membership(DECENTRALIZED_NETWORK, IDENTITY_A.party).addSettings(settings)
+
+        // Act
+        val result = membership.getSettingsByValueType<Int>()
+
+        // Assert
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun `Membership getSettingsByType should return all settings matching a particular value type and key`() {
+
+        // Arrange
+        val settings = setOf(
+            Network("Example Network"),
+            Setting("Key1", 123),
+            Setting("Key2", 456),
+            Setting("Key1", true),
+            Setting("Key2", "Example Setting"),
+            Role("User"),
+            Role("Admin"),
+            Permission("Example Permission 1"),
+            Permission("Example Permission 2")
+        )
+        val membership = Membership(DECENTRALIZED_NETWORK, IDENTITY_A.party).addSettings(settings)
+
+        // Act
+        val result = membership.getSettingsByType<Setting<*>>("Key1")
+
+        // Assert
+        assertEquals(2, result.size)
     }
 }

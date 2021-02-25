@@ -28,6 +28,8 @@ import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
+import io.onixlabs.corda.bnms.workflow.*
+import io.onixlabs.corda.core.workflow.checkSufficientSessions
 
 class AmendMembershipAttestationFlow(
     private val oldAttestation: StateAndRef<MembershipAttestation>,
@@ -46,7 +48,7 @@ class AmendMembershipAttestationFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(INITIALIZING)
-        checkHasSufficientFlowSessions(sessions, newAttestation)
+        checkSufficientSessions(sessions, newAttestation)
 
 
         val transaction = transaction(oldAttestation.state.notary) {

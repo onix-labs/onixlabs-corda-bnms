@@ -43,10 +43,10 @@ data class Membership(
         get() = holder == network.operator
 
     val roles: Set<Role>
-        get() = settings.filterIsInstance<Role>().toSet()
+        get() = getSettingsByType()
 
     val permissions: Set<Permission>
-        get() = settings.filterIsInstance<Permission>().toSet()
+        get() = getSettingsByType()
 
     override val hash: SecureHash
         get() = SecureHash.sha256("$network$holder$previousStateRef")
@@ -62,22 +62,55 @@ data class Membership(
         return settings.any { it.property == property.toUpperCase() }
     }
 
-    inline fun <reified T> getSettings(property: String): Set<Setting<T>> where T : Any {
+    fun <T : Setting<*>> getSettingsByType(settingClass: Class<T>, property: String? = null): Set<T> {
         return settings
-            .filter { it.property == property.toUpperCase() }
-            .map { Setting(it.property, T::class.java.cast(it.value)) }
+            .filter { it.javaClass == settingClass }
+            .filter { property?.toUpperCase()?.equals(it.property) ?: true }
+            .map { settingClass.cast(it) }
             .toSet()
+    }
+
+    inline fun <reified T : Setting<*>> getSettingsByType(property: String? = null): Set<T> {
+        return getSettingsByType(T::class.java, property)
+    }
+
+    fun <T : Setting<*>> getSettingByType(settingClass: Class<T>, property: String? = null): T {
+        return getSettingsByType(settingClass, property).single()
+    }
+
+    inline fun <reified T : Setting<*>> getSettingByType(property: String? = null): T {
+        return getSettingByType(T::class.java, property)
+    }
+
+    fun <T : Any> getSettingsByValueType(valueClass: Class<T>, property: String? = null): Set<Setting<T>> {
+        return settings
+            .filter { it.value.javaClass == valueClass }
+            .filter { property?.toUpperCase()?.equals(it.property) ?: true }
+            .map { Setting(it.property, valueClass.cast(it.value)) }
+            .toSet()
+    }
+
+    inline fun <reified T : Any> getSettingsByValueType(property: String? = null): Set<Setting<T>> {
+        return getSettingsByValueType(T::class.java, property)
+    }
+
+    fun <T : Any> getSettingByValueType(valueClass: Class<T>, property: String? = null): Setting<T> {
+        return getSettingsByValueType(valueClass, property).single()
+    }
+
+    inline fun <reified T : Any> getSettingByValueType(property: String? = null): Setting<T> {
+        return getSettingByValueType(T::class.java, property)
     }
 
     fun <T> addSetting(property: String, value: T): Membership where T : Any {
         return addSettings(Setting(property, value))
     }
 
-    fun <T> addSettings(settings: Set<Setting<T>>): Membership where T : Any {
+    fun <T> addSettings(settings: Set<Setting<out T>>): Membership where T : Any {
         return copy(settings = this.settings + settings)
     }
 
-    fun <T> addSettings(vararg settings: Setting<T>): Membership where T : Any {
+    fun <T> addSettings(vararg settings: Setting<out T>): Membership where T : Any {
         return addSettings(settings.toSet())
     }
 
