@@ -74,8 +74,16 @@ data class Membership(
         return getSettingsByType(T::class.java, property)
     }
 
+    fun <T : Setting<*>> getSettingByTypeOrNull(settingClass: Class<T>, property: String? = null): T? {
+        return getSettingsByType(settingClass, property).singleOrNull()
+    }
+
     fun <T : Setting<*>> getSettingByType(settingClass: Class<T>, property: String? = null): T {
         return getSettingsByType(settingClass, property).single()
+    }
+
+    inline fun <reified T : Setting<*>> getSettingByTypeOrNull(property: String? = null): T? {
+        return getSettingByTypeOrNull(T::class.java, property)
     }
 
     inline fun <reified T : Setting<*>> getSettingByType(property: String? = null): T {
@@ -94,8 +102,16 @@ data class Membership(
         return getSettingsByValueType(T::class.java, property)
     }
 
+    fun <T : Any> getSettingByValueTypeOrNull(valueClass: Class<T>, property: String? = null): Setting<T>? {
+        return getSettingsByValueType(valueClass, property).singleOrNull()
+    }
+
     fun <T : Any> getSettingByValueType(valueClass: Class<T>, property: String? = null): Setting<T> {
         return getSettingsByValueType(valueClass, property).single()
+    }
+
+    inline fun <reified T : Any> getSettingByValueTypeOrNull(property: String? = null): Setting<T>? {
+        return getSettingByValueTypeOrNull(T::class.java, property)
     }
 
     inline fun <reified T : Any> getSettingByValueType(property: String? = null): Setting<T> {
