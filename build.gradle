@@ -3,7 +3,7 @@ buildscript {
         kotlin_group = 'org.jetbrains.kotlin'
         kotlin_version = '1.2.71'
 
-        corda_artifactory_url = 'https://ci-artifactory.corda.r3cev.com/artifactory'
+        corda_artifactory_url = 'https://software.r3.com/artifactory'
         corda_group = 'net.corda'
         corda_release_version = '4.6'
 
@@ -18,7 +18,6 @@ buildscript {
         onixlabs_corda_idfx_release_version = '2.0.0-rc2'
 
         cordapp_platform_version = 8
-        cordapp_signing_enabled = true
         cordapp_contract_name = 'ONIXLabs Corda BNMS Contract'
         cordapp_workflow_name = 'ONIXLabs Corda BNMS Workflow'
         cordapp_vendor_name = 'ONIXLabs'
@@ -28,8 +27,8 @@ buildscript {
         cordapp_signing_enabled = true
         cordapp_signing_alias = 'cordapp-signer'
         cordapp_signing_storetype = 'PKCS12'
-        cordapp_signing_keystore = getProperty('jar.sign.keystore')
-        cordapp_signing_password = getProperty('jar.sign.password')
+        cordapp_signing_keystore = findProperty('onixlabs.production.jarsign.keystore') ?: getProperty('onixlabs.development.jarsign.keystore')
+        cordapp_signing_password = findProperty('onixlabs.production.jarsign.password') ?: getProperty('onixlabs.development.jarsign.password')
     }
 
     repositories {
@@ -47,7 +46,7 @@ buildscript {
 }
 
 group 'io.onixlabs'
-version '1.0.0-rc9'
+version '1.0.0'
 
 subprojects {
     repositories {

@@ -6,17 +6,17 @@ The ONIXLabs Corda BNMS (Business Network Management System) is a framework desi
 
 ## Prerequisites
 
-The ONIXLabs Corda BNMS utilizes the ONIXLabs Corda Claims API as an underlying mechanism for creating, distributing and attesting to identity credentials used to define membership. In order to fully understand how identity is managed within the ONIXLabs Corda BNMS, please see the readme for the ONIXLabs Corda Claims API.
+The ONIXLabs Corda BNMS utilizes the [ONIXLabs Corda Identity Framework](https://github.com/onix-labs/onixlabs-corda-identity-framework) as an underlying mechanism for creating, distributing and attesting to identity credentials used to define membership, as well as extending the claim and attestation models to create roles, permissions, settings, and membership and relationship attestations.
 
 ## Design Goals
 
 ### Business Network Interoperability
 
-Corda nodes may require participation in multiple business networks, each with their own standards governing identity and configuration. Without standard APIs for construction of business networks, there is a high likeliness that different business network implementations will be incompatible.
+Corda nodes may require participation in multiple business networks, each with their own standards governing identity and configuration. Without standard APIs for constructiing business networks, there is a high likeliness that different business network implementations will be incompatible.
 
 The ONIXLabs Corda BNMS solves this problem by providing protocol level, configurable standards for membership and multi-lateral relationship management implementations, allowing business networks to scale independently whilst remaining interoperable with one another.
 
-The ONIXLabs Corda BNMS is built on top of the ONIXLabs Corda Claims API which not only improves business network interoperability, but also Corda application interoperability. Claims can be shared between applications and distributed across the network, helping to reduce data duplication and inconsistency.
+The ONIXLabs Corda BNMS is built on top of the ONIXLabs Corda Identity Framework which not only improves business network interoperability, but also Corda application interoperability. Claims can be shared between applications and distributed across the network, helping to reduce data duplication and inconsistency.
 
 The ONIXLabs Corda BNMS has been designed from the ground up to support centralised business networks that are governed by a business network operator and decentralised business networks that are governed  autonomously by the network members themselves.
 
@@ -34,7 +34,7 @@ This constitutes a partial trust model, with respect to the network as a whole s
 
 ### Data Privacy
 
-Data privacy surrounding member identity is handled by the underlying ONIXLabs Corda Claims API. Membership in either centralised or decetralised networks will require either the business network operator or other members of the network to obtain and/or verify identity information. Claims can be issued, distributed and attested independly to membership states, thus allowing verified membership states to be distributed whilst keeping identity information private.
+Data privacy surrounding member identity is handled by the underlying ONIXLabs Corda Identity Framework. Membership in either centralised or decetralised networks will require either the business network operator or other members of the network to obtain and/or verify identity information. Claims can be issued, distributed and attested independly to membership states, thus allowing verified membership states to be distributed whilst keeping identity information private.
 
 ### Dynamic Smart Contract Execution
 
@@ -44,7 +44,7 @@ The ONIXLabs Corda BNMS facilitates the ability to perform dynamic smart contrac
 
 ## Membership Management
 
-Membership is defined as a reference to a business network, complete with configurable identity (using the ONIXLabs Corda Claims API) as well as roles and grants which provide levels of access and authorisation for utilitsation within the business network. A Corda node may define many relationship states; one per business network. These can be managed by the member or optionally by a network operator.
+Membership is defined as a reference to a business network, complete with configurable identity as well as roles, permissions and settings which provide levels of access and authorisation for utilitsation within the business network. A Corda node may define many relationship states; one per business network. These can be managed by the member or optionally by a network operator.
 
 ### Membership Issuance
 
@@ -57,10 +57,6 @@ Membership amendment can be performed by the member themselves, or optionally by
 ### Membership Revocation
 
 Membership revocation can be performed by the member themselves, or optionally by the network operator. This represents the exit of a member from a business network.  All participants are required to sign a membership revocation transaction.
-
-### Membership Discovery
-
-INSERT TEXT HERE
 
 ## Relationship Management
 
@@ -109,28 +105,3 @@ Membership attestation amendment can only be performed by the attestor. This rep
 ### Membership Attestation Revocation
 
 Membership attestation revocation can only be performed by the attestor. This represents complete revocation of an attestation to a membership state, which can be used when a membership state is revoked. Only the attestor is required to sign a membership attestation issuance transaction.
-
-
-# Local setup
-
-## How to publish to local maven repo
-- With tests
-  - `./gradlew releaseLocal`
-- Without tests
-  - `./gradlew clean build -x test publishToMavenLocal`
-
-## How to delete local maven repo
-- `rm -rf ~/.m2/repository/io/onixlabs`
-
-## How to setup to publish to maven repo
-- [Create a GitHub Personal Access Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
-- Ensure it has the [correct permissions](https://docs.github.com/en/packages/publishing-and-managing-packages/about-github-packages#about-scopes-and-permissions-for-github-container-registry)
-- Add the following to your `~/.gradle/gradle.properties` file, replacing `GITHUB_USERNAME` and `GITHUB_ACCESS_KEY`
-> Note this file is in your home directory - not the root of the repo
-```
-gpr.user=GITHUB_USERNAME
-gpr.key=GITHUB_ACCESS_KEY
-```
-## Publish a new version
-- Update the version name in the root `build.gradle` file
-- Run `./gradlew publish`
