@@ -17,7 +17,7 @@
 package io.onixlabs.corda.bnms.contract.membership
 
 import io.onixlabs.corda.identityframework.contract.AttestationStatus
-import io.onixlabs.corda.identityframework.contract.toAttestationPointer
+import io.onixlabs.corda.identityframework.contract.toStaticAttestationPointer
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty
@@ -54,7 +54,7 @@ fun StateAndRef<MembershipAttestation>.amend(
     membership: StateAndRef<Membership>,
     status: AttestationStatus,
     metadata: Map<String, String> = this.state.data.metadata
-) = this.state.data.amend(ref, status, membership.toAttestationPointer(), metadata)
+) = this.state.data.amend(ref, status, membership.toStaticAttestationPointer(), metadata)
 
 fun StateAndRef<MembershipAttestation>.accept(
     metadata: Map<String, String> = this.state.data.metadata

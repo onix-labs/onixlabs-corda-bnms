@@ -28,7 +28,7 @@ import net.corda.core.messaging.*
 import net.corda.core.transactions.SignedTransaction
 import java.util.*
 
-class RevocationLockCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
+class RevocationLockService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun <T : LinearState> lock(
         state: T,

@@ -3,12 +3,15 @@ package io.onixlabs.corda.bnms.workflow.membership
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
+import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema
+import io.onixlabs.corda.core.services.equalTo
+import io.onixlabs.corda.core.services.filter
+import io.onixlabs.corda.core.services.vaultServiceFor
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.identityframework.workflow.INITIALIZING
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
-import net.corda.core.node.services.Vault
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.unwrap
 
@@ -38,13 +41,10 @@ class SynchronizeMembershipFlow(
             throw FlowException("Membership synchronization can only occur when the membership is owned by this node.")
         }
 
-        val attestations = subFlow(
-            FindMembershipAttestationsFlow(
-                holder = holder,
-                network = network,
-                stateStatus = Vault.StateStatus.UNCONSUMED
-            )
-        )
+        val attestations = serviceHub.vaultServiceFor<MembershipAttestation>().filter {
+            expression(MembershipAttestationSchema.MembershipAttestationEntity::holder equalTo holder)
+            expression(MembershipAttestationSchema.MembershipAttestationEntity::networkHash equalTo network.hash.toString())
+        }.toList()
 
         if (network.operator != null && attestations.size > 1) {
             throw FlowException("Only one membership attestation is required when a network operator is present.")

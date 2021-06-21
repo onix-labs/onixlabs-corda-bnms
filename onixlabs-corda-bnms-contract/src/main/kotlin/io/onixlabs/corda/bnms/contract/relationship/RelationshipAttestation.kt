@@ -23,7 +23,7 @@ import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationSchem
 import io.onixlabs.corda.identityframework.contract.Attestation
 import io.onixlabs.corda.identityframework.contract.AttestationPointer
 import io.onixlabs.corda.identityframework.contract.AttestationStatus
-import io.onixlabs.corda.identityframework.contract.toAttestationPointer
+import io.onixlabs.corda.identityframework.contract.toStaticAttestationPointer
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.StateRef
@@ -63,7 +63,7 @@ class RelationshipAttestation internal constructor(
         relationship.state.data.network,
         attestor,
         relationship.state.data.participants.toSet(),
-        relationship.toAttestationPointer(),
+        relationship.toStaticAttestationPointer(),
         status,
         metadata,
         linearId,
@@ -96,9 +96,8 @@ class RelationshipAttestation internal constructor(
             networkValue = network.value,
             networkOperator = network.operator,
             networkHash = network.hash.toString(),
-            pointerStateRef = pointer.stateRef.toString(),
-            pointerStateClass = pointer.stateClass.canonicalName,
-            pointerStateLinearId = pointer.stateLinearId!!.id,
+            pointer = pointer.statePointer.toString(),
+            pointerStateType = pointer.stateType.canonicalName,
             pointerHash = pointer.hash.toString(),
             status = status,
             previousStateRef = previousStateRef?.toString(),

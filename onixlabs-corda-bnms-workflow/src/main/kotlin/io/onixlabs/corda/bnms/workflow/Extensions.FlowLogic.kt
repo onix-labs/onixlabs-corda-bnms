@@ -16,67 +16,89 @@
 
 package io.onixlabs.corda.bnms.workflow
 
+import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
+import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema
+import io.onixlabs.corda.bnms.contract.membership.MembershipSchema
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
-import io.onixlabs.corda.bnms.workflow.membership.FindMembershipAttestationFlow
-import io.onixlabs.corda.bnms.workflow.membership.FindMembershipFlow
-import net.corda.core.contracts.StateAndRef
-import net.corda.core.flows.FlowException
-import net.corda.core.flows.FlowLogic
-import net.corda.core.node.services.Vault
-import co.paralleluniverse.fibers.Suspendable
+import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
+import io.onixlabs.corda.bnms.contract.revocation.RevocationLockSchema
+import io.onixlabs.corda.core.services.any
+import io.onixlabs.corda.core.services.equalTo
+import io.onixlabs.corda.core.services.singleOrNull
+import io.onixlabs.corda.core.services.vaultServiceFor
 import io.onixlabs.corda.core.workflow.currentStep
-import io.onixlabs.corda.identityframework.contract.Attestation
-import io.onixlabs.corda.identityframework.contract.CordaClaim
 import io.onixlabs.corda.identityframework.workflow.*
+import net.corda.core.contracts.LinearState
+import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
+import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
+import net.corda.core.node.services.Vault
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import java.security.PublicKey
 
+@Suspendable
 fun FlowLogic<*>.checkMembershipExists(membership: Membership) {
-    subFlow(FindMembershipFlow(hash = membership.hash))?.let {
+    val membershipExists = serviceHub.vaultServiceFor<Membership>().any {
+        stateStatus(Vault.StateStatus.ALL)
+        expression(MembershipSchema.MembershipEntity::hash equalTo membership.hash.toString())
+    }
+
+    if (membershipExists) {
         throw FlowException("Membership state with the specified unique hash already exists: ${membership.hash}.")
     }
 }
 
+@Suspendable
 fun FlowLogic<*>.checkMembershipsAndAttestations(relationship: Relationship) {
     val counterparties = relationship.participants
         .map { serviceHub.identityService.requireWellKnownPartyFromAnonymous(it) }
         .filter { it !in serviceHub.myInfo.legalIdentities }
 
     counterparties.forEach {
-        val findMembershipFlow = FindMembershipFlow(
-            holder = it,
-            network = relationship.network,
-            stateStatus = Vault.StateStatus.UNCONSUMED
-        )
+        val membership = serviceHub.vaultServiceFor<Membership>().singleOrNull {
+            expression(MembershipSchema.MembershipEntity::holder equalTo it)
+            expression(MembershipSchema.MembershipEntity::networkHash equalTo relationship.network.hash.toString())
+        } ?: throw FlowException(buildString {
+            append("Membership for '$it' on network '${relationship.network}' ")
+            append("could not be found, or has not been witnessed by this node.")
+        })
 
-        val membership = subFlow(findMembershipFlow) ?: throw FlowException(
-            "Membership for specified holder and network could not be found, or has not been witnessed by this node."
-        )
-
-        val findAttestationFlow = FindMembershipAttestationFlow(
-            attestor = ourIdentity,
-            membership = membership,
-            stateStatus = Vault.StateStatus.UNCONSUMED
-        )
-
-        subFlow(findAttestationFlow) ?: throw FlowException(
-            "MembershipAttestation for specified membership could not be found, or has not been witnessed by this node."
-        )
+        serviceHub.vaultServiceFor<MembershipAttestation>().singleOrNull {
+            expression(MembershipAttestationSchema.MembershipAttestationEntity::attestor equalTo ourIdentity)
+            expression(MembershipAttestationSchema.MembershipAttestationEntity::pointer equalTo membership.ref.toString())
+        } ?: throw FlowException(buildString {
+            append("MembershipAttestation for '${membership.state.data.holder}' ")
+            append("could not be found, or has not been witnessed by this node.")
+        })
     }
 }
 
+@Suspendable
+fun FlowLogic<*>.checkRevocationLockExists(owner: AbstractParty, state: LinearState) {
+    val revocationLockExists = serviceHub.vaultServiceFor<RevocationLock<*>>().any {
+        expression(RevocationLockSchema.RevocationLockEntity::owner equalTo owner)
+        expression(RevocationLockSchema.RevocationLockEntity::pointerStateClass equalTo state.javaClass.canonicalName)
+        expression(RevocationLockSchema.RevocationLockEntity::pointerStateLinearId equalTo state.linearId.id)
+    }
+
+    if(revocationLockExists) {
+        throw FlowException("Revocation of this relationship is locked by counter-party: $owner.")
+    }
+}
+
+@Suspendable
 fun FlowLogic<*>.findMembershipForAttestation(attestation: MembershipAttestation): StateAndRef<Membership> {
     return attestation.pointer.resolve(serviceHub) ?: throw FlowException(
         "Membership for the specified attestation could not be found, or has not been witnessed by this node."
     )
 }
 
+@Suspendable
 fun FlowLogic<*>.findRelationshipForAttestation(attestation: RelationshipAttestation): StateAndRef<Relationship> {
     return attestation.pointer.resolve(serviceHub) ?: throw FlowException(
         "Relationship for the specified attestation could not be found, or has not been witnessed by this node."

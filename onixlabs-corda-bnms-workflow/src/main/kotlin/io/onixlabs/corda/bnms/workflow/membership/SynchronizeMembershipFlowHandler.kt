@@ -4,13 +4,18 @@ import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
+import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema
+import io.onixlabs.corda.bnms.contract.membership.MembershipSchema
+import io.onixlabs.corda.core.services.equalTo
+import io.onixlabs.corda.core.services.filter
+import io.onixlabs.corda.core.services.singleOrNull
+import io.onixlabs.corda.core.services.vaultServiceFor
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.identityframework.workflow.INITIALIZING
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.FlowSession
 import net.corda.core.flows.InitiatedBy
-import net.corda.core.node.services.Vault
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.unwrap
 
@@ -31,18 +36,18 @@ class SynchronizeMembershipFlowHandler(
     override fun call(): Pair<StateAndRef<Membership>, Set<StateAndRef<MembershipAttestation>>>? {
         currentStep(INITIALIZING)
         val network = session.receive<Network>().unwrap { it }
-        val membership = subFlow(FindMembershipFlow(holder = ourIdentity, network = network))
+        val membership = serviceHub.vaultServiceFor<Membership>().singleOrNull {
+            expression(MembershipSchema.MembershipEntity::holder equalTo ourIdentity)
+            expression(MembershipSchema.MembershipEntity::networkHash equalTo network.hash.toString())
+        }
 
         session.send(membership != null)
 
         if (membership != null) {
-            val attestations = subFlow(
-                FindMembershipAttestationsFlow(
-                    holder = ourIdentity,
-                    network = network,
-                    stateStatus = Vault.StateStatus.UNCONSUMED
-                )
-            )
+            val attestations = serviceHub.vaultServiceFor<MembershipAttestation>().filter {
+                expression(MembershipAttestationSchema.MembershipAttestationEntity::holder equalTo ourIdentity)
+                expression(MembershipAttestationSchema.MembershipAttestationEntity::networkHash equalTo network.hash.toString())
+            }.toList()
 
             currentStep(RECEIVING)
             val theirMembership = receiveTheirMembership()
@@ -92,8 +97,9 @@ class SynchronizeMembershipFlowHandler(
     }
 
     @InitiatedBy(SynchronizeMembershipFlow.Initiator::class)
-    private class Handler(private val session: FlowSession) :
-        FlowLogic<Pair<StateAndRef<Membership>, Set<StateAndRef<MembershipAttestation>>>?>() {
+    private class Handler(
+        private val session: FlowSession
+    ) : FlowLogic<Pair<StateAndRef<Membership>, Set<StateAndRef<MembershipAttestation>>>?>() {
 
         private companion object {
             object SYNCHRONIZING : ProgressTracker.Step("Synchronizing membership.") {

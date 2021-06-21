@@ -52,14 +52,11 @@ object RelationshipAttestationSchema {
         @Column(name = "network_hash", nullable = false)
         val networkHash: String = "",
 
-        @Column(name = "pointer_state_ref", nullable = false)
-        val pointerStateRef: String = "",
+        @Column(name = "pointer", nullable = false)
+        val pointer: String = "",
 
-        @Column(name = "pointer_state_class", nullable = false)
-        val pointerStateClass: String = "",
-
-        @Column(name = "pointer_state_linear_id", nullable = false)
-        val pointerStateLinearId: UUID = UUID.randomUUID(),
+        @Column(name = "pointer_state_type", nullable = false)
+        val pointerStateType: String = "",
 
         @Column(name = "pointer_hash", nullable = false)
         val pointerHash: String = "",
