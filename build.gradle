@@ -14,8 +14,8 @@ buildscript {
         junit_version = '5.3.1'
 
         onixlabs_group = 'io.onixlabs'
-        onixlabs_corda_core_release_version = '1.2.0'
-        onixlabs_corda_idfx_release_version = '2.0.0-rc2'
+        onixlabs_corda_core_release_version = '2.0.0'
+        onixlabs_corda_idfx_release_version = '2.0.0'
 
         cordapp_platform_version = 8
         cordapp_contract_name = 'ONIXLabs Corda BNMS Contract'
@@ -34,7 +34,6 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
         maven { url "$corda_artifactory_url/corda-releases" }
         maven { url "$corda_artifactory_url/corda-dependencies" }
     }
@@ -46,20 +45,27 @@ buildscript {
 }
 
 group 'io.onixlabs'
-version '1.0.0'
+version '2.0.0-rc1'
 
 subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
         maven { url "https://jitpack.io" }
         maven { url "$corda_artifactory_url/corda-releases" }
         maven { url "$corda_artifactory_url/corda-dependencies" }
         maven { url "https://repo.gradle.org/gradle/libs-releases" }
         maven {
-            name = "GitHubPackagesCIF"
-            url = uri("https://maven.pkg.github.com/onix-labs/onixlabs-corda-identity-framework-beta")
+            name = "GitHubPackages-onixlabs-corda-core"
+            url = uri("https://maven.pkg.github.com/onix-labs/onixlabs-corda-core")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+        maven {
+            name = "GitHubPackages-onixlabs-corda-identity-framework"
+            url = uri("https://maven.pkg.github.com/onix-labs/onixlabs-corda-identity-framework")
             credentials {
                 username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
                 password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")

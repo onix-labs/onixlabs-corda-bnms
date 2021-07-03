@@ -18,119 +18,126 @@ package io.onixlabs.corda.bnms.integration
 
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.Setting
-import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipMember
-import io.onixlabs.corda.bnms.workflow.relationship.AmendRelationshipFlow
-import io.onixlabs.corda.bnms.workflow.relationship.IssueRelationshipFlow
-import io.onixlabs.corda.bnms.workflow.relationship.RevokeRelationshipFlow
+import io.onixlabs.corda.bnms.contract.membership.Membership
+import io.onixlabs.corda.bnms.workflow.membership.AmendMembershipFlow
+import io.onixlabs.corda.bnms.workflow.membership.IssueMembershipFlow
+import io.onixlabs.corda.bnms.workflow.membership.RevokeMembershipFlow
 import io.onixlabs.corda.core.integration.RPCService
+import io.onixlabs.corda.identityframework.contract.AbstractClaim
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
 import net.corda.core.messaging.*
 import net.corda.core.transactions.SignedTransaction
 import java.util.*
 
-class RelationshipCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
+class MembershipService(rpc: CordaRPCOps) : RPCService(rpc) {
 
-    fun issueRelationship(
+    fun issueMembership(
         network: Network,
-        members: Set<RelationshipMember> = emptySet(),
+        holder: AbstractParty = ourIdentity,
+        identity: Set<AbstractClaim<*>> = emptySet(),
         settings: Set<Setting<*>> = emptySet(),
         linearId: UniqueIdentifier = UniqueIdentifier(),
         notary: Party? = null,
-        checkMembership: Boolean = false
+        observers: Set<Party> = emptySet()
     ): FlowProgressHandle<SignedTransaction> {
-        val relationship = Relationship(network, members, settings, linearId)
-        return issueRelationship(relationship, notary, checkMembership)
+        val membership = Membership(network, holder, identity, settings, linearId)
+        return issueMembership(membership, notary, observers)
     }
 
-    fun issueRelationship(
+    fun issueMembership(
         network: Network,
-        members: Set<RelationshipMember> = emptySet(),
+        holder: AbstractParty = ourIdentity,
+        identity: Set<AbstractClaim<*>> = emptySet(),
         settings: Set<Setting<*>> = emptySet(),
         linearId: UniqueIdentifier = UniqueIdentifier(),
         notary: Party? = null,
-        checkMembership: Boolean = false,
+        observers: Set<Party> = emptySet(),
         clientId: String = UUID.randomUUID().toString()
     ): FlowHandleWithClientId<SignedTransaction> {
-        val relationship = Relationship(network, members, settings, linearId)
-        return issueRelationship(relationship, notary, checkMembership, clientId)
+        val membership = Membership(network, holder, identity, settings, linearId)
+        return issueMembership(membership, notary, observers, clientId)
     }
 
-    fun issueRelationship(
-        relationship: Relationship,
+    fun issueMembership(
+        membership: Membership,
         notary: Party? = null,
-        checkMembership: Boolean = false
+        observers: Set<Party> = emptySet()
     ): FlowProgressHandle<SignedTransaction> {
         return rpc.startTrackedFlow(
-            IssueRelationshipFlow::Initiator,
-            relationship,
+            IssueMembershipFlow::Initiator,
+            membership,
             notary,
-            checkMembership
+            observers
         )
     }
 
-    fun issueRelationship(
-        relationship: Relationship,
+    fun issueMembership(
+        membership: Membership,
         notary: Party? = null,
-        checkMembership: Boolean = false,
+        observers: Set<Party> = emptySet(),
         clientId: String = UUID.randomUUID().toString()
     ): FlowHandleWithClientId<SignedTransaction> {
         return rpc.startFlowWithClientId(
             clientId,
-            IssueRelationshipFlow::Initiator,
-            relationship,
+            IssueMembershipFlow::Initiator,
+            membership,
             notary,
-            checkMembership
+            observers
         )
     }
 
-    fun amendRelationship(
-        oldRelationship: StateAndRef<Relationship>,
-        newRelationship: Relationship,
-        checkMembership: Boolean = false
+    fun amendMembership(
+        oldMembership: StateAndRef<Membership>,
+        newMembership: Membership,
+        observers: Set<Party> = emptySet()
     ): FlowProgressHandle<SignedTransaction> {
         return rpc.startTrackedFlow(
-            AmendRelationshipFlow::Initiator,
-            oldRelationship,
-            newRelationship,
-            checkMembership
+            AmendMembershipFlow::Initiator,
+            oldMembership,
+            newMembership,
+            observers
         )
     }
 
-    fun amendRelationship(
-        oldRelationship: StateAndRef<Relationship>,
-        newRelationship: Relationship,
-        checkMembership: Boolean = false,
+    fun amendMembership(
+        oldMembership: StateAndRef<Membership>,
+        newMembership: Membership,
+        observers: Set<Party> = emptySet(),
         clientId: String = UUID.randomUUID().toString()
     ): FlowHandleWithClientId<SignedTransaction> {
         return rpc.startFlowWithClientId(
             clientId,
-            AmendRelationshipFlow::Initiator,
-            oldRelationship,
-            newRelationship,
-            checkMembership
+            AmendMembershipFlow::Initiator,
+            oldMembership,
+            newMembership,
+            observers
         )
     }
 
-    fun revokeRelationship(
-        relationship: StateAndRef<Relationship>
+    fun revokeMembership(
+        membership: StateAndRef<Membership>,
+        observers: Set<Party> = emptySet()
     ): FlowProgressHandle<SignedTransaction> {
         return rpc.startTrackedFlow(
-            RevokeRelationshipFlow::Initiator,
-            relationship
+            RevokeMembershipFlow::Initiator,
+            membership,
+            observers
         )
     }
 
-    fun revokeRelationship(
-        relationship: StateAndRef<Relationship>,
+    fun revokeMembership(
+        membership: StateAndRef<Membership>,
+        observers: Set<Party> = emptySet(),
         clientId: String = UUID.randomUUID().toString()
     ): FlowHandleWithClientId<SignedTransaction> {
         return rpc.startFlowWithClientId(
             clientId,
-            RevokeRelationshipFlow::Initiator,
-            relationship
+            RevokeMembershipFlow::Initiator,
+            membership,
+            observers
         )
     }
 }

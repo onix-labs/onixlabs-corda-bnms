@@ -18,7 +18,7 @@ package io.onixlabs.corda.bnms.workflow.relationship
 
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.workflow.revocation.FindRevocationLockFlow
+import io.onixlabs.corda.bnms.workflow.checkRevocationLockExists
 import io.onixlabs.corda.core.workflow.currentStep
 import io.onixlabs.corda.identityframework.workflow.FINALIZING
 import io.onixlabs.corda.identityframework.workflow.SIGNING
@@ -47,9 +47,7 @@ class RevokeRelationshipFlowHandler(
                 )
 
                 val relationship = serviceHub.toStateAndRef<Relationship>(relationshipStateRef)
-                subFlow(FindRevocationLockFlow(ourIdentity, relationship.state.data))?.let {
-                    throw FlowException("Revocation of this relationship is locked by counter-party: $ourIdentity")
-                }
+                checkRevocationLockExists(ourIdentity, relationship.state.data)
             }
         })
 

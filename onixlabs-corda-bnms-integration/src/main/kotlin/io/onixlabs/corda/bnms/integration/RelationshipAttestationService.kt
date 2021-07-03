@@ -32,7 +32,7 @@ import net.corda.core.messaging.*
 import net.corda.core.transactions.SignedTransaction
 import java.util.*
 
-class RelationshipAttestationCommandService(rpc: CordaRPCOps) : RPCService(rpc) {
+class RelationshipAttestationService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun issueRelationshipAttestation(
         relationship: StateAndRef<Relationship>,

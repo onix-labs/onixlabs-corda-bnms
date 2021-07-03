@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package io.onixlabs.corda.bnms.contract
+package io.onixlabs.corda.bnms.contract.relationship
 
-/**
- * Represents a network permission.
- *
- * @property property The property of the permission, which is always "Permission".
- * @property normalizedProperty The normalized property of the permission, which is always "PERMISSION".
- * @property value The value of the permission.
- * @property normalizedValue The normalized value of the permission.
- * @property hash The hash that uniquely identifies the permission.
- */
-class Permission(value: String) : StringSetting(PERMISSION, value)
+import net.corda.core.contracts.Contract
+import net.corda.core.transactions.LedgerTransaction
+
+class RelationshipConfigurationContract : Contract {
+    override fun verify(tx: LedgerTransaction) {
+        TODO("Not yet implemented")
+    }
+}

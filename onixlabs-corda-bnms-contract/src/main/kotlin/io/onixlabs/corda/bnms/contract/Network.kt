@@ -16,15 +16,21 @@
 
 package io.onixlabs.corda.bnms.contract
 
-import io.onixlabs.corda.core.contract.Hashable
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 
-class Network(
-    value: String,
-    val operator: AbstractParty? = null
-) : Setting<String>(NETWORK, value.toUpperCase()), Hashable {
+/**
+ * Represents a reference to a business network.
+ *
+ * @property property The property of the network setting, which is always "Network".
+ * @property normalizedProperty The normalized property of the network setting, which is always "NETWORK".
+ * @property value The value of the network, which is usually the name of the business network.
+ * @property normalizedValue The normalized value of the network.
+ * @property operator The business network operator, or null if the business network is decentralized.
+ * @property hash The hash that uniquely identifies the network reference.
+ */
+class Network(value: String, val operator: AbstractParty? = null) : StringSetting(NETWORK, value) {
 
     override val hash: SecureHash
-        get() = SecureHash.sha256("$value$operator")
+        get() = SecureHash.sha256("${super.hash}$operator")
 }

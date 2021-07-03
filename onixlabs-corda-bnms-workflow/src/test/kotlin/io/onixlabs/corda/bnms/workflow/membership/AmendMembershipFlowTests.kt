@@ -38,7 +38,7 @@ class AmendMembershipFlowTests : FlowTest() {
             }
             .run(nodeA) {
                 val oldMembership = it.tx.outRefsOfType<Membership>().single()
-                membership = oldMembership.getNextOutput().addRoles("Administrator")
+                membership = oldMembership.getNextOutput().configure { addRoles("Administrator") }
                 AmendMembershipFlow.Initiator(oldMembership, membership, observers = setOf(partyB))
             }
             .finally { transaction = it }
@@ -72,7 +72,7 @@ class AmendMembershipFlowTests : FlowTest() {
                     ?: fail("Failed to find a recorded membership.")
 
                 assertEquals(membership, recordedMembership)
-                assert(recordedMembership.hasRole("Administrator"))
+                assert(recordedMembership.configuration.hasRole("Administrator"))
             }
         }
     }
