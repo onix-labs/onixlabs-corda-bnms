@@ -16,16 +16,17 @@
 
 package io.onixlabs.corda.bnms.integration
 
+import io.onixlabs.corda.bnms.contract.Configuration
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.Setting
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipMember
 import io.onixlabs.corda.bnms.workflow.relationship.AmendRelationshipFlow
 import io.onixlabs.corda.bnms.workflow.relationship.IssueRelationshipFlow
 import io.onixlabs.corda.bnms.workflow.relationship.RevokeRelationshipFlow
 import io.onixlabs.corda.core.integration.RPCService
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
+import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
 import net.corda.core.messaging.*
 import net.corda.core.transactions.SignedTransaction
@@ -35,26 +36,25 @@ class RelationshipService(rpc: CordaRPCOps) : RPCService(rpc) {
 
     fun issueRelationship(
         network: Network,
-        members: Set<RelationshipMember> = emptySet(),
-        settings: Set<Setting<*>> = emptySet(),
+        members: Map<out AbstractParty, Configuration> = emptyMap(),
         linearId: UniqueIdentifier = UniqueIdentifier(),
         notary: Party? = null,
         checkMembership: Boolean = false
     ): FlowProgressHandle<SignedTransaction> {
-        val relationship = Relationship(network, members, settings, linearId)
+        val relationship = Relationship(network, members, linearId)
         return issueRelationship(relationship, notary, checkMembership)
     }
 
     fun issueRelationship(
         network: Network,
-        members: Set<RelationshipMember> = emptySet(),
+        members: Map<out AbstractParty, Configuration> = emptyMap(),
         settings: Set<Setting<*>> = emptySet(),
         linearId: UniqueIdentifier = UniqueIdentifier(),
         notary: Party? = null,
         checkMembership: Boolean = false,
         clientId: String = UUID.randomUUID().toString()
     ): FlowHandleWithClientId<SignedTransaction> {
-        val relationship = Relationship(network, members, settings, linearId)
+        val relationship = Relationship(network, members, linearId)
         return issueRelationship(relationship, notary, checkMembership, clientId)
     }
 

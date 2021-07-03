@@ -16,10 +16,14 @@
 
 package io.onixlabs.corda.bnms.contract
 
-inline fun <T, K> Iterable<T>.isDistinctBy(selector: (T) -> K): Boolean {
+/**
+ * Determines whether an [Iterable] is distinct by the specified selector.
+ *
+ * @param T The underlying [Iterable] type.
+ * @param K The underlying selected type.
+ * @param selector The selector to use to determine distinction.
+ * @return Returns true if the [Iterable] is distinct by the specified selector; otherwise, false.
+ */
+fun <T, K> Iterable<T>.isDistinctBy(selector: (T) -> K): Boolean {
     return count() == distinctBy(selector).count()
-}
-
-inline fun <reified T : Any> Setting<*>.cast(): Setting<T> {
-    return Setting(property, T::class.java.cast(value))
 }

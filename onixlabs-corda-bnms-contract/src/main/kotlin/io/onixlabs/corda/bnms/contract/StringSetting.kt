@@ -16,33 +16,25 @@
 
 package io.onixlabs.corda.bnms.contract
 
-import io.onixlabs.corda.core.contract.Hashable
-import io.onixlabs.corda.identityframework.contract.Claim
 import net.corda.core.crypto.SecureHash
 import java.util.*
 
 /**
- * Represents the base class for implementing settings.
+ * Represents the base class for implementing string value settings.
  *
- * @property T The underlying setting value type.
  * @property property The property of the setting.
  * @property normalizedProperty The normalized property of the setting, which is an upper-case property.
  * @property value The value of the setting.
+ * @property normalizedValue The normalized value of the setting, which is an upper-case value.
  * @property hash The hash that uniquely identifies the setting.
  */
-open class Setting<T : Any>(property: String, value: T) : Claim<T>(property, value), Hashable {
+open class StringSetting(property: String, value: String) : Setting<String>(property, value) {
 
-    internal companion object {
-        const val NETWORK = "Network"
-        const val ROLE = "Role"
-        const val PERMISSION = "Permission"
-    }
-
-    val normalizedProperty: String
-        get() = property.toUpperCase()
+    val normalizedValue: String
+        get() = value.toUpperCase()
 
     override val hash: SecureHash
-        get() = SecureHash.sha256("$normalizedProperty$value")
+        get() = SecureHash.sha256("$normalizedProperty$normalizedValue")
 
     /**
      * Determines whether the specified object is equal to the current object.
@@ -51,10 +43,10 @@ open class Setting<T : Any>(property: String, value: T) : Claim<T>(property, val
      * @return Returns true if the specified object is equal to the current object; otherwise, false.
      */
     override fun equals(other: Any?): Boolean {
-        return this === other || (other is Setting<*>
+        return this === other || (other is StringSetting
                 && other.javaClass == javaClass
-                && property == other.property
-                && value == other.value)
+                && normalizedProperty == other.normalizedProperty
+                && normalizedValue == other.normalizedValue)
     }
 
     /**
@@ -63,6 +55,6 @@ open class Setting<T : Any>(property: String, value: T) : Claim<T>(property, val
      * @return Returns a hash code for the current object.
      */
     override fun hashCode(): Int {
-        return Objects.hash(property, value)
+        return Objects.hash(normalizedProperty, normalizedValue)
     }
 }

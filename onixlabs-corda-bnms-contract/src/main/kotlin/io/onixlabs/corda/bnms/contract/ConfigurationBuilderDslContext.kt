@@ -17,12 +17,7 @@
 package io.onixlabs.corda.bnms.contract
 
 /**
- * Represents a network permission.
- *
- * @property property The property of the permission, which is always "Permission".
- * @property normalizedProperty The normalized property of the permission, which is always "PERMISSION".
- * @property value The value of the permission.
- * @property normalizedValue The normalized value of the permission.
- * @property hash The hash that uniquely identifies the permission.
+ * Represents the marker for functions that belong to the configuration builder.
  */
-class Permission(value: String) : StringSetting(PERMISSION, value)
+@DslMarker
+annotation class ConfigurationBuilderDslContext

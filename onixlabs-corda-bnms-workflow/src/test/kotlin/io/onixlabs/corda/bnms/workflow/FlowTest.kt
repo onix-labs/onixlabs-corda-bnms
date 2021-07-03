@@ -16,10 +16,10 @@
 
 package io.onixlabs.corda.bnms.workflow
 
+import io.onixlabs.corda.bnms.contract.Configuration
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
-import io.onixlabs.corda.bnms.contract.relationship.RelationshipMember
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.TestInstance
 abstract class FlowTest {
 
     protected val NETWORK by lazy { Network("Example Network") }
-    protected val MEMBERS by lazy { setOf(RelationshipMember(partyA), RelationshipMember(partyB)) }
+    protected val MEMBERS by lazy { mapOf(partyA to Configuration(), partyB to Configuration()) }
     protected val MEMBERSHIP by lazy { Membership(NETWORK, partyA) }
     protected val RELATIONSHIP by lazy { Relationship(NETWORK, MEMBERS) }
 

@@ -29,7 +29,7 @@ class MembershipContractAmendCommandTests : ContractTest() {
         services.ledger {
             transaction {
                 val issuedMembershipA = issue(CENTRALIZED_MEMBERSHIP_IDENTITY_A)
-                val amendedMembershipA = issuedMembershipA.getNextOutput().addRoles("Example")
+                val amendedMembershipA = issuedMembershipA.getNextOutput().configure { addRoles("Example") }
                 input(issuedMembershipA.ref)
                 output(MembershipContract.ID, amendedMembershipA)
                 fails()
@@ -59,7 +59,7 @@ class MembershipContractAmendCommandTests : ContractTest() {
             transaction {
                 val issuedMembershipA = issue(CENTRALIZED_MEMBERSHIP_IDENTITY_A)
                 val issuedMembershipB = CENTRALIZED_MEMBERSHIP_IDENTITY_B
-                val amendedMembershipA = issuedMembershipA.getNextOutput().addRoles("Example")
+                val amendedMembershipA = issuedMembershipA.getNextOutput().configure { addRoles("Example") }
                 input(issuedMembershipA.ref)
                 output(MembershipContract.ID, amendedMembershipA)
                 output(MembershipContract.ID, issuedMembershipB)
