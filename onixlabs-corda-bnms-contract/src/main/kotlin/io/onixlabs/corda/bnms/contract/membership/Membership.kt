@@ -23,12 +23,14 @@ import io.onixlabs.corda.core.contract.ChainState
 import io.onixlabs.corda.core.contract.Hashable
 import io.onixlabs.corda.identityframework.contract.AbstractClaim
 import net.corda.core.contracts.BelongsToContract
+import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
+import net.corda.core.schemas.QueryableState
 
 /**
  * Represents a membership to a business network.
@@ -51,7 +53,7 @@ data class Membership(
     val configuration: Configuration = Configuration(),
     override val linearId: UniqueIdentifier = UniqueIdentifier(),
     override val previousStateRef: StateRef? = null
-) : NetworkState, ChainState, Hashable {
+) : NetworkState, ChainState, LinearState, QueryableState, Hashable {
 
     constructor(
         network: Network,

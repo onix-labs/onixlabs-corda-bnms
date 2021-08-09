@@ -30,6 +30,7 @@ import net.corda.core.identity.AbstractParty
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
+import net.corda.core.schemas.QueryableState
 
 /**
  * Represents a multi-lateral relationship between participants of a business network.
@@ -48,7 +49,7 @@ data class Relationship(
     val members: Map<out AbstractParty, Configuration> = emptyMap(),
     override val linearId: UniqueIdentifier = UniqueIdentifier(),
     override val previousStateRef: StateRef? = null
-) : NetworkState, ChainState, Hashable {
+) : NetworkState, ChainState, LinearState, QueryableState, Hashable {
 
     val configurations: PluralResolvable<RelationshipConfiguration>
         get() = RelationshipConfigurationResolver(linearId)

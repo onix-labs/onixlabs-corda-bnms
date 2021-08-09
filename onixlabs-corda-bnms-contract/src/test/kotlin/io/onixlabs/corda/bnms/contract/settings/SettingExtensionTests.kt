@@ -78,7 +78,6 @@ class SettingExtensionTests {
         assertEquals(2, result.size)
     }
 
-
     @Test
     fun `inline filterByType should filter all settings of type Setting where the value type is unknown`() {
         val result = settings.filterByType<Setting<*>>()

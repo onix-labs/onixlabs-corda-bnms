@@ -16,14 +16,13 @@
 
 package io.onixlabs.corda.bnms.contract
 
-import net.corda.core.contracts.LinearState
-import net.corda.core.schemas.QueryableState
+import net.corda.core.contracts.ContractState
 
 /**
  * Defines a contract state that belongs to a business network.
  *
  * @property network The business network that the state belongs to.
  */
-interface NetworkState : LinearState, QueryableState {
+interface NetworkState : ContractState {
     val network: Network
 }

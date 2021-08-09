@@ -26,12 +26,14 @@ import io.onixlabs.corda.core.contract.Hashable
 import io.onixlabs.corda.core.contract.SingularResolvable
 import io.onixlabs.corda.core.services.vaultQuery
 import net.corda.core.contracts.BelongsToContract
+import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.schemas.MappedSchema
+import net.corda.core.schemas.QueryableState
 
 @BelongsToContract(RelationshipConfigurationContract::class)
 class RelationshipConfiguration private constructor(
@@ -40,7 +42,7 @@ class RelationshipConfiguration private constructor(
     val configuration: Configuration,
     val relationshipLinearId: UniqueIdentifier,
     override val linearId: UniqueIdentifier
-) : NetworkState, Hashable {
+) : NetworkState, LinearState, QueryableState, Hashable {
 
     constructor(
         relationship: Relationship,
