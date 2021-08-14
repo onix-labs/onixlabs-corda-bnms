@@ -21,7 +21,7 @@ import io.onixlabs.corda.bnms.contract.membership.MembershipSchema.MembershipEnt
 import io.onixlabs.corda.bnms.contract.membership.MembershipSchema.MembershipSchemaV1
 import io.onixlabs.corda.core.contract.ChainState
 import io.onixlabs.corda.core.contract.Hashable
-import io.onixlabs.corda.identityframework.contract.AbstractClaim
+import io.onixlabs.corda.identityframework.contract.claims.AbstractClaim
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateRef
@@ -97,6 +97,7 @@ data class Membership(
             externalId = linearId.externalId,
             holder = holder,
             networkValue = network.value,
+            normalizedNetworkValue = network.normalizedValue,
             networkOperator = network.operator,
             networkHash = network.hash.toString(),
             isNetworkOperator = isNetworkOperator,

@@ -16,7 +16,7 @@
 
 package io.onixlabs.corda.bnms.contract.relationship
 
-import io.onixlabs.corda.identityframework.contract.AttestationStatus
+import io.onixlabs.corda.identityframework.contract.attestations.AttestationStatus
 import io.onixlabs.corda.identityframework.contract.toStaticAttestationPointer
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier

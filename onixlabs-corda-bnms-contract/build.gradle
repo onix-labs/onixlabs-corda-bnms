@@ -54,6 +54,7 @@ publishing {
             groupId = project.parent.group
             version = project.parent.version
             artifactId = 'onixlabs-corda-bnms-contract'
+            artifact sourceJar
             from components.java
         }
     }

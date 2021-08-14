@@ -43,6 +43,9 @@ object RelationshipSchema {
         @Column(name = "network_value", nullable = false)
         val networkValue: String = "",
 
+        @Column(name = "normalized_network_value", nullable = false)
+        val normalizedNetworkValue: String = "",
+
         @Column(name = "network_operator", nullable = true)
         val networkOperator: AbstractParty? = null,
 

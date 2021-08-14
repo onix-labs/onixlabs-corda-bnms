@@ -19,7 +19,7 @@ package io.onixlabs.corda.bnms.contract
 import io.onixlabs.corda.bnms.contract.membership.*
 import io.onixlabs.corda.bnms.contract.relationship.*
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLockContract
-import io.onixlabs.corda.identityframework.contract.AttestationContract
+import io.onixlabs.corda.identityframework.contract.attestations.AttestationContract
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.crypto.SecureHash
 import net.corda.core.identity.AbstractParty

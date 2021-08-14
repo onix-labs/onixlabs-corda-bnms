@@ -17,9 +17,8 @@
 package io.onixlabs.corda.bnms.contract.membership
 
 import io.onixlabs.corda.core.contract.ContractID
-import io.onixlabs.corda.identityframework.contract.AttestationContract
+import io.onixlabs.corda.identityframework.contract.attestations.AttestationContract
 import net.corda.core.contracts.Contract
-import net.corda.core.contracts.ContractClassName
 import net.corda.core.contracts.requireThat
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey

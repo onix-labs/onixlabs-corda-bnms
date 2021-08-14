@@ -98,6 +98,7 @@ data class Relationship(
             linearId = linearId.id,
             externalId = linearId.externalId,
             networkValue = network.value,
+            normalizedNetworkValue = network.normalizedValue,
             networkOperator = network.operator,
             networkHash = network.hash.toString(),
             hash = hash.toString()

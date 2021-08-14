@@ -16,7 +16,7 @@
 
 package io.onixlabs.corda.bnms.contract.relationship
 
-import io.onixlabs.corda.identityframework.contract.AttestationContract
+import io.onixlabs.corda.identityframework.contract.attestations.AttestationContract
 import net.corda.core.contracts.Contract
 import net.corda.core.contracts.ContractClassName
 import net.corda.core.contracts.requireThat

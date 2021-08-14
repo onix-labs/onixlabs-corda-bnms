@@ -17,6 +17,8 @@
 package io.onixlabs.corda.bnms.contract
 
 import io.onixlabs.corda.core.contract.Hashable
+import io.onixlabs.corda.identityframework.contract.filterByProperty
+import io.onixlabs.corda.identityframework.contract.filterByType
 import net.corda.core.crypto.SecureHash
 import net.corda.core.serialization.CordaSerializable
 

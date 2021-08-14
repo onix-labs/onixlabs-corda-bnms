@@ -20,9 +20,9 @@ import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.NetworkState
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema.MembershipAttestationEntity
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema.MembershipAttestationSchemaV1
-import io.onixlabs.corda.identityframework.contract.Attestation
-import io.onixlabs.corda.identityframework.contract.AttestationPointer
-import io.onixlabs.corda.identityframework.contract.AttestationStatus
+import io.onixlabs.corda.identityframework.contract.attestations.Attestation
+import io.onixlabs.corda.identityframework.contract.attestations.AttestationPointer
+import io.onixlabs.corda.identityframework.contract.attestations.AttestationStatus
 import io.onixlabs.corda.identityframework.contract.toStaticAttestationPointer
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.StateAndRef
@@ -101,6 +101,7 @@ class MembershipAttestation internal constructor(
             attestor = attestor,
             holder = holder,
             networkValue = network.value,
+            normalizedNetworkValue = network.normalizedValue,
             networkOperator = network.operator,
             networkHash = network.hash.toString(),
             pointer = pointer.statePointer.toString(),

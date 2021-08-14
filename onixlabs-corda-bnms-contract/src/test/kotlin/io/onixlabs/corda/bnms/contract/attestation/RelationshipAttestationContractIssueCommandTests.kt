@@ -19,7 +19,7 @@ package io.onixlabs.corda.bnms.contract.attestation
 import io.onixlabs.corda.bnms.contract.*
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationContract
 import io.onixlabs.corda.bnms.contract.relationship.accept
-import io.onixlabs.corda.identityframework.contract.AttestationContract
+import io.onixlabs.corda.identityframework.contract.attestations.AttestationContract
 import net.corda.testing.node.ledger
 import org.junit.jupiter.api.Test
 

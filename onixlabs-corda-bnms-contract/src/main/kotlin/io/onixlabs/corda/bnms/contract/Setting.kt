@@ -17,7 +17,7 @@
 package io.onixlabs.corda.bnms.contract
 
 import io.onixlabs.corda.core.contract.Hashable
-import io.onixlabs.corda.identityframework.contract.Claim
+import io.onixlabs.corda.identityframework.contract.claims.Claim
 import net.corda.core.crypto.SecureHash
 import java.util.*
 
