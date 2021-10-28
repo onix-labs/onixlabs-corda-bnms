@@ -5,7 +5,7 @@ buildscript {
 
         corda_artifactory_url = 'https://software.r3.com/artifactory'
         corda_group = 'net.corda'
-        corda_release_version = '4.6'
+        corda_release_version = '4.8'
 
         corda_gradle_plugin_group = 'net.corda.plugins'
         corda_gradle_plugin_version = '5.0.4'

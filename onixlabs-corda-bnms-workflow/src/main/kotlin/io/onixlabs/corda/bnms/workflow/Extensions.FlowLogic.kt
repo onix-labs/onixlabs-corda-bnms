@@ -19,33 +19,44 @@ package io.onixlabs.corda.bnms.workflow
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
-import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema
-import io.onixlabs.corda.bnms.contract.membership.MembershipSchema
+import io.onixlabs.corda.bnms.contract.membership.MembershipAttestationSchema.MembershipAttestationEntity
+import io.onixlabs.corda.bnms.contract.membership.MembershipSchema.MembershipEntity
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
 import io.onixlabs.corda.bnms.contract.revocation.RevocationLock
-import io.onixlabs.corda.bnms.contract.revocation.RevocationLockSchema
+import io.onixlabs.corda.bnms.contract.revocation.RevocationLockSchema.RevocationLockEntity
 import io.onixlabs.corda.core.services.any
 import io.onixlabs.corda.core.services.equalTo
 import io.onixlabs.corda.core.services.singleOrNull
 import io.onixlabs.corda.core.services.vaultServiceFor
 import io.onixlabs.corda.core.workflow.currentStep
-import io.onixlabs.corda.identityframework.workflow.*
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.StateAndRef
-import net.corda.core.flows.*
+import net.corda.core.flows.FlowException
+import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.FlowSession
 import net.corda.core.identity.AbstractParty
-import net.corda.core.identity.Party
 import net.corda.core.node.services.Vault
-import net.corda.core.transactions.SignedTransaction
-import net.corda.core.transactions.TransactionBuilder
-import java.security.PublicKey
+import net.corda.core.utilities.unwrap
+
+@Suspendable
+fun FlowLogic<*>.checkMembership(checkMembership: Boolean, relationship: Relationship, sessions: Set<FlowSession>) {
+    currentStep(SendCheckMembershipInstructionStep)
+    sessions.forEach { it.send(checkMembership) }
+    if (checkMembership) checkMembershipsAndAttestations(relationship)
+}
+
+@Suspendable
+fun FlowLogic<*>.checkMembershipHandler(session: FlowSession): Boolean {
+    currentStep(ReceiveCheckMembershipInstructionStep)
+    return session.receive<Boolean>().unwrap { it }
+}
 
 @Suspendable
 fun FlowLogic<*>.checkMembershipExists(membership: Membership) {
     val membershipExists = serviceHub.vaultServiceFor<Membership>().any {
         stateStatus(Vault.StateStatus.ALL)
-        expression(MembershipSchema.MembershipEntity::hash equalTo membership.hash.toString())
+        expression(MembershipEntity::hash equalTo membership.hash.toString())
     }
 
     if (membershipExists) {
@@ -55,22 +66,23 @@ fun FlowLogic<*>.checkMembershipExists(membership: Membership) {
 
 @Suspendable
 fun FlowLogic<*>.checkMembershipsAndAttestations(relationship: Relationship) {
+    currentStep(CheckMembershipStep)
     val counterparties = relationship.participants
         .map { serviceHub.identityService.requireWellKnownPartyFromAnonymous(it) }
         .filter { it !in serviceHub.myInfo.legalIdentities }
 
     counterparties.forEach {
         val membership = serviceHub.vaultServiceFor<Membership>().singleOrNull {
-            expression(MembershipSchema.MembershipEntity::holder equalTo it)
-            expression(MembershipSchema.MembershipEntity::networkHash equalTo relationship.network.hash.toString())
+            expression(MembershipEntity::holder equalTo it)
+            expression(MembershipEntity::networkHash equalTo relationship.network.hash.toString())
         } ?: throw FlowException(buildString {
             append("Membership for '$it' on network '${relationship.network}' ")
             append("could not be found, or has not been witnessed by this node.")
         })
 
         serviceHub.vaultServiceFor<MembershipAttestation>().singleOrNull {
-            expression(MembershipAttestationSchema.MembershipAttestationEntity::attestor equalTo ourIdentity)
-            expression(MembershipAttestationSchema.MembershipAttestationEntity::pointer equalTo membership.ref.toString())
+            expression(MembershipAttestationEntity::attestor equalTo ourIdentity)
+            expression(MembershipAttestationEntity::pointer equalTo membership.ref.toString())
         } ?: throw FlowException(buildString {
             append("MembershipAttestation for '${membership.state.data.holder}' ")
             append("could not be found, or has not been witnessed by this node.")
@@ -81,12 +93,12 @@ fun FlowLogic<*>.checkMembershipsAndAttestations(relationship: Relationship) {
 @Suspendable
 fun FlowLogic<*>.checkRevocationLockExists(owner: AbstractParty, state: LinearState) {
     val revocationLockExists = serviceHub.vaultServiceFor<RevocationLock<*>>().any {
-        expression(RevocationLockSchema.RevocationLockEntity::owner equalTo owner)
-        expression(RevocationLockSchema.RevocationLockEntity::pointerStateClass equalTo state.javaClass.canonicalName)
-        expression(RevocationLockSchema.RevocationLockEntity::pointerStateLinearId equalTo state.linearId.id)
+        expression(RevocationLockEntity::owner equalTo owner)
+        expression(RevocationLockEntity::pointerStateClass equalTo state.javaClass.canonicalName)
+        expression(RevocationLockEntity::pointerStateLinearId equalTo state.linearId.id)
     }
 
-    if(revocationLockExists) {
+    if (revocationLockExists) {
         throw FlowException("Revocation of this relationship is locked by counter-party: $owner.")
     }
 }
@@ -104,70 +116,3 @@ fun FlowLogic<*>.findRelationshipForAttestation(attestation: RelationshipAttesta
         "Relationship for the specified attestation could not be found, or has not been witnessed by this node."
     )
 }
-//
-///**
-// * Generates an unsigned transaction.
-// *
-// * @param notary The notary to assign to the transaction.
-// * @param action The context in which the [TransactionBuilder] will build the transaction.
-// * @return Returns an unsigned transaction.
-// */
-//@Suspendable
-//internal fun FlowLogic<*>.transaction(
-//    notary: Party,
-//    action: TransactionBuilder.() -> TransactionBuilder
-//): TransactionBuilder {
-//    currentStep(GENERATING)
-//    return with(TransactionBuilder(notary)) { action(this) }
-//}
-//
-///**
-// * Verifies and signs an unsigned transaction.
-// *
-// * @param builder The unsigned transaction to verify and sign.
-// * @param signingKey The initial signing ket for the transaction.
-// * @return Returns a verified and signed transaction.
-// */
-//@Suspendable
-//internal fun FlowLogic<*>.verifyAndSign(
-//    builder: TransactionBuilder,
-//    signingKey: PublicKey
-//): SignedTransaction {
-//    currentStep(VERIFYING)
-//    builder.verify(serviceHub)
-//
-//    currentStep(SIGNING)
-//    return serviceHub.signInitialTransaction(builder, signingKey)
-//}
-//
-///**
-// * Gathers counter-party signatures for a partially signed transaction.
-// *
-// * @param transaction The signed transaction for which to obtain additional signatures.
-// * @param sessions The flow sessions for the required signing counter-parties.
-// * @return Returns a signed transaction.
-// */
-//@Suspendable
-//internal fun FlowLogic<*>.countersign(
-//    transaction: SignedTransaction,
-//    sessions: Set<FlowSession>
-//): SignedTransaction {
-//    currentStep(COUNTERSIGNING)
-//    return subFlow(CollectSignaturesFlow(transaction, sessions, COUNTERSIGNING.childProgressTracker()))
-//}
-//
-///**
-// * Finalizes and records a signed transaction to the vault.
-// *
-// * @param transaction The transaction to finalize and record.
-// * @param sessions The flow sessions for counter-parties who are expected to finalize and record the transaction.
-// * @return Returns a finalized and recorded transaction.
-// */
-//@Suspendable
-//internal fun FlowLogic<*>.finalize(
-//    transaction: SignedTransaction,
-//    sessions: Set<FlowSession> = emptySet()
-//): SignedTransaction {
-//    currentStep(FINALIZING)
-//    return subFlow(FinalityFlow(transaction, sessions, FINALIZING.childProgressTracker()))
-//}

@@ -23,7 +23,7 @@ import io.onixlabs.corda.bnms.workflow.membership.AmendMembershipFlow
 import io.onixlabs.corda.bnms.workflow.membership.IssueMembershipFlow
 import io.onixlabs.corda.bnms.workflow.membership.RevokeMembershipFlow
 import io.onixlabs.corda.core.integration.RPCService
-import io.onixlabs.corda.identityframework.contract.AbstractClaim
+import io.onixlabs.corda.identityframework.contract.claims.AbstractClaim
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty

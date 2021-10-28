@@ -32,6 +32,22 @@ import net.corda.core.identity.AbstractParty
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
 
+/**
+ * Represents a membership attestation; a proof that a particular [Membership] state has been witnessed.
+ *
+ * @property network The business network that this membership attestation belongs to.
+ * @property attestor The party who is attesting to the witnessed [Membership] state.
+ * @property attestees The parties of this attestation, usually the participants of the attested [Membership] state.
+ * @property pointer The pointer to the attested [Membership] state.
+ * @property status The status of the attestation.
+ * @property metadata Additional information about the attestation.
+ * @property linearId The unique identifier of the attestation.
+ * @property previousStateRef The state reference of the previous state in the chain.
+ * @property hash The unique hash which represents this attestation.
+ * @property participants The participants of this attestation; namely the attestor and attestees.
+ * @property holder A reference to the only attestee of the attestation; namely the [Membership] holder.
+ * @property isNetworkOperator Determines whether this membership attestation is attesting to the business network operator's [Membership] state.
+ */
 @BelongsToContract(MembershipAttestationContract::class)
 class MembershipAttestation internal constructor(
     override val network: Network,
@@ -76,6 +92,15 @@ class MembershipAttestation internal constructor(
     val isNetworkOperator: Boolean
         get() = holder == network.operator
 
+    /**
+     * Amends this attestation.
+     *
+     * @property previousStateRef The state reference of the previous state in the chain.
+     * @param status The amended attestation status.
+     * @param pointer The pointer to the attested state, if a new version of the state is being attested.
+     * @param metadata Additional information about the attestation.
+     * @return Returns a new, amended version of this attestation state.
+     */
     override fun amend(
         previousStateRef: StateRef,
         status: AttestationStatus,
@@ -94,6 +119,12 @@ class MembershipAttestation internal constructor(
         )
     }
 
+    /**
+     * Generates a persistent state entity from this contract state.
+     *
+     * @param schema The mapped schema from which to generate a persistent state entity.
+     * @return Returns a persistent state entity.
+     */
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
         is MembershipAttestationSchemaV1 -> MembershipAttestationEntity(
             linearId = linearId.id,
@@ -114,6 +145,11 @@ class MembershipAttestation internal constructor(
         else -> super.generateMappedObject(schema)
     }
 
+    /**
+     * Gets the supported schemas of this state.
+     *
+     * @return Returns the supported schemas of this state.
+     */
     override fun supportedSchemas(): Iterable<MappedSchema> {
         return super.supportedSchemas() + MembershipAttestationSchemaV1
     }

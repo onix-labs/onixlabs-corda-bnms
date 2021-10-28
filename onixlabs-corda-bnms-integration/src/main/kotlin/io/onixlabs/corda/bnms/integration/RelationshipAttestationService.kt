@@ -23,7 +23,7 @@ import io.onixlabs.corda.bnms.workflow.relationship.AmendRelationshipAttestation
 import io.onixlabs.corda.bnms.workflow.relationship.IssueRelationshipAttestationFlow
 import io.onixlabs.corda.bnms.workflow.relationship.RevokeRelationshipAttestationFlow
 import io.onixlabs.corda.core.integration.RPCService
-import io.onixlabs.corda.identityframework.contract.AttestationStatus
+import io.onixlabs.corda.identityframework.contract.attestations.AttestationStatus
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.AbstractParty

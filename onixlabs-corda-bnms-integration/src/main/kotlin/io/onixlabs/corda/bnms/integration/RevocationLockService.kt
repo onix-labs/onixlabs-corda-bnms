@@ -36,7 +36,12 @@ class RevocationLockService(rpc: CordaRPCOps) : RPCService(rpc) {
         notary: Party? = null
     ): FlowProgressHandle<SignedTransaction> {
         val lock = RevocationLock(owner, state)
-        return rpc.startTrackedFlow(::LockRevocationLockFlow, lock, notary)
+        return rpc.startTrackedFlow(
+            ::LockRevocationLockFlow,
+            lock,
+            notary,
+            LockRevocationLockFlow.tracker()
+        )
     }
 
     fun <T : LinearState> lock(
@@ -46,19 +51,34 @@ class RevocationLockService(rpc: CordaRPCOps) : RPCService(rpc) {
         clientId: String = UUID.randomUUID().toString()
     ): FlowHandleWithClientId<SignedTransaction> {
         val lock = RevocationLock(owner, state)
-        return rpc.startFlowWithClientId(clientId, ::LockRevocationLockFlow, lock, notary)
+        return rpc.startFlowWithClientId(
+            clientId,
+            ::LockRevocationLockFlow,
+            lock,
+            notary,
+            LockRevocationLockFlow.tracker()
+        )
     }
 
     fun <T : LinearState> unlock(
         lock: StateAndRef<RevocationLock<T>>
     ): FlowProgressHandle<SignedTransaction> {
-        return rpc.startTrackedFlow(::UnlockRevocationLockFlow, lock)
+        return rpc.startTrackedFlow(
+            ::UnlockRevocationLockFlow,
+            lock,
+            UnlockRevocationLockFlow.tracker()
+        )
     }
 
     fun <T : LinearState> unlock(
         lock: StateAndRef<RevocationLock<T>>,
         clientId: String = UUID.randomUUID().toString()
     ): FlowHandleWithClientId<SignedTransaction> {
-        return rpc.startFlowWithClientId(clientId, ::UnlockRevocationLockFlow, lock)
+        return rpc.startFlowWithClientId(
+            clientId,
+            ::UnlockRevocationLockFlow,
+            lock,
+            UnlockRevocationLockFlow.tracker()
+        )
     }
 }

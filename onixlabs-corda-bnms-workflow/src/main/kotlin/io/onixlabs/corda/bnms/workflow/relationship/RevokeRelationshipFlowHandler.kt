@@ -19,13 +19,15 @@ package io.onixlabs.corda.bnms.workflow.relationship
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.workflow.checkRevocationLockExists
-import io.onixlabs.corda.core.workflow.currentStep
-import io.onixlabs.corda.identityframework.workflow.FINALIZING
-import io.onixlabs.corda.identityframework.workflow.SIGNING
-import net.corda.core.flows.*
+import io.onixlabs.corda.core.workflow.*
+import net.corda.core.flows.FlowException
+import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.FlowSession
+import net.corda.core.flows.InitiatedBy
 import net.corda.core.node.StatesToRecord
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.ProgressTracker
+import net.corda.core.utilities.ProgressTracker.Step
 
 class RevokeRelationshipFlowHandler(
     private val session: FlowSession,
@@ -34,42 +36,42 @@ class RevokeRelationshipFlowHandler(
 
     companion object {
         @JvmStatic
-        fun tracker() = ProgressTracker(SIGNING, FINALIZING)
+        fun tracker() = ProgressTracker(
+            SignTransactionStep,
+            ReceiveStatesToRecordStep,
+            RecordFinalizedTransactionStep
+        )
     }
 
     @Suspendable
     override fun call(): SignedTransaction {
-        currentStep(SIGNING)
-        val transaction = subFlow(object : SignTransactionFlow(session) {
-            override fun checkTransaction(stx: SignedTransaction) {
-                val relationshipStateRef = stx.tx.inputs.singleOrNull() ?: throw FlowException(
-                    "Failed to obtain a single state reference from the transaction."
-                )
+        val transaction = collectSignaturesHandler(session) {
+            val relationshipStateRef = it.tx.inputs.singleOrNull() ?: throw FlowException(
+                "Failed to obtain a single state reference from the transaction."
+            )
 
-                val relationship = serviceHub.toStateAndRef<Relationship>(relationshipStateRef)
-                checkRevocationLockExists(ourIdentity, relationship.state.data)
-            }
-        })
+            val relationship = serviceHub.toStateAndRef<Relationship>(relationshipStateRef)
+            checkRevocationLockExists(ourIdentity, relationship.state.data)
+        }
 
-        currentStep(FINALIZING)
-        return subFlow(ReceiveFinalityFlow(session, transaction.id, StatesToRecord.ONLY_RELEVANT))
+        return finalizeTransactionHandler(session, transaction?.id, StatesToRecord.ONLY_RELEVANT)
     }
 
     @InitiatedBy(RevokeRelationshipFlow.Initiator::class)
     private class Handler(private val session: FlowSession) : FlowLogic<SignedTransaction>() {
 
         private companion object {
-            object OBSERVING : ProgressTracker.Step("Observing relationship revocation.") {
-                override fun childProgressTracker() = RevokeRelationshipFlowHandler.tracker()
+            object HandleRevokeRelationshipStep : Step("Handling relationship revocation.") {
+                override fun childProgressTracker() = tracker()
             }
         }
 
-        override val progressTracker = ProgressTracker(OBSERVING)
+        override val progressTracker = ProgressTracker(HandleRevokeRelationshipStep)
 
         @Suspendable
         override fun call(): SignedTransaction {
-            currentStep(OBSERVING)
-            return subFlow(RevokeRelationshipFlowHandler(session, OBSERVING.childProgressTracker()))
+            currentStep(HandleRevokeRelationshipStep)
+            return subFlow(RevokeRelationshipFlowHandler(session, HandleRevokeRelationshipStep.childProgressTracker()))
         }
     }
 }

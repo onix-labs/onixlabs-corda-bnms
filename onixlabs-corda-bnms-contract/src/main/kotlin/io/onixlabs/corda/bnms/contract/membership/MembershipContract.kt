@@ -48,7 +48,7 @@ class MembershipContract : Contract {
             "On membership issuing, the previous state reference of the created membership state must be null."
 
         internal const val CONTRACT_RULE_SIGNERS =
-            "On membership issuing, either the holder or the network operator of the creates membership state must sign the transaction."
+            "On membership issuing, either the holder or the network operator of the created membership state must sign the transaction."
 
         override fun verify(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
             val inputs = transaction.inputsOfType<Membership>()

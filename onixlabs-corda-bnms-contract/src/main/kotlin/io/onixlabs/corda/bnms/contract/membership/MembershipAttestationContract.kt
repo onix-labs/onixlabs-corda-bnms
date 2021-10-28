@@ -23,10 +23,16 @@ import net.corda.core.contracts.requireThat
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
 
+/**
+ * Represents the smart contract for membership attestations.
+ */
 class MembershipAttestationContract : AttestationContract(), Contract {
 
     companion object : ContractID
 
+    /**
+     * Represents the command rules to issue attestations.
+     */
     internal object Issue {
         const val CONTRACT_RULE_REFERENCES =
             "On membership attestation issuing, only one membership state must be referenced."
@@ -47,6 +53,9 @@ class MembershipAttestationContract : AttestationContract(), Contract {
             "On membership attestation issuing, if present, only the network operator can self-attest their membership state."
     }
 
+    /**
+     * Represents the command rules to amend attestations.
+     */
     internal object Amend {
         const val CONTRACT_RULE_REFERENCES =
             "On membership attestation amending, only one membership state must be referenced."
@@ -61,6 +70,12 @@ class MembershipAttestationContract : AttestationContract(), Contract {
             "On membership attestation amending, the attestation network must be equal to the membership network."
     }
 
+    /**
+     * Provides the extended contract constraints for issuing membership attestations.
+     *
+     * @param transaction The ledger transaction to verify.
+     * @param signers The signers of the transaction.
+     */
     override fun onVerifyIssue(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
         val memberships = transaction.referenceInputRefsOfType<Membership>()
 
@@ -76,6 +91,12 @@ class MembershipAttestationContract : AttestationContract(), Contract {
         Issue.CONTRACT_RULE_SELF_ATTESTATION using (attestation.isNetworkOperator || attestation.attestor != attestation.holder)
     }
 
+    /**
+     * Provides the extended contract constraints for amending membership attestations.
+     *
+     * @param transaction The ledger transaction to verify.
+     * @param signers The signers of the transaction.
+     */
     override fun onVerifyAmend(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
         val memberships = transaction.referenceInputRefsOfType<Membership>()
 

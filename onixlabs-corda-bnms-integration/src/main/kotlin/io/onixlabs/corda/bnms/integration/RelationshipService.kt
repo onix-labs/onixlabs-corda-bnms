@@ -18,7 +18,6 @@ package io.onixlabs.corda.bnms.integration
 
 import io.onixlabs.corda.bnms.contract.Configuration
 import io.onixlabs.corda.bnms.contract.Network
-import io.onixlabs.corda.bnms.contract.Setting
 import io.onixlabs.corda.bnms.contract.relationship.Relationship
 import io.onixlabs.corda.bnms.workflow.relationship.AmendRelationshipFlow
 import io.onixlabs.corda.bnms.workflow.relationship.IssueRelationshipFlow
@@ -48,7 +47,6 @@ class RelationshipService(rpc: CordaRPCOps) : RPCService(rpc) {
     fun issueRelationship(
         network: Network,
         members: Map<out AbstractParty, Configuration> = emptyMap(),
-        settings: Set<Setting<*>> = emptySet(),
         linearId: UniqueIdentifier = UniqueIdentifier(),
         notary: Party? = null,
         checkMembership: Boolean = false,
