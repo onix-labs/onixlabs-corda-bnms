@@ -25,4 +25,6 @@ package io.onixlabs.corda.bnms.contract
  * @property normalizedValue The normalized value of the permission.
  * @property hash The hash that uniquely identifies the permission.
  */
-class Permission(value: String) : StringSetting(PERMISSION, value)
+class Permission(value: String) : StringSetting(PERMISSION, value) {
+    companion object
+}

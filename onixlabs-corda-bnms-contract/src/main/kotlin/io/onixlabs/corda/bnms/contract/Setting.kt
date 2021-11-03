@@ -32,10 +32,10 @@ import java.util.*
  */
 open class Setting<T : Any>(property: String, value: T) : Claim<T>(property, value), Hashable {
 
-    internal companion object {
-        const val NETWORK = "Network"
-        const val ROLE = "Role"
-        const val PERMISSION = "Permission"
+    companion object {
+        internal const val NETWORK = "Network"
+        internal const val ROLE = "Role"
+        internal const val PERMISSION = "Permission"
     }
 
     val normalizedProperty: String

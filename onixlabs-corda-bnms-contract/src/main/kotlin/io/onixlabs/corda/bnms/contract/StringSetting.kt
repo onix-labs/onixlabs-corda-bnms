@@ -30,6 +30,8 @@ import java.util.*
  */
 open class StringSetting(property: String, value: String) : Setting<String>(property, value) {
 
+    companion object
+
     val normalizedValue: String
         get() = value.toUpperCase()
 

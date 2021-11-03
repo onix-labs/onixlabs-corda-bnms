@@ -25,4 +25,6 @@ package io.onixlabs.corda.bnms.contract
  * @property normalizedValue The normalized value of the role.
  * @property hash The hash that uniquely identifies the role.
  */
-class Role(value: String) : StringSetting(ROLE, value)
+class Role(value: String) : StringSetting(ROLE, value) {
+    companion object
+}

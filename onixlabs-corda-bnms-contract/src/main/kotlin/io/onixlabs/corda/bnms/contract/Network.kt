@@ -31,6 +31,8 @@ import net.corda.core.identity.AbstractParty
  */
 class Network(value: String, val operator: AbstractParty? = null) : StringSetting(NETWORK, value) {
 
+    companion object;
+
     override val hash: SecureHash
         get() = SecureHash.sha256("${super.hash}$operator")
 }

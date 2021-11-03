@@ -33,6 +33,8 @@ import net.corda.core.serialization.CordaSerializable
 @CordaSerializable
 data class Configuration(val settings: Set<Setting<*>> = emptySet()) : Hashable {
 
+    companion object
+
     val permissions: Set<Permission>
         get() = getSettingsByType()
 
