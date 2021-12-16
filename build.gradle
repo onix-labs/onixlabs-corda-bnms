@@ -15,7 +15,7 @@ buildscript {
 
         onixlabs_group = 'io.onixlabs'
         onixlabs_corda_core_release_version = '4.0.0-rc1'
-        onixlabs_corda_idfx_release_version = '4.0.0-rc1'
+        onixlabs_corda_idfx_release_version = '4.0.0-rc2'
 
         cordapp_platform_version = 10
         cordapp_contract_name = 'ONIXLabs Corda BNMS Contract'
