@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 ONIXLabs
+ * Copyright 2020-2022 ONIXLabs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ class AmendRelationshipFlow(
     @Suspendable
     override fun call(): SignedTransaction {
         currentStep(InitializeFlowStep)
-        checkSufficientSessions(sessions, newRelationship)
+        checkSufficientSessionsForContractStates(sessions, newRelationship)
         checkMembership(checkMembership, newRelationship, sessions)
 
         val transaction = buildTransaction(oldRelationship.state.notary) {

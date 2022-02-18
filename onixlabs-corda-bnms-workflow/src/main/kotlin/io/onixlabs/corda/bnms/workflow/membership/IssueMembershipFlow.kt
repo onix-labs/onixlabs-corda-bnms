@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 ONIXLabs
+ * Copyright 2020-2022 ONIXLabs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class IssueMembershipFlow(
     override fun call(): SignedTransaction {
         currentStep(InitializeFlowStep)
         checkMembershipExists(membership)
-        checkSufficientSessions(sessions, membership)
+        checkSufficientSessionsForContractStates(sessions, membership)
 
         val transaction = buildTransaction(notary) {
             addIssuedMembership(membership, ourIdentity.owningKey)
