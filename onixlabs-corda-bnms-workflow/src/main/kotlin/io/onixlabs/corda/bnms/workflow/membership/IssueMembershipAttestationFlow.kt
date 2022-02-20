@@ -21,6 +21,7 @@ import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.bnms.workflow.addIssuedMembershipAttestation
 import io.onixlabs.corda.bnms.workflow.findMembershipForAttestation
 import io.onixlabs.corda.core.workflow.*
+import io.onixlabs.corda.identityframework.workflow.checkAttestationExistsForIssuance
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
@@ -52,6 +53,8 @@ class IssueMembershipAttestationFlow(
     override fun call(): SignedTransaction {
         currentStep(InitializeFlowStep)
         checkSufficientSessionsForContractStates(sessions, attestation)
+        checkAttestationExistsForIssuance(attestation)
+
         val membership = findMembershipForAttestation(attestation).referenced()
 
         val transaction = buildTransaction(notary) {

@@ -21,6 +21,7 @@ import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestation
 import io.onixlabs.corda.bnms.workflow.addAmendedRelationshipAttestation
 import io.onixlabs.corda.bnms.workflow.findRelationshipForAttestation
 import io.onixlabs.corda.core.workflow.*
+import io.onixlabs.corda.identityframework.workflow.checkAttestationExistsForAmendment
 import net.corda.core.contracts.StateAndRef
 import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
@@ -52,6 +53,8 @@ class AmendRelationshipAttestationFlow(
     override fun call(): SignedTransaction {
         currentStep(InitializeFlowStep)
         checkSufficientSessionsForContractStates(sessions, newAttestation, oldAttestation.state.data)
+        checkAttestationExistsForAmendment(newAttestation)
+
         val relationship = findRelationshipForAttestation(newAttestation).referenced()
 
         val transaction = buildTransaction(oldAttestation.state.notary) {

@@ -79,7 +79,7 @@ class MembershipAttestation internal constructor(
         membership.state.data.network,
         attestor,
         setOf(membership.state.data.holder),
-        membership.toStaticAttestationPointer(),
+        membership.toStaticAttestationPointer(identifier = membership.state.data.linearId.toString()),
         status,
         metadata,
         linearId,
