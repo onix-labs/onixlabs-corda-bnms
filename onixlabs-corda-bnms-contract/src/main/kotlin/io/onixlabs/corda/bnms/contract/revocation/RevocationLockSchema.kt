@@ -46,5 +46,12 @@ object RevocationLockSchema {
 
         @Column(name = "pointer_state_class", nullable = false)
         val pointerStateClass: String = ""
-    ) : PersistentState()
+    ) : PersistentState() {
+        constructor(revocationLock: RevocationLock<*>) : this(
+            owner = revocationLock.owner,
+            pointerStateLinearId = revocationLock.pointer.pointer.id,
+            pointerStateExternalId = revocationLock.pointer.pointer.externalId,
+            pointerStateClass = revocationLock.pointer.type.canonicalName
+        )
+    }
 }

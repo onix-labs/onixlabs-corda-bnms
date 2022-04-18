@@ -54,5 +54,15 @@ object RelationshipSchema {
 
         @Column(name = "hash", nullable = false, unique = true)
         val hash: String = ""
-    ) : PersistentState()
+    ) : PersistentState() {
+        constructor(relationship: Relationship) : this(
+            linearId = relationship.linearId.id,
+            externalId = relationship.linearId.externalId,
+            networkValue = relationship.network.value,
+            normalizedNetworkValue = relationship.network.normalizedValue,
+            networkOperator = relationship.network.operator,
+            networkHash = relationship.network.hash.toString(),
+            hash = relationship.hash.toString()
+        )
+    }
 }

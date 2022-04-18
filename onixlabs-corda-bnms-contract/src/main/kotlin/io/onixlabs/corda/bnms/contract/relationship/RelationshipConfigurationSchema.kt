@@ -49,6 +49,9 @@ object RelationshipConfigurationSchema {
         @Column(name = "network_value", nullable = false)
         val networkValue: String = "",
 
+        @Column(name = "normalized_network_value", nullable = false)
+        val normalizedNetworkValue: String = "",
+
         @Column(name = "network_operator", nullable = true)
         val networkOperator: AbstractParty? = null,
 
@@ -60,5 +63,18 @@ object RelationshipConfigurationSchema {
 
         @Column(name = "hash", nullable = false)
         val hash: String = ""
-    ) : PersistentState()
+    ) : PersistentState() {
+        constructor(configuration: RelationshipConfiguration) : this(
+            linearId = configuration.linearId.id,
+            externalId = configuration.linearId.externalId,
+            relationshipLinearId = configuration.relationshipLinearId.id,
+            relationshipExternalId = configuration.relationshipLinearId.externalId,
+            networkValue = configuration.network.value,
+            normalizedNetworkValue = configuration.network.normalizedValue,
+            networkOperator = configuration.network.operator,
+            networkHash = configuration.network.hash.toString(),
+            configurationHash = configuration.configuration.hash.toString(),
+            hash = configuration.hash.toString()
+        )
+    }
 }

@@ -61,5 +61,17 @@ object MembershipSchema {
 
         @Column(name = "hash", nullable = false, unique = true)
         val hash: String = ""
-    ) : PersistentState()
+    ) : PersistentState() {
+        constructor(membership: Membership) : this(
+            linearId = membership.linearId.id,
+            externalId = membership.linearId.externalId,
+            holder = membership.holder,
+            networkValue = membership.network.value,
+            normalizedNetworkValue = membership.network.normalizedValue,
+            networkOperator = membership.network.operator,
+            networkHash = membership.network.hash.toString(),
+            isNetworkOperator = membership.isNetworkOperator,
+            hash = membership.hash.toString()
+        )
+    }
 }

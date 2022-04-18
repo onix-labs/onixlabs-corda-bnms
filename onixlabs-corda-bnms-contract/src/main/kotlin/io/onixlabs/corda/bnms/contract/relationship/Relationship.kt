@@ -94,15 +94,7 @@ data class Relationship(
      * @return Returns a persistent state entity.
      */
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
-        is RelationshipSchemaV1 -> RelationshipEntity(
-            linearId = linearId.id,
-            externalId = linearId.externalId,
-            networkValue = network.value,
-            normalizedNetworkValue = network.normalizedValue,
-            networkOperator = network.operator,
-            networkHash = network.hash.toString(),
-            hash = hash.toString()
-        )
+        is RelationshipSchemaV1 -> RelationshipEntity(this)
         else -> throw IllegalArgumentException("Unrecognised schema: $schema.")
     }
 

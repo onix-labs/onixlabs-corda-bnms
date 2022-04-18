@@ -19,6 +19,8 @@ package io.onixlabs.corda.bnms.workflow.membership
 import co.paralleluniverse.fibers.Suspendable
 import io.onixlabs.corda.bnms.contract.membership.MembershipAttestation
 import io.onixlabs.corda.bnms.workflow.addIssuedMembershipAttestation
+import io.onixlabs.corda.bnms.workflow.checkMembershipAttestationExistsForAmendment
+import io.onixlabs.corda.bnms.workflow.checkMembershipAttestationExistsForIssuance
 import io.onixlabs.corda.bnms.workflow.findMembershipForAttestation
 import io.onixlabs.corda.core.workflow.*
 import io.onixlabs.corda.identityframework.workflow.checkAttestationExistsForIssuance
@@ -53,7 +55,7 @@ class IssueMembershipAttestationFlow(
     override fun call(): SignedTransaction {
         currentStep(InitializeFlowStep)
         checkSufficientSessionsForContractStates(sessions, attestation)
-        checkAttestationExistsForIssuance(attestation)
+        checkMembershipAttestationExistsForIssuance(attestation)
 
         val membership = findMembershipForAttestation(attestation).referenced()
 

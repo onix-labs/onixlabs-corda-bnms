@@ -92,17 +92,7 @@ data class Membership(
      * @return Returns a persistent state entity.
      */
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
-        is MembershipSchemaV1 -> MembershipEntity(
-            linearId = linearId.id,
-            externalId = linearId.externalId,
-            holder = holder,
-            networkValue = network.value,
-            normalizedNetworkValue = network.normalizedValue,
-            networkOperator = network.operator,
-            networkHash = network.hash.toString(),
-            isNetworkOperator = isNetworkOperator,
-            hash = hash.toString()
-        )
+        is MembershipSchemaV1 -> MembershipEntity(this)
         else -> throw IllegalArgumentException("Unrecognised schema: $schema.")
     }
 

@@ -73,5 +73,21 @@ object RelationshipAttestationSchema {
 
         @Column(name = "hash", nullable = false, unique = true)
         val hash: String = ""
-    ) : PersistentState()
+    ) : PersistentState() {
+        constructor(attestation: RelationshipAttestation) : this(
+            linearId = attestation.linearId.id,
+            externalId = attestation.linearId.externalId,
+            attestor = attestation.attestor,
+            networkValue = attestation.network.value,
+            normalizedNetworkValue = attestation.network.normalizedValue,
+            networkOperator = attestation.network.operator,
+            networkHash = attestation.network.hash.toString(),
+            pointer = attestation.pointer.statePointer.toString(),
+            pointerStateType = attestation.pointer.stateType.canonicalName,
+            pointerHash = attestation.pointer.hash.toString(),
+            status = attestation.status,
+            previousStateRef = attestation.previousStateRef?.toString(),
+            hash = attestation.hash.toString()
+        )
+    }
 }

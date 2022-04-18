@@ -57,17 +57,7 @@ class RelationshipConfiguration private constructor(
         get() = SecureHash.sha256("${configuration.hash}$relationshipLinearId")
 
     override fun generateMappedObject(schema: MappedSchema) = when (schema) {
-        is RelationshipConfigurationSchemaV1 -> RelationshipConfigurationEntity(
-            linearId = linearId.id,
-            externalId = linearId.externalId,
-            relationshipLinearId = relationshipLinearId.id,
-            relationshipExternalId = relationshipLinearId.externalId,
-            networkValue = network.value,
-            networkOperator = network.operator,
-            networkHash = network.hash.toString(),
-            configurationHash = configuration.hash.toString(),
-            hash = hash.toString()
-        )
+        is RelationshipConfigurationSchemaV1 -> RelationshipConfigurationEntity(this)
         else -> throw IllegalArgumentException("Unrecognised schema: $schema.")
     }
 

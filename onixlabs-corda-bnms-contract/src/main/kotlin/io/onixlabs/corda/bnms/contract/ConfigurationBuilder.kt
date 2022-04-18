@@ -196,7 +196,7 @@ class ConfigurationBuilder(private val settings: MutableSet<Setting<*>>) {
      *
      * @return Returns a configuration containing the settings built by this configuration builder.
      */
-    fun toConfiguration(): Configuration {
+    internal fun toConfiguration(): Configuration {
         return Configuration(settings)
     }
 }

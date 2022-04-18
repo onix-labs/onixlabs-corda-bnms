@@ -18,6 +18,7 @@ package io.onixlabs.corda.bnms.contract.relationship
 
 import io.onixlabs.corda.bnms.contract.Network
 import io.onixlabs.corda.bnms.contract.NetworkState
+import io.onixlabs.corda.bnms.contract.membership.Membership
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationSchema.RelationshipAttestationEntity
 import io.onixlabs.corda.bnms.contract.relationship.RelationshipAttestationSchema.RelationshipAttestationSchemaV1
 import io.onixlabs.corda.identityframework.contract.attestations.Attestation
@@ -32,6 +33,20 @@ import net.corda.core.identity.AbstractParty
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
 
+/**
+ * Represents a relationship attestation; a proof that a particular [Relationship] state has been witnessed.
+ *
+ * @property network The business network that this relationship attestation belongs to.
+ * @property attestor The party who is attesting to the witnessed [Relationship] state.
+ * @property attestees The parties of this attestation, usually the participants of the attested [Relationship] state.
+ * @property pointer The pointer to the attested [Relationship] state.
+ * @property status The status of the attestation.
+ * @property metadata Additional information about the attestation.
+ * @property linearId The unique identifier of the attestation.
+ * @property previousStateRef The state reference of the previous state in the chain.
+ * @property hash The unique hash which represents this attestation.
+ * @property participants The participants of this attestation; namely the attestor and attestees.
+ */
 @BelongsToContract(RelationshipAttestationContract::class)
 class RelationshipAttestation internal constructor(
     override val network: Network,
@@ -89,21 +104,7 @@ class RelationshipAttestation internal constructor(
     }
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
-        is RelationshipAttestationSchemaV1 -> RelationshipAttestationEntity(
-            linearId = linearId.id,
-            externalId = linearId.externalId,
-            attestor = attestor,
-            networkValue = network.value,
-            normalizedNetworkValue = network.normalizedValue,
-            networkOperator = network.operator,
-            networkHash = network.hash.toString(),
-            pointer = pointer.statePointer.toString(),
-            pointerStateType = pointer.stateType.canonicalName,
-            pointerHash = pointer.hash.toString(),
-            status = status,
-            previousStateRef = previousStateRef?.toString(),
-            hash = hash.toString()
-        )
+        is RelationshipAttestationSchemaV1 -> RelationshipAttestationEntity(this)
         else -> super.generateMappedObject(schema)
     }
 

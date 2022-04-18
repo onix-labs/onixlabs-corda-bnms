@@ -40,12 +40,7 @@ data class RevocationLock<T : LinearState>(
     }
 
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
-        is RevocationLockSchemaV1 -> RevocationLockEntity(
-            owner = owner,
-            pointerStateLinearId = pointer.pointer.id,
-            pointerStateExternalId = pointer.pointer.externalId,
-            pointerStateClass = pointer.type.canonicalName
-        )
+        is RevocationLockSchemaV1 -> RevocationLockEntity(this)
         else -> throw IllegalArgumentException("Unrecognised schema: $schema.")
     }
 

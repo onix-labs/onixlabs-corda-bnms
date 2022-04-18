@@ -68,6 +68,19 @@ class MembershipAttestation internal constructor(
     previousStateRef
 ), NetworkState {
 
+    /**
+     * Represents a membership attestation; a proof that a particular [Membership] state has been witnessed.
+     *
+     * @param attestor The party who is attesting to the witnessed [Membership] state.
+     * @param membership The [Membership] state that is being witnessed and attested.
+     * @param status The status of the attestation.
+     * @param metadata Additional information about the attestation.
+     * @param linearId The unique identifier of the attestation.
+     * @param previousStateRef The state reference of the previous state in the chain.
+     *
+     * The primary constructor of the [MembershipAttestation] class is deliberately private
+     * to enforce static attestation pointers via the secondary constructor.
+     */
     constructor(
         attestor: AbstractParty,
         membership: StateAndRef<Membership>,
@@ -79,7 +92,7 @@ class MembershipAttestation internal constructor(
         membership.state.data.network,
         attestor,
         setOf(membership.state.data.holder),
-        membership.toStaticAttestationPointer(identifier = membership.state.data.linearId.toString()),
+        membership.toStaticAttestationPointer(),
         status,
         metadata,
         linearId,
@@ -126,22 +139,7 @@ class MembershipAttestation internal constructor(
      * @return Returns a persistent state entity.
      */
     override fun generateMappedObject(schema: MappedSchema): PersistentState = when (schema) {
-        is MembershipAttestationSchemaV1 -> MembershipAttestationEntity(
-            linearId = linearId.id,
-            externalId = linearId.externalId,
-            attestor = attestor,
-            holder = holder,
-            networkValue = network.value,
-            normalizedNetworkValue = network.normalizedValue,
-            networkOperator = network.operator,
-            networkHash = network.hash.toString(),
-            pointer = pointer.statePointer.toString(),
-            pointerStateType = pointer.stateType.canonicalName,
-            pointerHash = pointer.hash.toString(),
-            status = status,
-            previousStateRef = previousStateRef?.toString(),
-            hash = hash.toString()
-        )
+        is MembershipAttestationSchemaV1 -> MembershipAttestationEntity(this)
         else -> super.generateMappedObject(schema)
     }
 
