@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 ONIXLabs
+ * Copyright 2020-2022 ONIXLabs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,23 @@
 
 package io.onixlabs.corda.bnms.contract.membership
 
-import io.onixlabs.corda.identityframework.contract.AttestationContract
+import io.onixlabs.corda.core.contract.ContractID
+import io.onixlabs.corda.identityframework.contract.attestations.AttestationContract
 import net.corda.core.contracts.Contract
-import net.corda.core.contracts.ContractClassName
 import net.corda.core.contracts.requireThat
 import net.corda.core.transactions.LedgerTransaction
 import java.security.PublicKey
 
+/**
+ * Represents the smart contract for membership attestations.
+ */
 class MembershipAttestationContract : AttestationContract(), Contract {
 
-    companion object {
-        @JvmStatic
-        val ID: ContractClassName = this::class.java.enclosingClass.canonicalName
-    }
+    companion object : ContractID
 
+    /**
+     * Represents the command rules to issue attestations.
+     */
     internal object Issue {
         const val CONTRACT_RULE_REFERENCES =
             "On membership attestation issuing, only one membership state must be referenced."
@@ -50,6 +53,9 @@ class MembershipAttestationContract : AttestationContract(), Contract {
             "On membership attestation issuing, if present, only the network operator can self-attest their membership state."
     }
 
+    /**
+     * Represents the command rules to amend attestations.
+     */
     internal object Amend {
         const val CONTRACT_RULE_REFERENCES =
             "On membership attestation amending, only one membership state must be referenced."
@@ -64,6 +70,12 @@ class MembershipAttestationContract : AttestationContract(), Contract {
             "On membership attestation amending, the attestation network must be equal to the membership network."
     }
 
+    /**
+     * Provides the extended contract constraints for issuing membership attestations.
+     *
+     * @param transaction The ledger transaction to verify.
+     * @param signers The signers of the transaction.
+     */
     override fun onVerifyIssue(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
         val memberships = transaction.referenceInputRefsOfType<Membership>()
 
@@ -79,6 +91,12 @@ class MembershipAttestationContract : AttestationContract(), Contract {
         Issue.CONTRACT_RULE_SELF_ATTESTATION using (attestation.isNetworkOperator || attestation.attestor != attestation.holder)
     }
 
+    /**
+     * Provides the extended contract constraints for amending membership attestations.
+     *
+     * @param transaction The ledger transaction to verify.
+     * @param signers The signers of the transaction.
+     */
     override fun onVerifyAmend(transaction: LedgerTransaction, signers: Set<PublicKey>) = requireThat {
         val memberships = transaction.referenceInputRefsOfType<Membership>()
 

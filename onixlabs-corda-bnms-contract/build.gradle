@@ -28,6 +28,7 @@ dependencies {
 
     // CorDapp Dependencies
     cordapp "$onixlabs_group:onixlabs-corda-core-contract:$onixlabs_corda_core_release_version"
+    cordapp "$onixlabs_group:onixlabs-corda-core-workflow:$onixlabs_corda_core_release_version"
     cordapp "$onixlabs_group:onixlabs-corda-identity-framework-contract:$onixlabs_corda_idfx_release_version"
 
     // Test Dependencies
@@ -53,6 +54,7 @@ publishing {
             groupId = project.parent.group
             version = project.parent.version
             artifactId = 'onixlabs-corda-bnms-contract'
+            artifact sourceJar
             from components.java
         }
     }
