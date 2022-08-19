@@ -129,8 +129,7 @@ data class Relationship(
         /**
          * The vault query criteria which will be used to resolve relationship configurations.
          */
-        @Transient
-        override val criteria: QueryCriteria = vaultQuery<RelationshipConfiguration> {
+        override val criteria: QueryCriteria get() = vaultQuery<RelationshipConfiguration> {
             expression(RelationshipConfigurationEntity::relationshipLinearId equalTo relationshipLinearId.id)
         }
 

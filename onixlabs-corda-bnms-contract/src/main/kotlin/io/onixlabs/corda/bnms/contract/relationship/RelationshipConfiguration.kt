@@ -69,8 +69,7 @@ class RelationshipConfiguration private constructor(
         private val relationshipLinearId: UniqueIdentifier
     ) : AbstractSingularResolvable<Relationship>() {
 
-        @Transient
-        override val criteria: QueryCriteria = vaultQuery<Relationship> {
+        override val criteria: QueryCriteria get() = vaultQuery<Relationship> {
             linearIds(relationshipLinearId)
         }
 
